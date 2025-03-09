@@ -14,18 +14,18 @@ namespace DataAccessLayer.Util
 {
     internal class ConnectionSettings
     {
-        public static string ?_connectionString;
+        public static string ?ConnectionString;
         public static ILogger<UserRepo> _logger;
 
         public static void Intialize(IConfiguration configuration, ILogger<UserRepo> logger)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            ConnectionString = configuration.GetConnectionString("DefaultConnection");
             _logger = logger;
         }
 
         public static MySqlConnection GetConnection()
         {
-            return new MySqlConnection(_connectionString);
+            return new MySqlConnection(ConnectionString);
         }
 
         public static MySqlCommand GetCommand(string query, MySqlConnection conn)

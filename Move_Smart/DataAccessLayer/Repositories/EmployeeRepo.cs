@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static DataAccessLayer.Repositories.EmployeeDTO;
+using static DataAccessLayer.EmployeeDTO;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer
 {
     public class EmployeeDTO
     {
@@ -18,14 +18,14 @@ namespace DataAccessLayer.Repositories
             Unsubscribed = 2
         }
 
-        public int EmployeeID { get; set; }
+        public int? EmployeeID { get; set; }
         public string NationalNo { get; set; }
         public string Name { get; set; }
         public string JobTitle { get; set; }
         public string Phone { get; set; }
         public enTransportationSubscriptionStatus TransportationSubscriptionStatus { get; set; }
 
-        public EmployeeDTO(int employeeID, string nationalNo, string name, string jobTitle, string phone,
+        public EmployeeDTO(int? employeeID, string nationalNo, string name, string jobTitle, string phone,
             enTransportationSubscriptionStatus transportationSubscriptionStatus)
         {
             EmployeeID = employeeID;
@@ -48,7 +48,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -89,7 +89,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -128,7 +128,7 @@ namespace DataAccessLayer.Repositories
                             WHERE EmployeeID = @EmployeeID;";
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -167,7 +167,7 @@ namespace DataAccessLayer.Repositories
                             WHERE NationalNo = @NationalNo;";
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -206,7 +206,7 @@ namespace DataAccessLayer.Repositories
                             WHERE Phone = @Phone;";
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -249,7 +249,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using(MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -290,11 +290,11 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("EmployeeID", updatedEmployee.EmployeeID);
+                        cmd.Parameters.AddWithValue("EmployeeID", updatedEmployee.EmployeeID ?? 0);
                         cmd.Parameters.AddWithValue("NationalNo", updatedEmployee.NationalNo);
                         cmd.Parameters.AddWithValue("Name", updatedEmployee.Name);
                         cmd.Parameters.AddWithValue("JobTitle", updatedEmployee.JobTitle);
@@ -322,7 +322,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -349,7 +349,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {

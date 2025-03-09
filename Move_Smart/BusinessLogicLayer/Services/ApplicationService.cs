@@ -101,7 +101,7 @@ namespace BusinessLayer.Services
 
 
         // Public methods
-        public async Task<bool> SaveAsync()
+        public virtual async Task<bool> SaveAsync()
         {
             if (!_ApplicationValidations())
                 throw new Exception("Application validations failed");

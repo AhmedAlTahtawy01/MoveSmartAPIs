@@ -7,17 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer
 {
     public class PatrolDTO
     {
-        public short PatrolID { get; set; }
+        public short? PatrolID { get; set; }
         public string Description { get; set; }
         public TimeOnly MovingAt { get; set; }
         public short ApproximatedTime { get; set; }
         public byte BusID { get; set; }
 
-        public PatrolDTO(short patrolID, string description, TimeOnly movingAt, short approximatedTime,
+        public PatrolDTO(short? patrolID, string description, TimeOnly movingAt, short approximatedTime,
             byte busID)
         {
             PatrolID = patrolID;
@@ -39,7 +39,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -75,7 +75,7 @@ namespace DataAccessLayer.Repositories
                             WHERE PatrolID = @PatrolID";
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -117,7 +117,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -156,11 +156,11 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("PatrolID", updatedPatrol.PatrolID);
+                        cmd.Parameters.AddWithValue("PatrolID", updatedPatrol.PatrolID ?? 0);
                         cmd.Parameters.AddWithValue("Description", updatedPatrol.Description);
                         cmd.Parameters.AddWithValue("MovingAt", updatedPatrol.MovingAt);
                         cmd.Parameters.AddWithValue("ApproximatedTime", updatedPatrol.ApproximatedTime);
@@ -187,7 +187,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {

@@ -6,17 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer
 {
     public class MaintenanceApplicationDTO
     {
-        public int MaintenanceApplicationID { get; set; }
+        public int? MaintenanceApplicationID { get; set; }
         public int ApplicationID { get; set; }
         public short VehicleID { get; set; }
         public bool ApprovedByGeneralSupervisor { get; set; }
         public bool ApprovedByGeneralManager { get; set; }
 
-        public MaintenanceApplicationDTO(int maintenanceApplicationID, int applicationID,
+        public MaintenanceApplicationDTO(int? maintenanceApplicationID, int applicationID,
             short vehicleID, bool approvedByGeneralSupervisor, bool approvedByGeneralManager)
         {
             MaintenanceApplicationID = maintenanceApplicationID;
@@ -38,7 +38,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -78,7 +78,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -117,7 +117,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -159,7 +159,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -197,11 +197,11 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", updatedMaintenanceApplication.MaintenanceApplicationID);
+                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", updatedMaintenanceApplication.MaintenanceApplicationID ?? 0);
                         cmd.Parameters.AddWithValue("ApplicationID", updatedMaintenanceApplication.ApplicationID);
                         cmd.Parameters.AddWithValue("VehicleID", updatedMaintenanceApplication.VehicleID);
                         cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", updatedMaintenanceApplication.ApprovedByGeneralSupervisor);
@@ -228,7 +228,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {

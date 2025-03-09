@@ -8,16 +8,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer
 {
     public class BusDTO
     {
-        public byte BusID { get; set; }
+        public byte? BusID { get; set; }
         public byte Capacity { get; set; }
         public byte AvailableSpace { get; set; }
         public short VehicleID { get; set; }
 
-        public BusDTO(byte busID, byte capacity, byte availableSpace, short vehicleID)
+        public BusDTO(byte? busID, byte capacity, byte availableSpace, short vehicleID)
         {
             BusID = busID;
             Capacity = capacity;
@@ -37,7 +37,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -73,7 +73,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -113,7 +113,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -153,7 +153,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -193,7 +193,7 @@ namespace DataAccessLayer.Repositories
                             SELECT LAST_INSERT_ID();";
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -229,7 +229,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -259,7 +259,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {

@@ -6,17 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer
 {
     public class VacationDTO
     {
-        public int VacationID { get; set; }
+        public int? VacationID { get; set; }
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public int VacationOwnerID { get; set; }
         public int SubstituteDriverID { get; set; }
 
-        public VacationDTO(int vacationID, DateOnly startDate, DateOnly endDate, int vacationOwnerID, int substituteDriverID)
+        public VacationDTO(int? vacationID, DateOnly startDate, DateOnly endDate, int vacationOwnerID, int substituteDriverID)
         {
             VacationID = vacationID;
             StartDate = startDate;
@@ -37,7 +37,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -77,7 +77,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -108,7 +108,7 @@ namespace DataAccessLayer.Repositories
             return vacationsList;
         }
 
-        public static async Task<List<VacationDTO>> GetAllActiveVacationsForDriverAsync(int driverID)
+        public static async Task<List<VacationDTO>> GetAllFutureVacationsForDriverAsync(int driverID)
         {
             List<VacationDTO> vacationsList = new List<VacationDTO>();
 
@@ -118,7 +118,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -156,7 +156,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -198,7 +198,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -236,11 +236,11 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("VacationID", updatedVacation.VacationID);
+                        cmd.Parameters.AddWithValue("VacationID", updatedVacation.VacationID ?? 0);
                         cmd.Parameters.AddWithValue("StartDate", updatedVacation.StartDate);
                         cmd.Parameters.AddWithValue("EndDate", updatedVacation.EndDate);
                         cmd.Parameters.AddWithValue("VacationOwnerID", updatedVacation.VacationOwnerID);
@@ -266,7 +266,7 @@ namespace DataAccessLayer.Repositories
                             WHERE VacationID = @VacationID;";
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -293,7 +293,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {

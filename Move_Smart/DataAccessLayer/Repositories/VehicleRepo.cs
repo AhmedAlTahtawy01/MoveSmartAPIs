@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using DataAccessLayer.Util;
 using MySqlConnector;
-using static DataAccessLayer.Repositories.VehicleDTO;
+using static DataAccessLayer.VehicleDTO;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer
 {
     public class VehicleDTO
     {
@@ -37,7 +37,7 @@ namespace DataAccessLayer.Repositories
             NaturalGas = 2
         }
 
-        public short VehicleID { get; set; }
+        public short? VehicleID { get; set; }
         public string BrandName { get; set; }
         public string ModelName { get; set; }
         public string PlateNumbers { get; set; }
@@ -50,7 +50,7 @@ namespace DataAccessLayer.Repositories
         public byte FuelConsumptionRate { get; set; }
         public byte OilConsumptionRate { get; set; }
 
-        public VehicleDTO(short vehicleID, string brandName, string modelName, string plateNumbers,
+        public VehicleDTO(short? vehicleID, string brandName, string modelName, string plateNumbers,
             enVehicleType vehicleType, string associatedHospital, string associatedTask,
             enVehicleStatus status, int totalKilometersMoved, enFuelType fuelType, byte fuelConsumptionRate,
             byte oilConsumptionRate)
@@ -81,7 +81,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -119,7 +119,7 @@ namespace DataAccessLayer.Repositories
             return vehiclesList;
         }
 
-        public static async Task<List<VehicleDTO>> GetVehiclesByVehicleTypeAsync(byte vehicleType)
+        public static async Task<List<VehicleDTO>> GetVehiclesByVehicleTypeAsync(enVehicleType vehicleType)
         {
             List<VehicleDTO> vehiclesList = new List<VehicleDTO>();
 
@@ -129,11 +129,11 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("VehicleType", vehicleType);
+                        cmd.Parameters.AddWithValue("VehicleType", vehicleType.ToString());
 
                         await conn.OpenAsync();
 
@@ -169,7 +169,7 @@ namespace DataAccessLayer.Repositories
             return vehiclesList;
         }
 
-        public static async Task<List<VehicleDTO>> GetVehiclesByFuelTypeAsync(byte FuelType)
+        public static async Task<List<VehicleDTO>> GetVehiclesByFuelTypeAsync(enFuelType FuelType)
         {
             List<VehicleDTO> vehiclesList = new List<VehicleDTO>();
 
@@ -179,11 +179,11 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("FuelType", FuelType);
+                        cmd.Parameters.AddWithValue("FuelType", FuelType.ToString());
 
                         await conn.OpenAsync();
 
@@ -219,6 +219,111 @@ namespace DataAccessLayer.Repositories
             return vehiclesList;
         }
 
+        public static async Task<List<VehicleDTO>> GetVehiclesByStatusAsync(enVehicleStatus status)
+        {
+            List<VehicleDTO> vehiclesList = new List<VehicleDTO>();
+
+            string query = @"SELECT * FROM Vehicles
+                            WHERE Status = @Status
+                            ORDER BY Status ASC;";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("Status", status.ToString());
+
+                        await conn.OpenAsync();
+
+                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                vehiclesList.Add(new VehicleDTO
+                                    (
+                                        Convert.ToInt16(reader["VehicleID"]),
+                                        (string)reader["BrandName"],
+                                        (string)reader["ModelName"],
+                                        (string)reader["PlateNumbers"],
+                                        (enVehicleType)Enum.Parse(typeof(enVehicleType), reader["VehicleType"].ToString() ?? string.Empty),
+                                        (string)reader["AssociatedHospital"],
+                                        (string)reader["AssociatedTask"],
+                                        (enVehicleStatus)Enum.Parse(typeof(enVehicleStatus), reader["Status"].ToString() ?? string.Empty),
+                                        Convert.ToInt32(reader["TotalKilometersMoved"]),
+                                        (enFuelType)Enum.Parse(typeof(enFuelType), reader["FuelType"].ToString() ?? string.Empty),
+                                        Convert.ToByte(reader["FuelConsumptionRate"]),
+                                        Convert.ToByte(reader["OilConsumptionRate"])
+                                    ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return vehiclesList;
+        }
+
+        public static async Task<short> GetNumbersVehiclesAsync()
+        {
+            List<VehicleDTO> vehiclesList = new List<VehicleDTO>();
+
+            string query = @"SELECT Count(*) FROM Vehicles;";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
+
+                        return Convert.ToInt16(await cmd.ExecuteScalarAsync());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return 0;
+        }
+
+        public static async Task<short> GetNumbersVehiclesByStatusAsync(enVehicleStatus status)
+        {
+            List<VehicleDTO> vehiclesList = new List<VehicleDTO>();
+
+            string query = @"SELECT Count(*) FROM Vehicles
+                            WHERE Status = @Status;";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("Status", status.ToString());
+
+                        await conn.OpenAsync();
+
+                        return Convert.ToInt16(await cmd.ExecuteScalarAsync());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return 0;
+        }
+
         public static async Task<VehicleDTO> GetVehicleByIDAsync(short vehicleID)
         {
             string query = @"SELECT * FROM Vehicles
@@ -226,7 +331,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -266,6 +371,33 @@ namespace DataAccessLayer.Repositories
             return null;
         }
 
+        public static async Task<bool> IsVehicleExistsAsync(short vehicleID)
+        {
+            string query = @"SELECT Found = 1 FROM Vehicles
+                            WHERE VehicleID = @VehicleID";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("VehicleID", vehicleID);
+
+                        await conn.OpenAsync();
+
+                       return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return false;
+        }
+
         public static async Task<VehicleDTO> GetVehicleByPlateNumbersAsync(string plateNumbers)
         {
             string query = @"SELECT * FROM Vehicles
@@ -273,7 +405,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -323,7 +455,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -375,11 +507,11 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("VehicleID", updatedVehicle.VehicleID);
+                        cmd.Parameters.AddWithValue("VehicleID", updatedVehicle.VehicleID ?? 0);
                         cmd.Parameters.AddWithValue("BrandName", updatedVehicle.BrandName);
                         cmd.Parameters.AddWithValue("ModelName", updatedVehicle.ModelName);
                         cmd.Parameters.AddWithValue("PlateNumbers", updatedVehicle.PlateNumbers);
@@ -412,7 +544,7 @@ namespace DataAccessLayer.Repositories
                             WHERE PlateNumbers = @PlateNumbers;";
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {

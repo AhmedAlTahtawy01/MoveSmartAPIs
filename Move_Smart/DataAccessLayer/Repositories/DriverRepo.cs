@@ -7,28 +7,28 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DataAccessLayer.DriverDTO;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer
 {
     public class DriverDTO
     {
-        public int DriverID { get; set; }
+        public enum enDriverStatus { Available, Absent, Working};
+        public int? DriverID { get; set; }
         public string NationalNo { get; set; }
         public string Name { get; set; }
         public string Phone { get; set; }
-        public bool IsAbsent { get; set; }
-        public bool IsAvailable { get; set; }
+        public enDriverStatus Status { get; set; }
         public short VehicleID { get; set; }
 
-        public DriverDTO(int driverID, string nationalNo, string name, string phone, bool isAbsent,
-            bool isAvailable, short vehicleID)
+        public DriverDTO(int? driverID, string nationalNo, string name, string phone,
+            enDriverStatus status, short vehicleID)
         {
             DriverID = driverID;
             NationalNo = nationalNo;
             Name = name;
             Phone = phone;
-            IsAbsent = isAbsent;
-            IsAvailable = isAvailable;
+            Status = status;
             VehicleID = vehicleID;
         }
     }
@@ -44,7 +44,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using(MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -57,10 +57,9 @@ namespace DataAccessLayer.Repositories
                                 driversList.Add(new DriverDTO(
                                     Convert.ToInt32(reader["DriverID"]),
                                     (string)reader["NationalNo"],
-                                    (string)reader["Name"]  ,
+                                    (string)reader["Name"],
                                     (string)reader["Phone"],
-                                    Convert.ToBoolean(reader["IsAbsent"]),
-                                    Convert.ToBoolean(reader["IsAvailable"]),
+                                    (enDriverStatus)Enum.Parse(typeof(enDriverStatus), reader["Status"].ToString() ?? string.Empty),
                                     Convert.ToInt16(reader["VehicleID"])
                                 ));
                             }
@@ -86,7 +85,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -103,8 +102,7 @@ namespace DataAccessLayer.Repositories
                                     (string)reader["NationalNo"],
                                     (string)reader["Name"],
                                     (string)reader["Phone"],
-                                    Convert.ToBoolean(reader["IsAbsent"]),
-                                    Convert.ToBoolean(reader["IsAvailable"]),
+                                    (enDriverStatus)Enum.Parse(typeof(enDriverStatus), reader["Status"].ToString() ?? string.Empty),
                                     Convert.ToInt16(reader["VehicleID"])
                                 ));
                             }
@@ -131,7 +129,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -148,8 +146,49 @@ namespace DataAccessLayer.Repositories
                                     (string)reader["NationalNo"],
                                     (string)reader["Name"],
                                     (string)reader["Phone"],
-                                    Convert.ToBoolean(reader["IsAbsent"]),
-                                    Convert.ToBoolean(reader["IsAvailable"]),
+                                    (enDriverStatus)Enum.Parse(typeof(enDriverStatus), reader["Status"].ToString() ?? string.Empty),
+                                    Convert.ToInt16(reader["VehicleID"])
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return driversList;
+        }
+
+        public static async Task<List<DriverDTO>> GetDriversByStatusAsync(enDriverStatus status)
+        {
+            List<DriverDTO> driversList = new List<DriverDTO>();
+
+            string query = @"SELECT * FROM Drivers
+                            WHERE Status = @Status;";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("Status", status);
+
+                        await conn.OpenAsync();
+
+                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                driversList.Add(new DriverDTO(
+                                    Convert.ToInt32(reader["DriverID"]),
+                                    (string)reader["NationalNo"],
+                                    (string)reader["Name"],
+                                    (string)reader["Phone"],
+                                    (enDriverStatus)Enum.Parse(typeof(enDriverStatus), reader["Status"].ToString() ?? string.Empty),
                                     Convert.ToInt16(reader["VehicleID"])
                                 ));
                             }
@@ -172,7 +211,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using(MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -189,8 +228,7 @@ namespace DataAccessLayer.Repositories
                                     (string)reader["NationalNo"],
                                     (string)reader["Name"],
                                     (string)reader["Phone"],
-                                    Convert.ToBoolean(reader["IsAbsent"]),
-                                    Convert.ToBoolean(reader["IsAvailable"]),
+                                    (enDriverStatus)Enum.Parse(typeof(enDriverStatus), reader["Status"].ToString() ?? string.Empty),
                                     Convert.ToInt16(reader["VehicleID"])
                                 );
                             }
@@ -213,7 +251,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -230,8 +268,7 @@ namespace DataAccessLayer.Repositories
                                     (string)reader["NationalNo"],
                                     (string)reader["Name"],
                                     (string)reader["Phone"],
-                                    Convert.ToBoolean(reader["IsAbsent"]),
-                                    Convert.ToBoolean(reader["IsAvailable"]),
+                                    (enDriverStatus)Enum.Parse(typeof(enDriverStatus), reader["Status"].ToString() ?? string.Empty),
                                     Convert.ToInt16(reader["VehicleID"])
                                 );
                             }
@@ -254,7 +291,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -271,8 +308,7 @@ namespace DataAccessLayer.Repositories
                                     (string)reader["NationalNo"],
                                     (string)reader["Name"],
                                     (string)reader["Phone"],
-                                    Convert.ToBoolean(reader["IsAbsent"]),
-                                    Convert.ToBoolean(reader["IsAvailable"]),
+                                    (enDriverStatus)Enum.Parse(typeof(enDriverStatus), reader["Status"].ToString() ?? string.Empty),
                                     Convert.ToInt16(reader["VehicleID"])
                                 );
                             }
@@ -291,22 +327,21 @@ namespace DataAccessLayer.Repositories
         public static async Task<int?> AddNewDriverAsync(DriverDTO newDriver)
         {
             string query = @"INSERT INTO Drivers
-                            (NationalNo, Name, Phone, IsAbsent, IsAvailable, VehicleID)
+                            (NationalNo, Name, Phone, Status, VehicleID)
                             VALUES
-                            (@NationalNo, @Name, @Phone, @IsAbsent, @IsAvailable, @VehicleID);
+                            (@NationalNo, @Name, @Phone, @Status, @VehicleID);
                             SELECT LAST_INSERT_ID();";
 
             try
             {
-                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using(MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("NationalNo", newDriver.NationalNo);
                         cmd.Parameters.AddWithValue("Name", newDriver.Name);
                         cmd.Parameters.AddWithValue("Phone", newDriver.Phone);
-                        cmd.Parameters.AddWithValue("IsAbsent", newDriver.IsAbsent);
-                        cmd.Parameters.AddWithValue("IsAvailable", newDriver.IsAvailable);
+                        cmd.Parameters.AddWithValue("Status", newDriver.Status.ToString());
                         cmd.Parameters.AddWithValue("VehicleID", newDriver.VehicleID);
 
                         await conn.OpenAsync();
@@ -333,23 +368,21 @@ namespace DataAccessLayer.Repositories
                             NationalNo = @NationalNo,
                             Name = @Name,
                             Phone = @Phone,
-                            IsAbsent = @IsAbsent,
-                            IsAvailable = @IsAvailable,
+                            Status = @Status,
                             VehicleID = @VehicleID
                             WHERE DriverID = @DriverID;";
 
             try
             {
-                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using(MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("DriverID", updatedDriver.DriverID);
+                        cmd.Parameters.AddWithValue("DriverID", updatedDriver.DriverID ?? 0);
                         cmd.Parameters.AddWithValue("NationalNo", updatedDriver.NationalNo);
                         cmd.Parameters.AddWithValue("Name", updatedDriver.Name);
                         cmd.Parameters.AddWithValue("Phone", updatedDriver.Phone);
-                        cmd.Parameters.AddWithValue("IsAbsent", updatedDriver.IsAbsent);
-                        cmd.Parameters.AddWithValue("IsAvailable", updatedDriver.IsAvailable);
+                        cmd.Parameters.AddWithValue("Status", updatedDriver.Status.ToString());
                         cmd.Parameters.AddWithValue("VehicleID", updatedDriver.VehicleID);
 
                         await conn.OpenAsync();
@@ -373,7 +406,7 @@ namespace DataAccessLayer.Repositories
 
             try
             {
-                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings._connectionString))
+                using(MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
                 {
                     using(MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -391,6 +424,61 @@ namespace DataAccessLayer.Repositories
             }
 
             return false;
+        }
+
+        public static async Task<short> GetNumberOfDriversAsync()
+        {
+            List<DriverDTO> driversList = new List<DriverDTO>();
+
+            string query = @"SELECT Count(*) FROM Drivers;";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
+
+                        return Convert.ToInt16(await cmd.ExecuteScalarAsync());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return 0;
+        }
+
+        public static async Task<short> GetNumberOfDriversByStatusAsync(enDriverStatus status)
+        {
+            List<DriverDTO> driversList = new List<DriverDTO>();
+
+            string query = @"SELECT Count(*) FROM Drivers
+                            WHERE Status = @Status;";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("Status", status);
+
+                        await conn.OpenAsync();
+
+                        return Convert.ToInt16(await cmd.ExecuteScalarAsync());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return 0;
         }
     }
 }
