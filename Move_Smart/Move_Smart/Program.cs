@@ -1,37 +1,58 @@
-using DataAccessLayer.Repositories;
+using DataAccessLayer.Util; // For ConnectionSettings
+using DataAccessLayer.Repositories; // For UserRepo, Sparepart
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.IncludeFields = true; // Moved from unused variable
+    });
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<appDBContext>(options => options.UseMySql(connectionString, ServerVersion.Parse("8.0.36-mysql")));
 
-builder.Services.AddScoped<Sparepart>();
-
-
-var options = new JsonSerializerOptions
+// Logging
+builder.Services.AddLogging(logging =>
 {
-    IncludeFields = true
-};
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Information);
+});
+
+// ConnectionSettings for raw SQL (your approach)
+builder.Services.AddSingleton<ConnectionSettings>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var logger = sp.GetRequiredService<ILogger<ConnectionSettings>>();
+    return new ConnectionSettings(config, logger);
+});
+
+// Register repositories
+builder.Services.AddScoped<UserRepo>();
+builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
+
+// EF Core for Kamal's work
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<appDBContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.Parse("8.0.36-mysql")));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseAuthorization();
-
+app.UseHttpsRedirection();
+app.UseAuthorization(); // No auth enforced, but kept for future use
 app.MapControllers();
 
 app.Run();

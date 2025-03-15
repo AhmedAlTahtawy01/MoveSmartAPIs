@@ -1,44 +1,39 @@
-﻿using DataAccessLayer.Repositories;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DataAccessLayer.Util
 {
-    internal class ConnectionSettings
+    public class ConnectionSettings
     {
-        public static string ?ConnectionString;
-        public static ILogger<UserRepo> _logger;
+        private readonly string _connectionString;
+        private readonly ILogger<ConnectionSettings> _logger;
 
-        public static void Intialize(IConfiguration configuration, ILogger<UserRepo> logger)
+        public ConnectionSettings(IConfiguration configuration, ILogger<ConnectionSettings> logger)
         {
-            ConnectionString = configuration.GetConnectionString("DefaultConnection");
-            _logger = logger;
+            _connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new ArgumentNullException(nameof(configuration), "Connection string 'DefaultConnection' is missing.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public static MySqlConnection GetConnection()
-        {
-            return new MySqlConnection(ConnectionString);
-        }
+        public MySqlConnection GetConnection() => new MySqlConnection(_connectionString);
+        
 
-        public static MySqlCommand GetCommand(string query, MySqlConnection conn)
+        public MySqlCommand GetCommand(string query, MySqlConnection conn)
         {
             var command = new MySqlCommand(query, conn);
             command.CommandType = CommandType.Text;
             return command;
         }
 
-        public static async Task<T> ExecuteQueryAsync<T>(string query, Func<DbCommand, Task<T>> func, params MySqlParameter[] parameters)
+        public async Task<T> ExecuteQueryAsync<T>(string query, Func<DbCommand, Task<T>> func, params MySqlParameter[] parameters)
         {
-            await using var conn = ConnectionSettings.GetConnection();
-            using var cmd = ConnectionSettings.GetCommand(query, conn);
+            await using var conn = GetConnection();
+            using var cmd = GetCommand(query, conn);
             cmd.Parameters.AddRange(parameters);
 
             try

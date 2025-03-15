@@ -43,11 +43,14 @@ namespace DataAccessLayer.Repositories
 
     public class ApplicationRepo
     {
+
+        private readonly ConnectionSettings _connectionSettings;
         private readonly ILogger<ApplicationRepo> _logger;
 
-        public ApplicationRepo(ILogger<ApplicationRepo> logger)
+        public ApplicationRepo(ConnectionSettings connectionSettings, ILogger<ApplicationRepo> logger)
         {
-            _logger = logger;
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         private ApplicationDTO MapApplication(DbDataReader reader)
@@ -80,7 +83,7 @@ namespace DataAccessLayer.Repositories
                         LIMIT @Offset, @PageSize";
             int offset = (pageNumber - 1) * pageSize;
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var applicationsList = new List<ApplicationDTO>();
                 using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
@@ -98,7 +101,7 @@ namespace DataAccessLayer.Repositories
                         FROM applications
                         WHERE ApplicationID = @applicationId";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
                 return await reader.ReadAsync() ? MapApplication(reader) : null;
@@ -112,7 +115,7 @@ namespace DataAccessLayer.Repositories
                 FROM applications
                 WHERE ApplicationType = @applicationType";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var applicationsList = new List<ApplicationDTO>();
                 using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
@@ -128,7 +131,7 @@ namespace DataAccessLayer.Repositories
                 FROM applications
                 WHERE CreatedByUserID = @createdByUser";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var applicationsList = new List<ApplicationDTO>();
                 using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
@@ -144,7 +147,7 @@ namespace DataAccessLayer.Repositories
                 FROM applications
                 WHERE Status = @status";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var applicationsList = new List<ApplicationDTO>();
                 using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
@@ -157,7 +160,7 @@ namespace DataAccessLayer.Repositories
         {
             const string query = "SELECT COUNT(*) FROM applications";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
             });
@@ -167,7 +170,7 @@ namespace DataAccessLayer.Repositories
         {
             const string query = "SELECT COUNT(*) FROM applications WHERE Status = @status";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
             }, new MySqlParameter("@status", status.ToString()));
@@ -177,7 +180,7 @@ namespace DataAccessLayer.Repositories
         {
             const string query = "SELECT COUNT(*) FROM applications WHERE ApplicationType = @applicationType";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
             }, new MySqlParameter("@applicationType", applicationType));
@@ -190,7 +193,7 @@ namespace DataAccessLayer.Repositories
                 SET Status = @status
                 WHERE ApplicationID = @applicationId";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
             }, new MySqlParameter("@applicationId", applicationId), new MySqlParameter("@status", status.ToString()));
@@ -203,7 +206,7 @@ namespace DataAccessLayer.Repositories
                 VALUES (@creationDate, @status, @applicationType, @applicationDescription, @createdByUser);
                 SELECT LAST_INSERT_ID()";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
             }, new MySqlParameter("@creationDate", application.CreationDate),
@@ -223,7 +226,7 @@ namespace DataAccessLayer.Repositories
                     CreatedByUserID = @createdByUser
                 WHERE ApplicationID = @applicationId";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
             }, new MySqlParameter("@status", application.Status.ToString()),
@@ -237,7 +240,7 @@ namespace DataAccessLayer.Repositories
         {
             const string query = "DELETE FROM applications WHERE ApplicationID = @applicationId";
 
-            return await ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
             }, new MySqlParameter("@applicationId", applicationId));

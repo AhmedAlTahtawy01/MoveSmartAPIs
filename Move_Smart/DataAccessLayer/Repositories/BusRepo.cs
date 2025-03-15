@@ -1,4 +1,6 @@
-﻿using DataAccessLayer.Util;
+﻿using DataAccessLayer.Repositories;
+using DataAccessLayer.Util;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -28,6 +30,16 @@ namespace DataAccessLayer
 
     public class BusRepo
     {
+
+        private readonly ConnectionSettings _connectionSettings;
+        private readonly ILogger<BusRepo> _logger;
+
+        public BusRepo(ConnectionSettings connectionSettings, ILogger<BusRepo> logger)
+        {
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public static async Task<List<BusDTO>> GetAllBusesAsync()
         {
             List<BusDTO> busesList = new List<BusDTO>();
@@ -37,7 +49,7 @@ namespace DataAccessLayer
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(ConnectionSettings.ConnectionString))
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
