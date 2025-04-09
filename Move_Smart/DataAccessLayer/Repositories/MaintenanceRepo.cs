@@ -1,49 +1,47 @@
-﻿using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
 using System.Data.Common;
+using DataAccessLayer.Util;
+using MySql.Data.MySqlClient;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace DataAccessLayer.Repositories
 {
-    public class Maintenance
+    public class MaintenanceDTO
     {
         public int MaintenanceId { get; set; }
         public DateTime MaintenanceDate { get; set; }
         public string Description { get; set; }
         public int MaintenanceApplicationId { get; set; }
 
-        public Maintenance(int maintenanceId, DateTime date, string description, int maintenanceApplicationId)
+        public MaintenanceDTO(int maintenanceId, DateTime date, string description, int maintenanceApplicationId)
         {
-            this.MaintenanceId = maintenanceId;
-            this.MaintenanceDate = date;
-            this.Description = description;
-            this.MaintenanceApplicationId = maintenanceApplicationId;
+            MaintenanceId = maintenanceId;
+            MaintenanceDate = date;
+            Description = description;
+            MaintenanceApplicationId = maintenanceApplicationId;
         }
     }
 
     public class MaintenanceRepo
     {
-        private static readonly string _connectionString = "Server=localhost;Database=move_smart;User Id=root;Password=ahmedroot;";
+        private readonly ConnectionsSettings _connectionsSettings;
+        private readonly ILogger<MaintenanceRepo> _logger;
 
-        private MySqlConnection GetConnection()
+        public MaintenanceRepo(ConnectionsSettings connectionsSettings, ILogger<MaintenanceRepo> logger)
         {
-            return new MySqlConnection(_connectionString);
+            _connectionsSettings = connectionsSettings ?? throw new ArgumentNullException(nameof(connectionsSettings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        private MySqlCommand GetCommand(string query, MySqlConnection conn)
+        private MaintenanceDTO MapMaintenance(DbDataReader reader)
         {
-            var cmd = new MySqlCommand(query, conn);
-            cmd.CommandType = CommandType.Text;
-            return cmd;
-        }
-
-        private Maintenance MapMaintenance(DbDataReader reader)
-        {
-            return new Maintenance
+            return new MaintenanceDTO
             (
                 reader.GetInt32("MaintenanceID"),
                 reader.GetDateTime("MaintenanceDate"),
@@ -52,146 +50,113 @@ namespace DataAccessLayer.Repositories
             );
         }
 
-        public async Task<List<Maintenance>> GetAllMaintenancesAsync()
+        public async Task<List<MaintenanceDTO>> GetAllMaintenancesAsync(int pageNumber = 1, int pageSize = 10)
         {
-            var maintenances = new List<Maintenance>();
+            if (pageNumber < 1 || pageSize < 1)
+                throw new ArgumentException("Page number and page size must be greater than 0.");
 
-            await using (var conn = GetConnection())
+            const string query = @"
+                SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
+                FROM maintenance";
+            int offset = (pageNumber - 1) * pageSize;
+
+            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
-                    FROM maintenance";
+                var maintenancesList = new List<MaintenanceDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                maintenances.Add(MapMaintenance(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetAllMaintenancesAsync.", ex);
-                    }
-                }
-
-                return maintenances;
-            }
+                while (await reader.ReadAsync()) maintenancesList.Add(MapMaintenance(reader));
+                return maintenancesList;
+            }, new MySqlParameter("@Offset", offset), new MySqlParameter("PageSize", pageSize));
         }
 
-        public async Task<Maintenance> GetMaintenanceByIdAsync(int maintenanceId)
+        public async Task<MaintenanceDTO?> GetMaintenanceByIdAsync(int maintenanceId)
         {
-            await using (var conn = GetConnection())
+            var query = @"
+                SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
+                FROM maintenance
+                WHERE MaintenanceID = @maintenanceId;";
+
+            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
-                    FROM maintenance
-                    WHERE MaintenanceID = @maintenanceId;";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@maintenanceId", maintenanceId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                return MapMaintenance(reader);
-                            }
-                            else
-                            {
-                                return null;
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMaintenanceByIdAsync.", ex);
-                    }
-                }
-            }
+                using var reader = await cmd.ExecuteReaderAsync();
+                return await reader.ReadAsync() ? MapMaintenance(reader) : null;
+            }, new MySqlParameter("maintenanceId", maintenanceId));
         }
 
-        public async Task<List<Maintenance>> GetMaintenancesByDateAsync(DateTime maintenanceDate)
+        private async Task<List<MaintenanceDTO>> GetMaintenancesAsync(string filter, params MySqlParameter[] parameters)
         {
-            var maintenances = new List<Maintenance>();
+            string query = @"
+                SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
+                FROM maintenance";
 
-            await using (var conn = GetConnection())
+            if (!string.IsNullOrEmpty(filter))
+                query += " WHERE " + filter;
+
+            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
-                    FROM maintenance
-                    WHERE DATE(MaintenanceDate) = @maintenanceDate";
+                var maintenancesList = new List<MaintenanceDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@maintenanceDate", maintenanceDate.Date);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                maintenances.Add(MapMaintenance(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMaintenancesByDateAsync.", ex);
-                    }
-                }
-            }
-
-            return maintenances;
+                while (await reader.ReadAsync()) maintenancesList.Add(MapMaintenance(reader));
+                return maintenancesList;
+            }, parameters);
         }
 
-        public async Task<List<Maintenance>> GetMaintenanceByMaintenanceApplicationIdAsync(int maintenanceApplicationId)
+        public async Task<List<MaintenanceDTO>> GetMaintenancesByDateAsync(DateTime maintenanceDate)
         {
-            var maintenances = new List<Maintenance>();
+            return await GetMaintenancesAsync("DATE(MaintenanceDate) = @maintenanceDate",
+                new MySqlParameter("@maintenanceDate", maintenanceDate.Date));
+        }
 
-            await using (var conn = GetConnection())
+        public async Task<List<MaintenanceDTO>> GetMaintenanceByMaintenanceApplicationIdAsync(int maintenanceApplicationId)
+        {
+            return await GetMaintenancesAsync("MaintenanceApplicationID = @maintenanceApplicationId",
+                new MySqlParameter("@maintenanceApplicationId", maintenanceApplicationId));
+        }
+
+        public async Task<int> CreateMaintenanceAsync(MaintenanceDTO maintenance)
+        {
+            const string query = @"
+                INSERT INTO maintenance (MaintenanceDate, Description, MaintenanceApplicationID)
+                VALUES (@maintenanceDate, @description, @maintenanceApplicationId);
+                SELECT LAST_INSERT_ID();";
+            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
-                    FROM maintenance
-                    WHERE MaintenanceApplicationID = @maintenanceApplicationId";
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            },
+            new MySqlParameter("@maintenanceDate", maintenance.MaintenanceDate),
+            new MySqlParameter("@description", maintenance.Description),
+            new MySqlParameter("@maintenanceApplicationId", maintenance.MaintenanceApplicationId));
+        }
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@maintenanceApplicationId", maintenanceApplicationId);
+        public async Task<bool> UpdateMaintenanceAsync(MaintenanceDTO maintenance)
+        {
+            const string query = @"
+                UPDATE maintenance
+                SET MaintenanceDate = @maintenanceDate,
+                    Description = @description,
+                    MaintenanceApplicationID = @maintenanceApplicationId
+                WHERE MaintenanceID = @maintenanceId;";
+            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            },
+            new MySqlParameter("@maintenanceId", maintenance.MaintenanceId),
+            new MySqlParameter("@maintenanceDate", maintenance.MaintenanceDate),
+            new MySqlParameter("@description", maintenance.Description),
+            new MySqlParameter("@maintenanceApplicationId", maintenance.MaintenanceApplicationId));
+        }
 
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                maintenances.Add(MapMaintenance(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMaintenanceByMaintenanceApplicationIdAsync.", ex);
-                    }
-                }
-            }
-
-            return maintenances;
+        public async Task<bool> DeleteMaintenanceAsync(int maintenanceId)
+        {
+            const string query = @"
+                DELETE FROM maintenance
+                WHERE MaintenanceID = @maintenanceId;";
+            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@maintenanceId", maintenanceId));
         }
 
     }

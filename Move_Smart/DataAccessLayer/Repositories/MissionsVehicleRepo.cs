@@ -85,7 +85,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<MissionsVehicle> GetMissionVehicleByIdAsync(int missionVehicleId)
+        public async Task<MissionsVehicle?> GetMissionVehicleByIdAsync(int missionVehicleId)
         {
             await using (var conn = GetConnection())
             {

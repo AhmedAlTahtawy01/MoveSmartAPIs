@@ -131,9 +131,7 @@ namespace DataAccessLayer.Repositories
                 FROM applications";
 
             if (!string.IsNullOrEmpty(filter))
-            {
                 query += " WHERE " + filter;
-            }
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {

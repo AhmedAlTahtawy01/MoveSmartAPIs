@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using DataAccessLayer.Util;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -6,10 +7,12 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
 namespace DataAccessLayer.Repositories
 {
-    public class Mission
+    public class MissionDTO
     {
         public int MissionId { get; set; }
         public int MissionNoteId { get; set; }
@@ -19,37 +22,32 @@ namespace DataAccessLayer.Repositories
         public string Destination { get; set; }
         public int UserId { get; set; }
 
-        public Mission(int missionId, int missionNoteId, int missionVechiclesId, DateTime startDate, DateTime endDate, string destination, int createdByUser)
+        public MissionDTO(int missionId, int missionNoteId, int missionVechiclesId, DateTime startDate, DateTime endDate, string destination, int createdByUser)
         {
-            this.MissionId = missionId;
-            this.MissionNoteId = missionNoteId;
-            this.MissionVehiclesId = missionVechiclesId;
-            this.StartDate = startDate;
-            this.EndDate = endDate;
-            this.Destination = destination;
-            this.UserId = createdByUser;
+            MissionId = missionId;
+            MissionNoteId = missionNoteId;
+            MissionVehiclesId = missionVechiclesId;
+            StartDate = startDate;
+            EndDate = endDate;
+            Destination = destination;
+            UserId = createdByUser;
         }
     }
 
     public class MissionRepo
     {
-        private static readonly string _connectionString = "Server=localhost;Database=MoveSmart;User Id=root;Password=ahmedroot;";
+        private readonly ConnectionsSettings _connectionSettings;
+        private readonly ILogger<MissionRepo> _logger;
 
-        private MySqlConnection GetConnection()
+        public MissionRepo(ConnectionsSettings connectionSettings, ILogger<MissionRepo> logger)
         {
-            return new MySqlConnection(_connectionString);
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        private MySqlCommand GetCommand(string query, MySqlConnection conn)
+        private MissionDTO MapMission(DbDataReader reader)
         {
-            var cmd = new MySqlCommand(query, conn);
-            cmd.CommandType = CommandType.Text;
-            return cmd;
-        }
-
-        private Mission MapMission(DbDataReader reader)
-        {
-            return new Mission
+            return new MissionDTO
             (
                 reader.GetInt32("MissionID"),
                 reader.GetInt32("MissionNoteID"),
@@ -61,352 +59,142 @@ namespace DataAccessLayer.Repositories
             );
         }
 
-        public async Task<List<Mission>> GetAllMissionsAsync()
+        public async Task<List<MissionDTO>> GetAllMissionsAsync(int pageNumber = 1, int pageSize = 10)
         {
-            var missions = new List<Mission>();
+            if (pageNumber < 1 || pageSize < 1)
+                throw new ArgumentException("Page number and page size must be greater than 0.");
 
-            await using (var conn = GetConnection())
-            {
-                var query = @"
+            const string query = @"
                     SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
-                    FROM missions";
+                    FROM missions
+                    LIMIT @Offset, @PageSize";
+            int offset = (pageNumber - 1) * pageSize;
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                var missionsList = new List<MissionDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
 
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missions.Add(MapMission(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetAllMissionsAsync.", ex);
-                    }
-                }
+                while (await reader.ReadAsync()) missionsList.Add(MapMission(reader));
+                return missionsList;
 
-                return missions;
-            }
+            }, new MySqlParameter("@Offset", offset), new MySqlParameter("@PageSize", pageSize));
         }
 
-        public async Task<Mission> GetMissionByIdAsync(int missionId)
+        public async Task<MissionDTO?> GetMissionByIdAsync(int missionId)
         {
-            await using (var conn = GetConnection())
-            {
-                var query = @"
+            const string query = @"
                     SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
                     FROM missions
                     WHERE MissionID = @missionId";
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionId", missionId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                return MapMission(reader);
-                            }
-                            else
-                            {
-                                return null;
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionByIdAsync.", ex);
-                    }
-                }
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                using var reader = await cmd.ExecuteReaderAsync();
+                return await reader.ReadAsync() ? MapMission(reader) : null;
+            }, new MySqlParameter("@missionId", missionId));
         }
 
-        public async Task<List<Mission>> GetMissionsByNoteIdAsync(int missionNoteId)
+        private async Task<List<MissionDTO>> GetMissionsAsync(string filter, params MySqlParameter[] parameters)
         {
-            var missions = new List<Mission>();
-
-            await using (var conn = GetConnection())
-            {
-                var query = @"
+            string query = @"
                     SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
-                    FROM missions
-                    WHERE MissionNoteID = @missionNoteId";
+                    FROM missions";
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionNoteId", missionNoteId);
+            if (!string.IsNullOrEmpty(filter))
+                query += " WHERE " + filter;
 
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missions.Add(MapMission(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsByNoteIdAsync.", ex);
-                    }
-                }
-            }
-
-            return missions;
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                var missionsList = new List<MissionDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync()) missionsList.Add(MapMission(reader));
+                return missionsList;
+            }, parameters);
         }
 
-        public async Task<List<Mission>> GetMissionsByVehiclesIdAsync(int missionVehiclesId)
+        public async Task<List<MissionDTO>> GetMissionsByNoteIdAsync(int missionNoteId)
         {
-            var missions = new List<Mission>();
-
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
-                    FROM missions
-                    WHERE MissionVehiclesID = @missionVehiclesId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionVehiclesId", missionVehiclesId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missions.Add(MapMission(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsByVehiclesIdAsync.", ex);
-                    }
-                }
-            }
-
-            return missions;
+            return await GetMissionsAsync("MissionNoteID = @missionNoteId",
+                new MySqlParameter("@missionNoteId", missionNoteId));
         }
 
-        public async Task<List<Mission>> GetMissionsByStartDateAsync(DateTime startDate)
+        public async Task<List<MissionDTO>> GetMissionsByVehiclesIdAsync(int missionVehiclesId)
         {
-            var missions = new List<Mission>();
-
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
-                    FROM missions
-                    WHERE MissionStartDate = @startDate";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@startDate", startDate);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missions.Add(MapMission(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsByStartDateAsync.", ex);
-                    }
-                }
-            }
-
-            return missions;
+            return await GetMissionsAsync("MissionVehiclesID = @missionVehiclesId",
+                new MySqlParameter("@missionVehicleId", missionVehiclesId));
         }
 
-        public async Task<List<Mission>> GetMissionsByDestinationAsync(string destination)
+        public async Task<List<MissionDTO>> GetMissionsByStartDateAsync(DateTime startDate)
         {
-            var missions = new List<Mission>();
-
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
-                    FROM missions
-                    WHERE DIstination = @destination";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@destination", destination);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missions.Add(MapMission(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsByDestinationAsync.", ex);
-                    }
-                }
-            }
-
-            return missions;
+            return await GetMissionsAsync("MissionStartDate = @startDate",
+                new MySqlParameter("@startDate", startDate));
         }
 
-        public async Task<List<Mission>> GetMissionsByUserIdAsync(int userId)
+        public async Task<List<MissionDTO>> GetMissionsByDestinationAsync(string destination)
         {
-            var missions = new List<Mission>();
-
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
-                    FROM missions
-                    WHERE CreatedByUser = @userId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@userId", userId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missions.Add(MapMission(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsByUserIdAsync.", ex);
-                    }
-                }
-            }
-
-            return missions;
+            return await GetMissionsAsync("DIstination = @destination",
+                new MySqlParameter("@destination", destination));
         }
 
-        public async Task<int> CreateMissionAsync(Mission mission)
+        public async Task<List<MissionDTO>> GetMissionsByUserIdAsync(int userId)
         {
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    INSERT INTO missions (MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser)
-                    VALUES (@missionNoteId, @missionVehiclesId, @missionStartDate, @missionEndDate, @destination, @createdByUser)
-                    SELECT LAST_INSERT_ID();";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionNoteId", mission.MissionNoteId);
-                    cmd.Parameters.AddWithValue("@missionVehiclesId", mission.MissionVehiclesId);
-                    cmd.Parameters.AddWithValue("@missionStartDate", mission.StartDate);
-                    cmd.Parameters.AddWithValue("@missionEndDate", mission.EndDate);
-                    cmd.Parameters.AddWithValue("@destination", mission.Destination);
-                    cmd.Parameters.AddWithValue("@createdByUser", mission.UserId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var newMissionId = Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
-
-                        return newMissionId;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in CreateMissionAsync.", ex);
-                    }
-                }
-            }
+            return await GetMissionsAsync("CreatedByUser = @userId",
+                new MySqlParameter("@userId", userId));
         }
 
-        public async Task<bool> UpdateMissionAsync(Mission mission)
+        public async Task<int> CreateMissionAsync(MissionDTO mission)
         {
-            await using (var conn = GetConnection())
+            const string query = @"
+                INSERT INTO missions (MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser)
+                VALUES (@missionNoteId, @missionVehiclesId, @missionStartDate, @missionEndDate, @destination, @createdByUser)
+                SELECT LAST_INSERT_ID();";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    UPDATE missions
-                    SET 
-                        MissionNoteID = @missionNoteId,
-                        MissionVehiclesID = @missionVehiclesId,
-                        MissionStartDate = @startDate,
-                        MissionEndDate = @endDate,
-                        DIstination = @destination,
-                        CreatedByUser = @createdByUser
-                    WHERE
-                        MissionID = @missionId";
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            }, new MySqlParameter("@missionNoteId", mission.MissionNoteId),
+            new MySqlParameter("@missionVehiclesId", mission.MissionVehiclesId),
+            new MySqlParameter("@missionStartDate", mission.StartDate),
+            new MySqlParameter("@missionEndDate", mission.EndDate),
+            new MySqlParameter("@destination", mission.Destination),
+            new MySqlParameter("@createdByUser", mission.UserId));
+        }
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionId", mission.MissionId);
-                    cmd.Parameters.AddWithValue("@missionNoteId", mission.MissionNoteId);
-                    cmd.Parameters.AddWithValue("@missionVehiclesId", mission.MissionVehiclesId);
-                    cmd.Parameters.AddWithValue("@startDate", mission.StartDate);
-                    cmd.Parameters.AddWithValue("@endDate", mission.EndDate);
-                    cmd.Parameters.AddWithValue("@destination", mission.Destination);
-                    cmd.Parameters.AddWithValue("@createdByUser", mission.UserId);
+        public async Task<bool> UpdateMissionAsync(MissionDTO mission)
+        {
+            const string query = @"
+                UPDATE missions
+                SET 
+                    MissionNoteID = @missionNoteId,
+                    MissionVehiclesID = @missionVehiclesId,
+                    MissionStartDate = @startDate,
+                    MissionEndDate = @endDate,
+                    DIstination = @destination,
+                    CreatedByUser = @createdByUser
+                WHERE
+                    MissionID = @missionId";
 
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                        return rowsAffected > 0;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in UpdateMissionAsync.", ex);
-                    }
-                }
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@missionId", mission.MissionId),
+            new MySqlParameter("@missionNoteId", mission.MissionNoteId),
+            new MySqlParameter("@missionVehiclesId", mission.MissionVehiclesId),
+            new MySqlParameter("@missionStartDate", mission.StartDate),
+            new MySqlParameter("@missionEndDate", mission.EndDate),
+            new MySqlParameter("@destination", mission.Destination),
+            new MySqlParameter("@createdByUser", mission.UserId));
         }
 
         public async Task<bool> DeleteMissionAsync(int missionId)
         {
-            await using (var conn = GetConnection())
+            const string query = "DELETE FROM missions WHERE MissionID = @missionId";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = "DELETE FROM missions WHERE MissionID = @missionId";
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionId", missionId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                        return rowsAffected > 0;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in DeleteMissionAsync.", ex);
-                    }
-                }
-            }
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("missionId", missionId));
         }
     }
 }

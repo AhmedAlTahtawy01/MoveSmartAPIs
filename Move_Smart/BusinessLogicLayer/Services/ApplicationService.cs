@@ -19,56 +19,29 @@ namespace BusinessLayer.Services
 
         protected async Task<int> CreateApplicationAsync(ApplicationDTO dto)
         {
-            if (dto == null)
-            {
-                _logger.LogWarning("Attempted to create a null application DTO.");
-                throw new ArgumentNullException(nameof(dto), "Application DTO cannot be null.");
-            }
-            
             if (dto.ApplicationId != 0)
             {
                 _logger.LogWarning("Attempted to create an application with a non-zero ID.");
                 throw new InvalidOperationException("Application ID must be 0 for new applications.");
             }
 
-            try
-            {
-                _ValidateApplicationDTO(dto);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogWarning($"Validation failed: {ex.Message}");
-                throw;
-            }
-
-
+            
+            _ValidateApplicationDTO(dto);
+            
             _logger.LogInformation("Creating new application.");
             return await _repo.CreateApplicationAsync(dto);
         }
 
         protected async Task<bool> UpdateApplicationAsync(ApplicationDTO dto)
         {
-            if (dto == null)
-            {
-                _logger.LogWarning("Attempted to update a null application DTO.");
-                throw new ArgumentNullException(nameof(dto), "Application DTO cannot be null.");
-            }
-
             if (dto.ApplicationId <= 0)
             {
                 _logger.LogWarning("Attempted to update an application with invalid ID.");
                 throw new InvalidOperationException("Application ID must be greater than 0 for updates.");
             }
 
-            try
-            {
-                _ValidateApplicationDTO(dto);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogWarning($"Validation failed: {ex.Message}");
-                throw;
-            }
+            _ValidateApplicationDTO(dto);
+            
 
             var existingApplication = await _repo.GetApplicationByIdAsync(dto.ApplicationId);
             if (existingApplication == null)
@@ -184,6 +157,12 @@ namespace BusinessLayer.Services
 
         protected void _ValidateApplicationDTO(ApplicationDTO dto)
         {
+            if (dto == null)
+            {
+                _logger.LogWarning("Attempted to process a null application DTO.");
+                throw new ArgumentNullException(nameof(dto), "Application DTO cannot be null.");
+            }
+
             if (dto.CreationDate == default)
             {
                 _logger.LogWarning("Validation Failed: Creation Date is required.");

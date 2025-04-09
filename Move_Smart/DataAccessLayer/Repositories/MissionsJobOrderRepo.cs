@@ -83,7 +83,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<MissionsJobOrder> GetMissionsJobOrderByIdAsync(int orderId)
+        public async Task<MissionsJobOrder?> GetMissionsJobOrderByIdAsync(int orderId)
         {
             await using (var conn = GetConnection())
             {
