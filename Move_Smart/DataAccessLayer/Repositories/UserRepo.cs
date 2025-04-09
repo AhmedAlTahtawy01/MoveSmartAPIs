@@ -42,10 +42,10 @@ namespace DataAccessLayer.Repositories
 
     public class UserRepo
     {
-        private readonly ConnectionSettings _connectionSettings;
+        private readonly ConnectionsSettings _connectionSettings;
         private readonly ILogger<UserRepo> _logger;
 
-        public UserRepo(ConnectionSettings connectionSettings, ILogger<UserRepo> logger)
+        public UserRepo(ConnectionsSettings connectionSettings, ILogger<UserRepo> logger)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -53,10 +53,11 @@ namespace DataAccessLayer.Repositories
 
         private UserDTO MapUser(DbDataReader reader)
         {
-            if (!Enum.TryParse(reader["Role"].ToString(), out EnUserRole role))
+            string roleString = reader.GetString(reader.GetOrdinal("Role"));
+            if (!Enum.TryParse(roleString, true, out EnUserRole role))
             {
-                _logger.LogError($"Invalid Role value in database: {reader["Role"]}");
-                throw new InvalidOperationException($"Unable to parse role: {reader["Role"]}");
+                _logger.LogError($"Invalid Role value in database: {roleString}");
+                throw new InvalidOperationException($"Unable to parse role: {roleString}");
             }
 
             return new UserDTO
@@ -75,36 +76,39 @@ namespace DataAccessLayer.Repositories
             if (pageNumber < 1 || pageSize < 1)
                 throw new ArgumentException("Page number and page size must be greater than 0.");
 
-            const string query = "SELECT UserID, NationalNo, Password, Name, Role, AccessRight FROM users LIMIT @Offset, @PageSize";
+            const string query = @"
+                        SELECT UserID, NationalNo, Password, Name, Role, AccessRight
+                        FROM users
+                        LIMIT @Offset, @PageSize";
             int offset = (pageNumber - 1) * pageSize;
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var usersList = new List<UserDTO>();
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                using var reader = await cmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync()) usersList.Add(MapUser(reader));
                 return usersList;
             }, new MySqlParameter("@Offset", offset), new MySqlParameter("@PageSize", pageSize));
         }
 
-        public async Task<UserDTO> GetUserByIdAsync(int userId)
+        public async Task<UserDTO?> GetUserByIdAsync(int userId)
         {
             const string query = "SELECT UserID, NationalNo, Password, Name, Role, AccessRight FROM users WHERE UserID = @userId";
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                using var reader = await cmd.ExecuteReaderAsync();
                 return await reader.ReadAsync() ? MapUser(reader) : null;
             }, new MySqlParameter("@userId", userId));
         }
 
-        public async Task<UserDTO> GetUserByNationalNoAsync(string nationalNo)
+        public async Task<UserDTO?> GetUserByNationalNoAsync(string nationalNo)
         {
             const string query = "SELECT UserID, NationalNo, Password, Name, Role, AccessRight FROM users WHERE NationalNo = @nationalNo";
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                using var reader = await cmd.ExecuteReaderAsync();
                 return await reader.ReadAsync() ? MapUser(reader) : null;
             }, new MySqlParameter("@nationalNo", nationalNo));
         }
@@ -112,115 +116,79 @@ namespace DataAccessLayer.Repositories
         public async Task<bool> NationalNoExistsAsync(string nationalNo, int excludeUserId = 0)
         {
             string query = "SELECT COUNT(*) FROM users WHERE NationalNo = @nationalNo";
+            var parameters = new List<MySqlParameter>
+            {
+                new MySqlParameter("@nationalNo", nationalNo)
+            };
+
             if (excludeUserId > 0)
+            {
                 query += " AND UserID != @excludeUserId";
+                parameters.Add(new MySqlParameter("@excludeUserId", excludeUserId));
+            }
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
-            }, new MySqlParameter("@nationalNo", nationalNo),
-               excludeUserId > 0 ? new MySqlParameter("@excludeUserId", excludeUserId) : null);
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync()) > 0;
+            }, parameters.ToArray());
         }
 
         public async Task<int> CreateUserAsync(UserDTO user)
         {
-            await using var conn = _connectionSettings.GetConnection();
             const string query = @"
                 INSERT INTO users (NationalNo, Password, Name, Role, AccessRight)
                 VALUES (@NationalNo, @Password, @Name, @Role, @AccessRight);
                 SELECT LAST_INSERT_ID();";
 
-            using var cmd = _connectionSettings.GetCommand(query, conn);
-            cmd.Parameters.AddWithValue("@NationalNo", user.NationalNo);
-            cmd.Parameters.AddWithValue("@Password", user.Password);
-            cmd.Parameters.AddWithValue("@Name", user.Name);
-            cmd.Parameters.AddWithValue("@Role", user.Role.ToString());
-            cmd.Parameters.AddWithValue("@AccessRight", user.AccessRight);
-
-            try
-            {
-                await conn.OpenAsync().ConfigureAwait(false);
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
-            }
-            catch (MySqlException ex)
-            {
-                _logger.LogError($"Database error occurred in CreateUserAsync.", ex);
-                throw new Exception("Database error occurred in CreateUserAsync.", ex);
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+                Convert.ToInt32(await cmd.ExecuteScalarAsync()),
+                new MySqlParameter("@NationalNo", user.NationalNo),
+                new MySqlParameter("@Password", user.Password),
+                new MySqlParameter("@Name", user.Name),
+                new MySqlParameter("@Role", user.Role.ToString()),
+                new MySqlParameter("@AccessRight", user.AccessRight));
         }
 
         public async Task<bool> UpdateUserInfoAsync(UserDTO user)
         {
-            await using var conn = _connectionSettings.GetConnection();
             const string query = @"
                 UPDATE users
                 SET NationalNo = @NationalNo, Password = @Password, Name = @Name
                 WHERE UserID = @UserID";
 
-            using var cmd = _connectionSettings.GetCommand(query, conn);
-            cmd.Parameters.AddWithValue("@UserID", user.UserId);
-            cmd.Parameters.AddWithValue("@NationalNo", user.NationalNo);
-            cmd.Parameters.AddWithValue("@Password", user.Password);
-            cmd.Parameters.AddWithValue("@Name", user.Name);
-
-            try
-            {
-                await conn.OpenAsync().ConfigureAwait(false);
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
-            }
-            catch (MySqlException ex)
-            {
-                _logger.LogError($"Database error occurred in UpdateUserInfoAsync.", ex);
-                throw new Exception("Database error occurred in UpdateUserInfoAsync.", ex);
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+                await cmd.ExecuteNonQueryAsync() > 0,
+                new MySqlParameter("@UserID", user.UserId),
+                new MySqlParameter("@NationalNo", user.NationalNo),
+                new MySqlParameter("@Password", user.Password),
+                new MySqlParameter("@Name", user.Name));
         }
 
         public async Task<bool> UpdateAllUserInfoAsync(UserDTO user)
         {
-            await using var conn = _connectionSettings.GetConnection();
             const string query = @"
                 UPDATE users
-                SET NationalNo = @NationalNo, Password = @Password, Name = @Name, Role = @Role, AccessRight = @AccessRight
+                SET NationalNo = @NationalNo, Password = @Password, Name = @Name, 
+                    Role = @Role, AccessRight = @AccessRight
                 WHERE UserID = @UserID";
 
-            using var cmd = _connectionSettings.GetCommand(query, conn);
-            cmd.Parameters.AddWithValue("@UserID", user.UserId);
-            cmd.Parameters.AddWithValue("@NationalNo", user.NationalNo);
-            cmd.Parameters.AddWithValue("@Password", user.Password);
-            cmd.Parameters.AddWithValue("@Name", user.Name);
-            cmd.Parameters.AddWithValue("@Role", user.Role.ToString());
-            cmd.Parameters.AddWithValue("@AccessRight", user.AccessRight);
-
-            try
-            {
-                await conn.OpenAsync().ConfigureAwait(false);
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
-            }
-            catch (MySqlException ex)
-            {
-                _logger.LogError($"Database error occurred in UpdateAllUserInfoAsync.", ex);
-                throw new Exception("Database error occurred in UpdateAllUserInfoAsync.", ex);
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+                await cmd.ExecuteNonQueryAsync() > 0,
+                new MySqlParameter("@UserID", user.UserId),
+                new MySqlParameter("@NationalNo", user.NationalNo),
+                new MySqlParameter("@Password", user.Password),
+                new MySqlParameter("@Name", user.Name),
+                new MySqlParameter("@Role", user.Role.ToString()),
+                new MySqlParameter("@AccessRight", user.AccessRight));
         }
 
         public async Task<bool> DeleteUserAsync(int userId)
         {
-            await using var conn = _connectionSettings.GetConnection();
             const string query = "DELETE FROM users WHERE UserID = @UserID";
 
-            using var cmd = _connectionSettings.GetCommand(query, conn);
-            cmd.Parameters.AddWithValue("@UserID", userId);
-
-            try
-            {
-                await conn.OpenAsync().ConfigureAwait(false);
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
-            }
-            catch (MySqlException ex)
-            {
-                _logger.LogError("Database error occurred in DeleteUserAsync.", ex);
-                throw new Exception("Database error occurred in DeleteUserAsync.", ex);
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+                await cmd.ExecuteNonQueryAsync() > 0,
+                new MySqlParameter("@UserID", userId));
         }
     }
 }

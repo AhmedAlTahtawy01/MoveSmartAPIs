@@ -6,276 +6,238 @@ using Microsoft.Extensions.Logging;
 
 namespace BusinessLayer.Services
 {
-    public class JobOrder : Application
+    public class JobOrderService : ApplicationService
     {
-        // Private properties
-        private readonly JobOrderRepo _jobOrderDAL;
-        private readonly ILogger<JobOrder> _jobOrderLogger;
+        
+        private readonly JobOrderRepo _repo;
+        private readonly ILogger<JobOrderService> _logger;
 
-        // Public properties
-        public int OrderId { get; set; }
-        public int VehicleId { get; set; }
-        public int DriverId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
-        public string Destination { get; set; }
-        public int OdometerBefore { get; set; }
-        public int OdometerAfter { get; set; }
-
-        // Database properties
-        public enum EnMode { AddNew = 0, Update = 1 }
-        public EnMode Mode { get; private set; } = EnMode.AddNew;
-        public JobOrderDTO JobOrderDTO => new JobOrderDTO(
-            OrderId,
-            ApplicationId,
-            VehicleId,
-            DriverId,
-            StartDate,
-            EndDate,
-            StartTime,
-            EndTime,
-            Destination,
-            OdometerBefore,
-            OdometerAfter
-            );
-
-        // Constructor
-        public JobOrder(JobOrderDTO jobOrderDTO, JobOrderRepo dal, ILogger<JobOrder> logger,
-            ApplicationDTO applicationDTO, ApplicationRepo applicationDal, ILogger<Application> applicationLogger
-            , EnMode mode = EnMode.AddNew,
-             Application.EnMode applicaitonMode = Application.EnMode.AddNew)
-            : base(applicationDTO, applicationDal, applicationLogger, applicaitonMode)
+        public JobOrderService(JobOrderRepo repo, ApplicationRepo appRepo, ILogger<JobOrderService> logger, ILogger<ApplicationService> appLogger)
+            : base(appRepo, appLogger)
         {
-            OrderId = jobOrderDTO.OrderId;
-            ApplicationId = jobOrderDTO.ApplicationId;
-            VehicleId = jobOrderDTO.VehicleId;
-            DriverId = jobOrderDTO.DriverId;
-            StartDate = jobOrderDTO.StartDate;
-            EndDate = jobOrderDTO.EndDate;
-            StartTime = jobOrderDTO.StartTime;
-            EndTime = jobOrderDTO.EndTime;
-            Destination = jobOrderDTO.Destination;
-            OdometerBefore = jobOrderDTO.OdometerBefore;
-            OdometerAfter = jobOrderDTO.OdometerAfter;
-
-            _jobOrderDAL = dal;
-            _jobOrderLogger = logger;
-            Mode = mode;
+            _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
-        // Private methods
-        private bool _JobOrderValidations()
+        public async Task<int> CreateJobOrderAsync(JobOrderDTO dto)
         {
-            if (OrderId < 0)
-                throw new Exception("Order ID must be greater than or equal to 0.");
-
-            if (ApplicationId <= 0)
-                throw new Exception("Application ID must be greater than 0.");
-
-            if (VehicleId <= 0)
-                throw new Exception("Vehicle ID must be greater than 0.");
-
-            if (DriverId <= 0)
-                throw new Exception("Driver ID must be greater than 0.");
-
-            if (StartDate == default)
-                throw new Exception("Start date is required.");
-
-            if (EndDate == default)
-                throw new Exception("End date is required.");
-
-            if (string.IsNullOrWhiteSpace(Destination))
-                throw new Exception("Destination is required.");
-
-            if (OdometerBefore < 0)
-                throw new Exception("Odometer before must be greater than or equal to 0.");
-
-            if (OdometerAfter < 0)
-                throw new Exception("Odometer after must be greater than or equal to 0.");
-
-            return true;
-        }
-
-        private async Task<bool> _CreateJobOrderAsync()
-        {
-            if (await _jobOrderDAL.GetJobOrderByIdAsync(OrderId) != null)
-                throw new Exception($"Job order with ID {OrderId} already exists.");
-
-            OrderId = await _jobOrderDAL.CreateJobOrderAsync(JobOrderDTO);
-            if (OrderId > 0)
+            if (dto == null)
             {
-                Mode = EnMode.Update;
-                return true;
+                _logger.LogWarning("Attempted to create a null job order DTO.");
+                throw new ArgumentNullException(nameof(dto), "Job order DTO cannot be null.");
             }
 
-            return false;
-        }
-
-        private async Task<bool> _UpdateJobOrderAsync()
-        {
-            var existingJobOrder = await _jobOrderDAL.GetJobOrderByIdAsync(OrderId);
-            if (existingJobOrder == null)
-                throw new Exception("Job order not found.");
-
-            // Ensure the user can't change certain fields (e.g., ApplicationId, VehicleId, DriverId)
-            ApplicationId = existingJobOrder.ApplicationId;
-            VehicleId = existingJobOrder.VehicleId;
-            DriverId = existingJobOrder.DriverId;
-
-            return await _jobOrderDAL.UpdateJobOrderAsync(JobOrderDTO);
-        }
-
-        // Public methods
-        public async Task<bool> SaveAsync()
-        {
-            if (!_JobOrderValidations())
-                throw new Exception("Job order validations failed.");
-
-            if (Mode == EnMode.Update)
+            if (dto.OrderId != 0)
             {
-                return await _UpdateJobOrderAsync();
+                _logger.LogWarning("Attempted to create a job order with a non-zero ID.");
+                throw new InvalidOperationException("Job order ID must be 0 for new job orders.");
             }
-            else
-            {
-                return await _CreateJobOrderAsync();
-            }
-        }
 
-        public async Task<List<JobOrder>> GetAllJobOrdersAsync(int pageNumber = 1, int pageSize = 10)
-        {
+            _ValidateJobOrderDTO(dto);
             
-            var jobOrderDTOs = await _jobOrderDAL.GetAllJobOrdersAsync(pageNumber, pageSize);
-            var jobOrdersList = new List<JobOrder>();
+            dto.Application.ApplicationId = await CreateApplicationAsync(dto.Application);
+            _logger.LogInformation($"Created application with ID {dto.Application.ApplicationId} for job order.");
 
-            foreach (var jobOrderDTO in jobOrderDTOs)
-            {
-                var applicationDTO = await _dal.GetApplicationByIdAsync(jobOrderDTO.ApplicationId);
-                jobOrdersList.Add(new JobOrder(jobOrderDTO, _jobOrderDAL, _jobOrderLogger, applicationDTO, _dal, _logger, EnMode.Update));
-            }
-
-            return jobOrdersList;
+            _logger.LogInformation("Creating new job order.");
+            return await _repo.CreateJobOrderAsync(dto);
         }
 
-        //public async Task<JobOrder> GetJobOrderByIdAsync(int orderId)
-        //{
-        //    if (orderId <= 0)
-        //        throw new Exception("Order ID must be greater than 0.");
+        public async Task<bool> UpdateJobOrderAsync(JobOrderDTO dto)
+        {
+            if (dto == null)
+            {
+                _logger.LogWarning("Attempted to update a null job order DTO.");
+                throw new ArgumentNullException(nameof(dto), "Job order DTO cannot be null.");
+            }
+            if (dto.OrderId <= 0)
+            {
+                _logger.LogWarning("Attempted to update a job order with invalid ID.");
+                throw new InvalidOperationException("Job order ID must be greater than 0 for updates.");
+            }
 
-        //    var jobOrderDTO = await _jobOrderDAL.GetJobOrderByIdAsync(orderId);
-        //    return jobOrderDTO != null ? new JobOrder(jobOrderDTO, _jobOrderDAL, _jobOrderLogger, EnMode.Update) : null;
-        //}
+            _ValidateJobOrderDTO(dto);
+            
+            var existingJobOrder = await _repo.GetJobOrderByIdAsync(dto.OrderId);
+            if (existingJobOrder == null)
+            {
+                _logger.LogWarning($"Job order with ID {dto.OrderId} not found.");
+                throw new KeyNotFoundException($"Job order with ID {dto.OrderId} not found.");
+            }
 
-        //public async Task<List<JobOrder>> GetJobOrdersByApplicationIdAsync(int applicationId)
-        //{
-        //    if (applicationId <= 0)
-        //        throw new Exception("Application ID must be greater than 0.");
 
-        //    var jobOrderDTOs = await _jobOrderDAL.GetJobOrdersByApplicationIdAsync(applicationId);
-        //    var jobOrdersList = new List<JobOrder>();
+            if ((dto.Application.Status != existingJobOrder.Application.Status) || (dto.Application.ApplicationDescription != existingJobOrder.Application.ApplicationDescription))
+            {
+                dto.Application.CreationDate = existingJobOrder.Application.CreationDate;
+                await UpdateApplicationAsync(dto.Application);
+                _logger.LogInformation($"Updated application with ID {dto.Application.ApplicationId} for job order.");
+            }
+            else if (dto.Application.ApplicationId != 0)
+            {
+                _logger.LogWarning("Cannot change the application associated with the job order.");
+                throw new InvalidOperationException("Changing the application is not allowed.");
+            }
 
-        //    foreach (var jobOrderDTO in jobOrderDTOs)
-        //    {
-        //        jobOrdersList.Add(new JobOrder(jobOrderDTO, _jobOrderDAL, _jobOrderLogger, EnMode.Update));
-        //    }
+            _logger.LogInformation("Updating job order.");
+            return await _repo.UpdateJobOrderAsync(dto);
+        }
 
-        //    return jobOrdersList;
-        //}
+        public async Task<List<JobOrderDTO>> GetAllJobOrdersAsync(int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1 || pageSize < 1)
+            {
+                _logger.LogWarning("Invalid pagination parameters.");
+                throw new ArgumentException("Page number and page size must be greater than 0.");
+            }
 
-        //public async Task<List<JobOrder>> GetJobOrdersByVehicleIdAsync(int vehicleId)
-        //{
-        //    if (vehicleId <= 0)
-        //        throw new Exception("Vehicle ID must be greater than 0.");
+            _logger.LogInformation("Retrieving all job orders.");
+            return await _repo.GetAllJobOrdersAsync(pageNumber, pageSize);
+        }
 
-        //    var jobOrderDTOs = await _jobOrderDAL.GetJobOrdersByVehicleIdAsync(vehicleId);
-        //    var jobOrdersList = new List<JobOrder>();
+        public async Task<JobOrderDTO> GetJobOrderByIdAsync(int orderId)
+        {
+            if (orderId <= 0)
+            {
+                _logger.LogWarning("Attempted to retrieve a job order with invalid ID.");
+                throw new ArgumentException("Order ID must be greater than 0.");
+            }
 
-        //    foreach (var jobOrderDTO in jobOrderDTOs)
-        //    {
-        //        jobOrdersList.Add(new JobOrder(jobOrderDTO, _jobOrderDAL, _jobOrderLogger, EnMode.Update));
-        //    }
+            var jobOrder = await _repo.GetJobOrderByIdAsync(orderId);
+            if (jobOrder == null)
+            {
+                _logger.LogError($"Job order with ID {orderId} not found.");
+                throw new KeyNotFoundException($"Job order with ID {orderId} not found.");
+            }
 
-        //    return jobOrdersList;
-        //}
+            _logger.LogInformation($"Retrieving job order with ID {orderId}.");
+            return jobOrder;
+        }
 
-        //public async Task<List<JobOrder>> GetJobOrdersByDriverIdAsync(int driverId)
-        //{
-        //    if (driverId <= 0)
-        //        throw new Exception("Driver ID must be greater than 0.");
+        public async Task<List<JobOrderDTO>> GetJobOrdersByVehicleIdAsync(int vehicleId)
+        {
+            if (vehicleId <= 0)
+            {
+                _logger.LogWarning("Attempted to retrieve job orders with invalid vehicle ID.");
+                throw new ArgumentException("Vehicle ID must be greater than 0.");
+            }
+            _logger.LogInformation($"Retrieving job orders for vehicle ID {vehicleId}.");
+            return await _repo.GetJobOrdersByVehicleIdAsync(vehicleId);
+        }
 
-        //    var jobOrderDTOs = await _jobOrderDAL.GetJobOrdersByDriverIdAsync(driverId);
-        //    var jobOrdersList = new List<JobOrder>();
+        public async Task<List<JobOrderDTO>> GetJobOrdersByDriverIdAsync(int driverId)
+        {
+            if (driverId <= 0)
+            {
+                _logger.LogWarning("Attempted to retrieve job orders with invalid driver ID.");
+                throw new ArgumentException("Driver ID must be greater than 0.");
+            }
+            _logger.LogInformation($"Retrieving job orders for driver ID {driverId}.");
+            return await _repo.GetJobOrdersByDriverIdAsync(driverId);
+        }
 
-        //    foreach (var jobOrderDTO in jobOrderDTOs)
-        //    {
-        //        jobOrdersList.Add(new JobOrder(jobOrderDTO, _jobOrderDAL, _jobOrderLogger, EnMode.Update));
-        //    }
+        public async Task<List<JobOrderDTO>> GetJobOrdersByStartDateAsync(DateTime startDate)
+        {
+            if (startDate == default)
+            {
+                _logger.LogWarning("Attempted to retrieve job orders with invalid start date.");
+                throw new ArgumentException("Start date must be a valid date.");
+            }
+            _logger.LogInformation($"Retrieving job orders starting from {startDate}.");
+            return await _repo.GetJobOrdersByStartDateAsync(startDate);
+        }
 
-        //    return jobOrdersList;
-        //}
+        public async Task<List<JobOrderDTO>> GetJobOrdersByDestinationAsync(string destination)
+        {
+            if (string.IsNullOrWhiteSpace(destination))
+            {
+                _logger.LogWarning("Attempted to retrieve job orders with invalid destination.");
+                throw new ArgumentException("Destination cannot be null or empty.");
+            }
+            _logger.LogInformation($"Retrieving job orders with destination {destination}.");
+            return await _repo.GetJobOrdersByDestinationAsync(destination);
+        }
 
-        //public async Task<List<JobOrder>> GetJobOrdersByStartDateAsync(DateTime startDate)
-        //{
-        //    var jobOrderDTOs = await _jobOrderDAL.GetJobOrdersByStartDateAsync(startDate);
-        //    var jobOrdersList = new List<JobOrder>();
+        public async Task<List<JobOrderDTO>> GetJobOrdersByStatusAsync(enStatus status)
+        {
+            _logger.LogInformation($"Retrieving job orders with status {status}.");
+            return await _repo.GetJobOrdersByStatusAsync(status);
+        }
 
-        //    foreach (var jobOrderDTO in jobOrderDTOs)
-        //    {
-        //        jobOrdersList.Add(new JobOrder(jobOrderDTO, _jobOrderDAL, _jobOrderLogger, EnMode.Update));
-        //    }
-
-        //    return jobOrdersList;
-        //}
-
-        //public async Task<List<JobOrder>> GetJobOrdersByDestinationAsync(string destination)
-        //{
-        //    if (string.IsNullOrWhiteSpace(destination))
-        //        throw new Exception("Destination cannot be null or empty.");
-
-        //    var jobOrderDTOs = await _jobOrderDAL.GetJobOrdersByDestinationAsync(destination);
-        //    var jobOrdersList = new List<JobOrder>();
-
-        //    foreach (var jobOrderDTO in jobOrderDTOs)
-        //    {
-        //        jobOrdersList.Add(new JobOrder(jobOrderDTO, _jobOrderDAL, _jobOrderLogger, EnMode.Update));
-        //    }
-
-        //    return jobOrdersList;
-        //}
-
-        //public async Task<int> CountAllJobOrdersAsync()
-        //{
-        //    return await _jobOrderDAL.CountAllJobOrdersAsync();
-        //}
-
-        //public async Task<int> CountJobOrdersByStatusAsync(enStatus status)
-        //{
-        //    return await _jobOrderDAL.CountJobOrdersByStatusAsync(status);
-        //}
-
-        //public async Task<int> CountJobOrdersByTypeAsync(int applicationType)
-        //{
-        //    if (applicationType <= 0)
-        //        throw new Exception("Application type must be greater than 0.");
-
-        //    return await _jobOrderDAL.CountJobOrdersByTypeAsync(applicationType);
-        //}
-
-        //public async Task<bool> UpdateStatusAsync(int orderId, enStatus status)
-        //{
-        //    if (orderId <= 0)
-        //        throw new Exception("Order ID must be greater than 0.");
-
-        //    return await _jobOrderDAL.UpdateStatusAsync(orderId, status);
-        //}
+        public async Task<List<JobOrderDTO>> GetJobOrdersByDateRange(DateTime startDate, DateTime endDate)
+        {
+            if (startDate == default || endDate == default)
+            {
+                _logger.LogWarning("Attempted to retrieve job orders with invalid date range.");
+                throw new ArgumentException("Start date and end date must be valid dates.");
+            }
+            _logger.LogInformation($"Retrieving job orders between {startDate} and {endDate}.");
+            return await _repo.GetJobOrdersByDateRangeAsync(startDate, endDate);
+        }
 
         public async Task<bool> DeleteJobOrderAsync(int orderId)
         {
             if (orderId <= 0)
-                throw new Exception("Order ID must be greater than 0.");
+            {
+                _logger.LogWarning("Attempted to delete a job order with invalid ID.");
+                throw new ArgumentException("Order ID must be greater than 0.");
+            }
+            var jobOrder = await _repo.GetJobOrderByIdAsync(orderId);
+            if (jobOrder == null)
+            {
+                _logger.LogError($"Job order with ID {orderId} not found.");
+                throw new KeyNotFoundException($"Job order with ID {orderId} not found.");
+            }
 
-            return await _jobOrderDAL.DeleteJobOrderAsync(orderId);
+            
+            _logger.LogInformation($"Deleting job order with ID {orderId}.");
+            bool jobOrderDeleted = await _repo.DeleteJobOrderAsync(orderId);
+            
+            if (jobOrderDeleted)
+            {
+                _logger.LogInformation($"Job order with ID {orderId} deleted successfully.");
+
+                try
+                {
+                    await DeleteApplicationAsync(jobOrder.Application.ApplicationId);
+                    _logger.LogInformation($"Application with ID {jobOrder.Application.ApplicationId} deleted successfully.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed to delete application with ID {jobOrder.Application.ApplicationId}: {ex.Message}");
+                    throw new InvalidOperationException($"Failed to delete application with ID {jobOrder.Application.ApplicationId}.", ex);
+                }
+            }
+
+            return jobOrderDeleted;
         }
+
+        private void _ValidateJobOrderDTO(JobOrderDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto), "Job order DTO cannot be null.");
+
+            _ValidateApplicationDTO(dto.Application);
+
+            if (dto.VehicleId <= 0)
+                throw new InvalidOperationException("Vehicle ID must be greater than 0.");
+
+            if (dto.DriverId <= 0)
+                throw new InvalidOperationException("Driver ID must be greater than 0.");
+
+            if (dto.StartDate == default)
+                throw new InvalidOperationException("Start date is required.");
+
+            if (dto.EndDate == default)
+                throw new InvalidOperationException("End date is required.");
+
+            if (string.IsNullOrWhiteSpace(dto.Destination))
+                throw new InvalidOperationException("Destination is required.");
+
+            if (dto.OdometerBefore < 0)
+                throw new InvalidOperationException("Odometer before must be greater than or equal to 0.");
+
+            if (dto.OdometerAfter < 0)
+                throw new InvalidOperationException("Odometer after must be greater than or equal to 0.");
+        }
+
     }
 }

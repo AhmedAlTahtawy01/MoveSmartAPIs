@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace BusinessLayer
 {
-    public class MaintenanceApplication : Application
+    public class MaintenanceApplication : ApplicationService
     {
         private static ApplicationRepo _Dal;
-        private static ILogger<Application> _Logger;
+        private static ILogger<ApplicationService> _Logger;
 
         public enum enMode { Add, Update };
         public enMode mode = enMode.Add;
@@ -30,7 +30,7 @@ namespace BusinessLayer
             ApprovedByGeneralManager
             );
 
-        public MaintenanceApplication(MaintenanceApplicationDTO maintenanceApplicationDTO, ApplicationDTO applicationDTO, ApplicationRepo dal, ILogger<Application> logger, enMode mode = enMode.Add) 
+        public MaintenanceApplication(MaintenanceApplicationDTO maintenanceApplicationDTO, ApplicationDTO applicationDTO, ApplicationRepo dal, ILogger<ApplicationService> logger, enMode mode = enMode.Add) 
             : base(applicationDTO, dal, logger, EnMode.Update)
         {
             this.MaintenanceApplicationID = maintenanceApplicationDTO.MaintenanceApplicationID;

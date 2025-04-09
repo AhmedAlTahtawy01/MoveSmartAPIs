@@ -20,45 +20,60 @@ namespace DataAccessLayer.Repositories
         Canceled
     }
 
+    public enum enApplicationType
+    {
+        JobOrder,
+        MissionNote,
+        SparePartWithdrawApplication,
+        ConsumablePurchaseOrder,
+        MaintenanceApplication
+    }
+
     public class ApplicationDTO
     {
 
         public int ApplicationId { get; set; }
         public DateTime CreationDate { get; set; }
         public enStatus Status { get; set; }
-        public int ApplicationType { get; set; }
+        public enApplicationType ApplicationType { get; set; }
         public string ApplicationDescription { get; set; }
         public int UserId { get; set; }
 
-        public ApplicationDTO(int applicationId, DateTime creationDate, enStatus status, int applicationType, string applicationDescription, int createdByUser)
+        public ApplicationDTO(int applicationId, DateTime creationDate, enStatus status, enApplicationType applicationType, string applicationDescription, int createdByUser)
         {
-            this.ApplicationId = applicationId;
-            this.CreationDate = creationDate;
-            this.Status = status;
-            this.ApplicationType = applicationType;
-            this.ApplicationDescription = applicationDescription;
-            this.UserId = createdByUser;
+            ApplicationId = applicationId;
+            CreationDate = creationDate;
+            Status = status;
+            ApplicationType = applicationType;
+            ApplicationDescription = applicationDescription;
+            UserId = createdByUser;
         }
     }
 
     public class ApplicationRepo
     {
 
-        private readonly ConnectionSettings _connectionSettings;
+        private readonly ConnectionsSettings _connectionSettings;
         private readonly ILogger<ApplicationRepo> _logger;
 
-        public ApplicationRepo(ConnectionSettings connectionSettings, ILogger<ApplicationRepo> logger)
+        public ApplicationRepo(ConnectionsSettings connectionSettings, ILogger<ApplicationRepo> logger)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        private ApplicationDTO MapApplication(DbDataReader reader)
+        public ApplicationDTO MapApplication(DbDataReader reader)
         {
-            if (!Enum.TryParse(reader.GetString(reader.GetOrdinal("Status")), out enStatus status))
+            if (!Enum.TryParse(reader.GetString(reader.GetOrdinal("Status")), true, out enStatus status))
             {
-                _logger.LogWarning($"Invalid Status value: {reader["Status"]}. Defaulting to Pending.");
-                status = enStatus.Pending;
+                _logger.LogError($"Invalid Status value in database: {reader["Status"]}");
+                throw new InvalidOperationException($"Unable to parse status: {reader["Status"]}");
+            }
+
+            if (!Enum.TryParse(reader.GetString(reader.GetOrdinal("ApplicationType")), true, out enApplicationType applicationType))
+            {
+                _logger.LogError($"Invalid ApplicationType value in database: {reader["ApplicationType"]}");
+                throw new InvalidOperationException($"Unable to parse application type: {reader["ApplicationType"]}");
             }
 
             return new ApplicationDTO
@@ -66,7 +81,7 @@ namespace DataAccessLayer.Repositories
                 reader.GetInt32("ApplicationID"),
                 reader.GetDateTime("CreationDate"),
                 status,
-                reader.GetInt32("ApplicationType"),
+                applicationType,
                 reader.GetString("ApplicationDescription"),
                 reader.GetInt32("CreatedByUserID")
             );
@@ -86,15 +101,15 @@ namespace DataAccessLayer.Repositories
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var applicationsList = new List<ApplicationDTO>();
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                using var reader = await cmd.ExecuteReaderAsync();
 
                 while (await reader.ReadAsync()) applicationsList.Add(MapApplication(reader));
                 return applicationsList;
 
             }, new MySqlParameter("@Offset", offset), new MySqlParameter("@PageSize", pageSize));
         }
-        
-        public async Task<ApplicationDTO> GetApplicationByIdAsync(int applicationId)
+
+        public async Task<ApplicationDTO?> GetApplicationByIdAsync(int applicationId)
         {
             const string query = @"
                         SELECT ApplicationID, CreationDate, Status, ApplicationType, ApplicationDescription, CreatedByUserID
@@ -103,57 +118,45 @@ namespace DataAccessLayer.Repositories
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                using var reader = await cmd.ExecuteReaderAsync();
                 return await reader.ReadAsync() ? MapApplication(reader) : null;
             }, new MySqlParameter("@applicationId", applicationId));
         }
 
-        public async Task<List<ApplicationDTO>> GetApplicationsByApplicationTypeAsync(int applicationType)
+        // Helper method to get applications based on a filter
+        private async Task<List<ApplicationDTO>> GetApplicationsAsync(string filter, params MySqlParameter[] parameters)
         {
-            const string query = @"
+            string query = @"
                 SELECT ApplicationID, CreationDate, Status, ApplicationType, ApplicationDescription, CreatedByUserID
-                FROM applications
-                WHERE ApplicationType = @applicationType";
+                FROM applications";
+
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query += " WHERE " + filter;
+            }
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var applicationsList = new List<ApplicationDTO>();
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                using var reader = await cmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync()) applicationsList.Add(MapApplication(reader));
                 return applicationsList;
-            }, new MySqlParameter("@applicationType", applicationType));
+            }, parameters);
+        }
+
+        public async Task<List<ApplicationDTO>> GetApplicationsByApplicationTypeAsync(enApplicationType applicationType)
+        {
+            return await GetApplicationsAsync("ApplicationType = @applicationType", new MySqlParameter("@applicationType", applicationType.ToString()));
         }
 
         public async Task<List<ApplicationDTO>> GetApplicationsByUserIdAsync(int createdByUser)
         {
-            const string query = @"
-                SELECT ApplicationID, CreationDate, Status, ApplicationType, ApplicationDescription, CreatedByUserID
-                FROM applications
-                WHERE CreatedByUserID = @createdByUser";
-
-            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
-            {
-                var applicationsList = new List<ApplicationDTO>();
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
-                while (await reader.ReadAsync()) applicationsList.Add(MapApplication(reader));
-                return applicationsList;
-            }, new MySqlParameter("@createdByUser", createdByUser));
+            return await GetApplicationsAsync("CreatedByUserID = @createdByUser", new MySqlParameter("@createdByUser", createdByUser));
         }
 
         public async Task<List<ApplicationDTO>> GetApplicationsByStatusAsync(enStatus status)
         {
-            const string query = @"
-                SELECT ApplicationID, CreationDate, Status, ApplicationType, ApplicationDescription, CreatedByUserID
-                FROM applications
-                WHERE Status = @status";
-
-            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
-            {
-                var applicationsList = new List<ApplicationDTO>();
-                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
-                while (await reader.ReadAsync()) applicationsList.Add(MapApplication(reader));
-                return applicationsList;
-            }, new MySqlParameter("@status", status.ToString()));
+            return await GetApplicationsAsync("Status = @status", new MySqlParameter("@status", status.ToString()));
         }
 
         public async Task<int> CountAllApplicationsAsync()
@@ -162,28 +165,32 @@ namespace DataAccessLayer.Repositories
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
             });
+        }
+
+        // Helper method to count applications based on a filter
+        private async Task<int> CountApplicationAsync(string filter, params MySqlParameter[] parameters)
+        {
+            string query = "SELECT COUNT(*) FROM applications";
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query += " WHERE " + filter;
+            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            }, parameters);
         }
 
         public async Task<int> CountApplicationsByStatusAsync(enStatus status)
         {
-            const string query = "SELECT COUNT(*) FROM applications WHERE Status = @status";
-
-            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
-            {
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
-            }, new MySqlParameter("@status", status.ToString()));
+            return await CountApplicationAsync("Status = @status", new MySqlParameter("@status", status.ToString()));
         }
 
-        public async Task<int> CountApplicationsByTypeAsync(int applicationType)
+        public async Task<int> CountApplicationsByTypeAsync(enApplicationType applicationType)
         {
-            const string query = "SELECT COUNT(*) FROM applications WHERE ApplicationType = @applicationType";
-
-            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
-            {
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
-            }, new MySqlParameter("@applicationType", applicationType));
+            return await CountApplicationAsync("ApplicationType = @applicationType", new MySqlParameter("@applicationType", applicationType.ToString()));
         }
 
         public async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)
@@ -195,8 +202,9 @@ namespace DataAccessLayer.Repositories
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
-            }, new MySqlParameter("@applicationId", applicationId), new MySqlParameter("@status", status.ToString()));
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@applicationId", applicationId),
+                new MySqlParameter("@status", status.ToString()));
         }
 
         public async Task<int> CreateApplicationAsync(ApplicationDTO application)
@@ -208,12 +216,13 @@ namespace DataAccessLayer.Repositories
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
             }, new MySqlParameter("@creationDate", application.CreationDate),
-               new MySqlParameter("@status", enStatus.Pending.ToString()),
-               new MySqlParameter("@applicationType", application.ApplicationType),
-               new MySqlParameter("@applicationDescription", application.ApplicationDescription),
-               new MySqlParameter("@createdByUser", application.UserId));
+                new MySqlParameter("@status", enStatus.Pending.ToString()),
+                new MySqlParameter("@applicationType", application.ApplicationType.ToString()),
+                new MySqlParameter("@applicationDescription", application.ApplicationDescription),
+                new MySqlParameter("@createdByUser", application.UserId)
+            );
         }
 
         public async Task<bool> UpdateApplicationAsync(ApplicationDTO application)
@@ -228,12 +237,13 @@ namespace DataAccessLayer.Repositories
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
-            }, new MySqlParameter("@status", application.Status.ToString()),
-               new MySqlParameter("@applicationType", application.ApplicationType),
-               new MySqlParameter("@applicationDescription", application.ApplicationDescription),
-               new MySqlParameter("@createdByUser", application.UserId),
-               new MySqlParameter("@applicationId", application.ApplicationId));
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@applicationId", application.ApplicationId),
+                new MySqlParameter("@status", application.Status.ToString()),
+                new MySqlParameter("@applicationType", application.ApplicationType.ToString()),
+                new MySqlParameter("@applicationDescription", application.ApplicationDescription),
+                new MySqlParameter("@createdByUser", application.UserId)
+            );
         }
         
         public async Task<bool> DeleteApplicationAsync(int applicationId)
@@ -242,8 +252,9 @@ namespace DataAccessLayer.Repositories
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
+                return await cmd.ExecuteNonQueryAsync() > 0;
             }, new MySqlParameter("@applicationId", applicationId));
+
         }
 
     }

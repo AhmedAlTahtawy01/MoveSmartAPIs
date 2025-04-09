@@ -1,19 +1,19 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using MySql.Data.MySqlClient;
-using System;
+﻿using System;
 using System.Data;
 using System.Data.Common;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
 using System.Threading.Tasks;
 
 namespace DataAccessLayer.Util
 {
-    public class ConnectionSettings
+    public class ConnectionsSettings
     {
         private readonly string _connectionString;
-        private readonly ILogger<ConnectionSettings> _logger;
+        private readonly ILogger<ConnectionsSettings> _logger;
 
-        public ConnectionSettings(IConfiguration configuration, ILogger<ConnectionSettings> logger)
+        public ConnectionsSettings(IConfiguration configuration, ILogger<ConnectionsSettings> logger)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException(nameof(configuration), "Connection string 'DefaultConnection' is missing.");

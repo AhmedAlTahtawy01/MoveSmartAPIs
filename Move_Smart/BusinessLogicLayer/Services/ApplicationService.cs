@@ -1,219 +1,206 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DataAccessLayer.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace BusinessLayer.Services
-{
-    public class Application
+{ 
+    public class ApplicationService
     {
-        // Private properties
-        protected readonly ApplicationRepo _dal;
-        protected readonly ILogger<Application> _logger;
+        private readonly ApplicationRepo _repo;
+        private readonly ILogger<ApplicationService> _logger;
 
-        // Public properties
-        public int ApplicationId { get; set; }
-        public DateTime CreationDate { get; set; }
-        public enStatus Status { get; set; }
-        public int ApplicationType { get; set; }
-        public string ApplicationDescription { get; set; }
-        public int UserId { get; set; }
-
-        // Database properties
-        public enum EnMode
+        protected ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger)
         {
-            AddNew = 0,
-            Update = 1
+            _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
-        public EnMode Mode { get; private set; } = EnMode.AddNew;
-        public ApplicationDTO ApplicationDTO => new ApplicationDTO(ApplicationId, CreationDate, Status, ApplicationType, ApplicationDescription, UserId);
-
-        // Constructor
-        public Application(ApplicationDTO applicationDTO, ApplicationRepo dal, ILogger<Application> logger, EnMode mode = EnMode.AddNew)
+        protected async Task<int> CreateApplicationAsync(ApplicationDTO dto)
         {
-            ApplicationId = applicationDTO.ApplicationId;
-            CreationDate = applicationDTO.CreationDate;
-            Status = applicationDTO.Status;
-            ApplicationType = applicationDTO.ApplicationType;
-            ApplicationDescription = applicationDTO.ApplicationDescription;
-            UserId = applicationDTO.UserId;
-
-            _dal = dal;
-            _logger = logger;
-            Mode = mode;
-        }
-
-        // Private methods
-        private bool _ApplicationValidations()
-        {
-            if (Mode == EnMode.AddNew && ApplicationId > 0)
-                throw new Exception("Application ID must be 0 for new applications.");
-
-            if (Mode == EnMode.Update && ApplicationId <= 0)
-                throw new Exception("Application Id must be greater than 0");
-
-            if (CreationDate == default)
-                throw new Exception("Creation Date is required");
-
-            if (string.IsNullOrWhiteSpace(ApplicationDescription))
-                throw new Exception("Application Description is required");
-
-            if (ApplicationType <= 0)
-                throw new Exception("Application Type must be greater than 0");
-
-            if (UserId <= 0)
-                throw new Exception("User Id must be greater than 0");
-
-            return true;
-        }
-
-        private async Task <bool> _CreateApplicationAsync()
-        {
-            if (await _dal.GetApplicationByIdAsync(ApplicationId) != null)
-                throw new Exception("Application Id already exists");
-
-            ApplicationId = await _dal.CreateApplicationAsync(ApplicationDTO);
-            if (ApplicationId > 0)
+            if (dto == null)
             {
-                Mode = EnMode.Update;
-                return true;
+                _logger.LogWarning("Attempted to create a null application DTO.");
+                throw new ArgumentNullException(nameof(dto), "Application DTO cannot be null.");
+            }
+            
+            if (dto.ApplicationId != 0)
+            {
+                _logger.LogWarning("Attempted to create an application with a non-zero ID.");
+                throw new InvalidOperationException("Application ID must be 0 for new applications.");
             }
 
-            return false;
-        }
-
-        private async Task <bool> _UpdateApplicationAsync()
-        {
-            var exsitingApplication = await _dal.GetApplicationByIdAsync(ApplicationId);
-            if (exsitingApplication == null)
-                throw new Exception("Application does not exist");
-
-            CreationDate = exsitingApplication.CreationDate;
-            UserId = exsitingApplication.UserId;
-
-            return await _dal.UpdateApplicationAsync(ApplicationDTO);
-        }
-
-
-        // Public methods
-        public virtual async Task<bool> SaveAsync()
-        {
-            if (!_ApplicationValidations())
-                throw new Exception("Application validations failed");
-
-            return Mode switch
+            try
             {
-                EnMode.AddNew => await _CreateApplicationAsync(),
-                EnMode.Update => await _UpdateApplicationAsync(),
-                _ => throw new Exception("Invalid mode"),
-            };
-        }
-
-        public async Task<List<Application>> GetApplicationsAsync(int pageNumber = 1, int pageSize = 10)
-        {
-            var applicationDTOs = await _dal.GetAllApplicationsAsync(pageNumber, pageSize);
-            var applicationsList = new List<Application>();
-
-            foreach (var applicationDTO in applicationDTOs)
+                _ValidateApplicationDTO(dto);
+            }
+            catch (InvalidOperationException ex)
             {
-                applicationsList.Add(new Application(applicationDTO, _dal, _logger, EnMode.Update));
+                _logger.LogWarning($"Validation failed: {ex.Message}");
+                throw;
             }
 
-            return applicationsList;
+
+            _logger.LogInformation("Creating new application.");
+            return await _repo.CreateApplicationAsync(dto);
         }
 
-        public async Task<Application> GetApplicationByIdAsync(int applicationId)
+        protected async Task<bool> UpdateApplicationAsync(ApplicationDTO dto)
+        {
+            if (dto == null)
+            {
+                _logger.LogWarning("Attempted to update a null application DTO.");
+                throw new ArgumentNullException(nameof(dto), "Application DTO cannot be null.");
+            }
+
+            if (dto.ApplicationId <= 0)
+            {
+                _logger.LogWarning("Attempted to update an application with invalid ID.");
+                throw new InvalidOperationException("Application ID must be greater than 0 for updates.");
+            }
+
+            try
+            {
+                _ValidateApplicationDTO(dto);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning($"Validation failed: {ex.Message}");
+                throw;
+            }
+
+            var existingApplication = await _repo.GetApplicationByIdAsync(dto.ApplicationId);
+            if (existingApplication == null)
+            {
+                _logger.LogWarning($"Attempted to update a non-existing application with ID {dto.ApplicationId}.");
+                throw new KeyNotFoundException($"Application with ID {dto.ApplicationId} does not exist.");
+            }
+
+            dto.CreationDate = existingApplication.CreationDate;
+            dto.UserId = existingApplication.UserId;
+
+            _logger.LogInformation($"Updating application with ID {dto.ApplicationId}.");
+            return await _repo.UpdateApplicationAsync(dto);
+        }
+
+        protected async Task<List<ApplicationDTO>> GetAllApplicationsAsync(int pageNumber = 1, int pageSize = 10)
+        {
+            if (pageNumber < 1 || pageSize < 1)
+            {
+                _logger.LogWarning("Invalid pagination parameters.");
+                throw new ArgumentException("Page number and page size must be greater than 0.");
+            }
+
+            _logger.LogInformation($"Retrieving all applications (Page {pageNumber}, Size {pageSize}).");
+            return await _repo.GetAllApplicationsAsync(pageNumber, pageSize);
+        }
+
+        protected async Task<ApplicationDTO> GetApplicationByIdAsync(int applicationId)
         {
             if (applicationId <= 0)
-                throw new Exception("Application ID must be greater than 0.");
-
-            var applicationDTO = await _dal.GetApplicationByIdAsync(applicationId);
-            return applicationDTO != null ? new Application(applicationDTO, _dal, _logger, EnMode.Update) : null;
-        }
-
-        public async Task<List<Application>> GetApplicationsByApplicationTypeAsync(int applicationType)
-        {
-            if (applicationType <= 0)
-                throw new Exception("Application type must be greater than 0.");
-
-            var applicationDTOs = await _dal.GetApplicationsByApplicationTypeAsync(applicationType);
-            var applicationsList = new List<Application>();
-
-            foreach (var applicationDTO in applicationDTOs)
             {
-                applicationsList.Add(new Application(applicationDTO, _dal, _logger, EnMode.Update));
+                _logger.LogWarning("Attempted to retrieve an application with invalid ID.");
+                throw new ArgumentException("Application ID must be greater than 0.");
             }
 
-            return applicationsList;
+            var application = await _repo.GetApplicationByIdAsync(applicationId);
+
+            if (application == null)
+            {
+                _logger.LogError($"Application with ID {applicationId} not found.");
+                throw new KeyNotFoundException($"Application with ID {applicationId} not found.");
+            }
+
+            _logger.LogInformation($"Retrieving application with ID {applicationId}.");
+            return application;
         }
 
-        public async Task<List<Application>> GetApplicationsByUserIdAsync(int userId)
+        protected async Task<List<ApplicationDTO>> GetApplicationsByApplicationTypeAsync(enApplicationType applicationType)
+        {
+            _logger.LogInformation($"Retrieving applications with type {applicationType}.");
+            return await _repo.GetApplicationsByApplicationTypeAsync(applicationType);
+        }
+
+        protected async Task<List<ApplicationDTO>> GetApplicationsByUserIdAsync(int userId)
         {
             if (userId <= 0)
-                throw new Exception("User ID must be greater than 0.");
-
-            var applicationDTOs = await _dal.GetApplicationsByUserIdAsync(userId);
-            var applicationsList = new List<Application>();
-
-            foreach (var applicationDTO in applicationDTOs)
             {
-                applicationsList.Add(new Application(applicationDTO, _dal, _logger, EnMode.Update));
+                _logger.LogWarning("Attempted to retrieve applications with invalid user ID.");
+                throw new ArgumentException("User ID must be greater than 0.");
             }
 
-            return applicationsList;
+            _logger.LogInformation($"Retrieving applications for user with ID {userId}.");
+            return await _repo.GetApplicationsByUserIdAsync(userId);
         }
 
-        public async Task<List<Application>> GetApplicationsByStatusAsync(enStatus status)
+        protected async Task<List<ApplicationDTO>> GetApplicationsByStatusAsync(enStatus status)
         {
-            var applicationDTOs = await _dal.GetApplicationsByStatusAsync(status);
-            var applicationsList = new List<Application>();
-
-            foreach (var applicationDTO in applicationDTOs)
-            {
-                applicationsList.Add(new Application(applicationDTO, _dal, _logger, EnMode.Update));
-            }
-
-            return applicationsList;
+            _logger.LogInformation($"Retrieving applications with status {status}.");
+            return await _repo.GetApplicationsByStatusAsync(status);
         }
 
         public async Task<int> CountAllApplicationsAsync()
         {
-            return await _dal.CountAllApplicationsAsync();
+            _logger.LogInformation("Counting all applications.");
+            return await _repo.CountAllApplicationsAsync();
         }
 
         public async Task<int> CountApplicationsByStatusAsync(enStatus status)
         {
-            return await _dal.CountApplicationsByStatusAsync(status);
+            _logger.LogInformation($"Counting applications with status {status}.");
+            return await _repo.CountApplicationsByStatusAsync(status);
         }
 
-        public async Task<int> CountApplicationsByTypeAsync(int applicationType)
+        public async Task<int> CountApplicationsByTypeAsync(enApplicationType applicationType)
         {
-            if (applicationType <= 0)
-                throw new Exception("Application type must be greater than 0.");
-
-            return await _dal.CountApplicationsByTypeAsync(applicationType);
+            _logger.LogInformation($"Counting applications with type {applicationType}.");
+            return await _repo.CountApplicationsByTypeAsync(applicationType);
         }
 
-        public async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)
-        {
-            if (applicationId <= 0)
-                throw new Exception("Application ID must be greater than 0.");
-
-            return await _dal.UpdateStatusAsync(applicationId, status);
-        }
-
-        public async Task<bool> DeleteApplicationAsync(int applicationId)
+        protected async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)
         {
             if (applicationId <= 0)
-                throw new Exception("Application ID must be greater than 0.");
+            {
+                _logger.LogWarning("Attempted to update status of an application with invalid ID.");
+                throw new ArgumentException("Application ID must be greater than 0.");
+            }
 
-            return await _dal.DeleteApplicationAsync(applicationId);
+            _logger.LogInformation($"Updating status of application with ID {applicationId} to {status}.");
+            return await _repo.UpdateStatusAsync(applicationId, status);
         }
 
+        protected async Task<bool> DeleteApplicationAsync(int applicationId)
+        {
+            if (applicationId <= 0)
+            {
+                _logger.LogWarning("Attempted to delete an application with invalid ID.");
+                throw new ArgumentException("Application ID must be greater than 0.");
+            }
+
+            _logger.LogInformation($"Deleting application with ID {applicationId}.");
+            return await _repo.DeleteApplicationAsync(applicationId);
+        }
+
+        protected void _ValidateApplicationDTO(ApplicationDTO dto)
+        {
+            if (dto.CreationDate == default)
+            {
+                _logger.LogWarning("Validation Failed: Creation Date is required.");
+                throw new InvalidOperationException("Creation Date is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.ApplicationDescription))
+            {
+                _logger.LogWarning("Validation Failed: Application Description is required.");
+                throw new InvalidOperationException("Application Description is required.");
+            }
+
+            if (dto.UserId <= 0)
+            {
+                _logger.LogWarning("Validation Failed: User Id must be greater than 0.");
+                throw new InvalidOperationException("User Id must be greater than 0.");
+            }
+        }
     }
 }

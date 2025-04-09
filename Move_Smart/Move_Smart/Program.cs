@@ -25,12 +25,12 @@ builder.Services.AddLogging(logging =>
     logging.SetMinimumLevel(LogLevel.Information);
 });
 
-// ConnectionSettings for raw SQL (your approach)
-builder.Services.AddSingleton<ConnectionSettings>(sp =>
+// ConnectionSettings for raw SQL
+builder.Services.AddSingleton<ConnectionsSettings>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
-    var logger = sp.GetRequiredService<ILogger<ConnectionSettings>>();
-    return new ConnectionSettings(config, logger);
+    var logger = sp.GetRequiredService<ILogger<ConnectionsSettings>>();
+    return new ConnectionsSettings(config, logger);
 });
 
 // Register repositories
