@@ -54,7 +54,7 @@ namespace DataAccessLayer.Repositories
 
         public async Task DeleteConsumablesWithdrawApplication(int WithdrawApplicationID)
         {
-            var application = await _appDBContext.Consumableswithdrawapplications.AsNoTracking().FirstOrDefaultAsync(id => id.WithdrawApplicationId== WithdrawApplicationID);
+            var application = await _appDBContext.Consumableswithdrawapplications.AsNoTracking().FirstOrDefaultAsync(id => id.WithdrawApplicationId == WithdrawApplicationID);
             if (application == null)
             {
                 throw new InvalidOperationException(" Cannot be null");

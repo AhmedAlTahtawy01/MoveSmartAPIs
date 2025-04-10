@@ -8,21 +8,25 @@ namespace DataAccessLayer.Repositories
 {
 
 
-public partial class Vehicleconsumable
-{
-    public sbyte ConsumableId { get; set; }
+    public partial class Vehicleconsumable
+    {
+        public sbyte ConsumableId { get; set; }
 
-    public string ConsumableName { get; set; }
+        public string ConsumableName { get; set; }
 
-    public int ValidityLength { get; set; }
+        public int ValidityLength { get; set; }
 
-    public short Quantity { get; set; }
+        public short Quantity { get; set; }
 
-    public virtual ICollection<Consumablespurchaseorder> Consumablespurchaseorders { get; set; } = new List<Consumablespurchaseorder>();
+        public virtual ICollection<Consumablespurchaseorder> Consumablespurchaseorders { get; set; } = new List<Consumablespurchaseorder>();
 
-    public virtual ICollection<Consumablesreplacement> Consumablesreplacements { get; set; } = new List<Consumablesreplacement>();
+        public virtual ICollection<Consumablesreplacement> Consumablesreplacements { get; set; } = new List<Consumablesreplacement>();
 
-    public virtual ICollection<Consumableswithdrawapplication> Consumableswithdrawapplications { get; set; } = new List<Consumableswithdrawapplication>();
+        public virtual ICollection<Consumableswithdrawapplication> Consumableswithdrawapplications { get; set; } = new List<Consumableswithdrawapplication>();
+        public Vehicleconsumable()
+        {
+            
+        }
     }
     public partial class Vehicleconsumable
     {

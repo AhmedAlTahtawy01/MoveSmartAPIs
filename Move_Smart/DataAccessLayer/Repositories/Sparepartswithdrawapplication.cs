@@ -6,21 +6,21 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
-public partial class Sparepartswithdrawapplication
-{
-    public int WithdrawApplicationId { get; set; }
+    public partial class Sparepartswithdrawapplication
+    {
+        public int WithdrawApplicationId { get; set; }
 
-    public int ApplicationId { get; set; }
+        public int ApplicationId { get; set; }
 
-    public short SparePartId { get; set; }
+        public short SparePartId { get; set; }
 
-    public short VehicleId { get; set; }
+        public short VehicleId { get; set; }
 
-    public ulong ApprovedByGeneralSupervisor { get; set; }
+        public ulong ApprovedByGeneralSupervisor { get; set; }
 
-    public ulong ApprovedByGeneralManager { get; set; }
+        public ulong ApprovedByGeneralManager { get; set; }
 
-    public virtual Sparepart SparePart { get; set; }
+        public virtual Sparepart SparePart { get; set; }
     }
     class SparepartsWithdrawApplication
     {
@@ -31,7 +31,7 @@ public partial class Sparepartswithdrawapplication
         }
         public async Task AddSparepartsWithdrawApplication(Sparepartswithdrawapplication order)
         {
-            var check = await _appDBContext.Sparepartswithdrawapplications.FirstOrDefaultAsync(x => x.WithdrawApplicationId== order.WithdrawApplicationId);
+            var check = await _appDBContext.Sparepartswithdrawapplications.FirstOrDefaultAsync(x => x.WithdrawApplicationId == order.WithdrawApplicationId);
             if (check != null)
             {
                 throw new InvalidOperationException(" Cannot be null");
@@ -42,7 +42,7 @@ public partial class Sparepartswithdrawapplication
 
         public async Task DeleteSparepartsWithdrawApplication(int OrderID)
         {
-            var sparepart = await _appDBContext.Sparepartswithdrawapplications.AsNoTracking().FirstOrDefaultAsync(id => id.WithdrawApplicationId== OrderID);
+            var sparepart = await _appDBContext.Sparepartswithdrawapplications.AsNoTracking().FirstOrDefaultAsync(id => id.WithdrawApplicationId == OrderID);
             if (sparepart == null)
             {
                 throw new InvalidOperationException(" Cannot be null");
@@ -57,7 +57,7 @@ public partial class Sparepartswithdrawapplication
 
         }
 
-        public  async Task<Sparepartswithdrawapplication> GetSparepartsWithdrawApplication(int OrderID)
+        public async Task<Sparepartswithdrawapplication> GetSparepartsWithdrawApplication(int OrderID)
         {
             return await _appDBContext.Sparepartswithdrawapplications.AsNoTracking().FirstAsync(id => OrderID == id.WithdrawApplicationId);
         }
@@ -88,6 +88,6 @@ public partial class Sparepartswithdrawapplication
         {
             throw new NotImplementedException();
         }
-        
+
     }
 }

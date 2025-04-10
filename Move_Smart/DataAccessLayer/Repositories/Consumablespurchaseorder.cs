@@ -7,21 +7,21 @@ using System.Collections.Generic;
 namespace DataAccessLayer.Repositories
 {
 
-public partial class Consumablespurchaseorder
-{
-    public int OrderId { get; set; }
+    public partial class Consumablespurchaseorder
+    {
+        public int OrderId { get; set; }
 
-    public int ApplicationId { get; set; }
+        public int ApplicationId { get; set; }
 
-    public sbyte RequiredItem { get; set; }
+        public sbyte RequiredItem { get; set; }
 
-    public short RequiredQuantity { get; set; }
+        public short RequiredQuantity { get; set; }
 
-    public ulong ApprovedByGeneralSupervisor { get; set; }
+        public ulong ApprovedByGeneralSupervisor { get; set; }
 
-    public ulong ApprovedByGeneralManager { get; set; }
+        public ulong ApprovedByGeneralManager { get; set; }
 
-    public virtual Vehicleconsumable RequiredItemNavigation { get; set; }
+        public virtual Vehicleconsumable RequiredItemNavigation { get; set; }
     }
     public class consumablespurchaseorderRepo
     {
@@ -47,7 +47,7 @@ public partial class Consumablespurchaseorder
             }
             _appDbContext.Consumablespurchaseorders.Add(order);
             await _appDbContext.SaveChangesAsync();
-            
+
 
         }
 
@@ -139,7 +139,7 @@ public partial class Consumablespurchaseorder
             }
             _appDbContext.Consumablespurchaseorders.Remove(order);
             await _appDbContext.SaveChangesAsync();
-            
+
         }
 
         public async Task<List<Consumablespurchaseorder>> GetAllConsumablesPurchaseOrder()

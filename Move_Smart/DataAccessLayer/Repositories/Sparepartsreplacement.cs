@@ -6,17 +6,17 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
-public partial class Sparepartsreplacement
-{
-    public int ReplacementId { get; set; }
+    public partial class Sparepartsreplacement
+    {
+        public int ReplacementId { get; set; }
 
-    public int MaintenanceId { get; set; }
+        public int MaintenanceId { get; set; }
 
-    public short SparePartId { get; set; }
+        public short SparePartId { get; set; }
 
-    public virtual Sparepart SparePart { get; set; }
-    public Sparepartsreplacement() { }
-    
+        public virtual Sparepart SparePart { get; set; }
+        public Sparepartsreplacement() { }
+
     }
     class SparePartsReplacement
     {
@@ -25,7 +25,7 @@ public partial class Sparepartsreplacement
         {
             _appDBContext = appDBContext;
         }
-        public  async Task AddSparePartsReplacement(Sparepartsreplacement order)
+        public async Task AddSparePartsReplacement(Sparepartsreplacement order)
         {
             var check = await _appDBContext.Sparepartsreplacements.FirstOrDefaultAsync(x => x.ReplacementId == order.ReplacementId);
             if (check != null)
@@ -39,7 +39,7 @@ public partial class Sparepartsreplacement
 
         public async Task DeleteSparePartsReplacement(int WithdrawApplicationID)
         {
-            var sparepart = await _appDBContext.Sparepartsreplacements.AsNoTracking().FirstOrDefaultAsync(id => id.ReplacementId== WithdrawApplicationID);
+            var sparepart = await _appDBContext.Sparepartsreplacements.AsNoTracking().FirstOrDefaultAsync(id => id.ReplacementId == WithdrawApplicationID);
             if (sparepart == null)
             {
                 throw new InvalidOperationException(" Cannot be null");
@@ -63,7 +63,7 @@ public partial class Sparepartsreplacement
             _appDBContext.Sparepartsreplacements.Update(order);
             await _appDBContext.SaveChangesAsync();
         }
-        
+
     }
 
 }

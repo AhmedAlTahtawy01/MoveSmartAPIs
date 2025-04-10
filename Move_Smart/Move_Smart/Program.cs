@@ -36,6 +36,7 @@ builder.Services.AddSingleton<ConnectionsSettings>(sp =>
 // Register repositories
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
+builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
