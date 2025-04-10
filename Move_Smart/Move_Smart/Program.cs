@@ -1,5 +1,6 @@
 using DataAccessLayer.Util; // For ConnectionSettings
 using DataAccessLayer.Repositories; // For UserRepo, Sparepart
+using BusinessLayer.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +38,9 @@ builder.Services.AddSingleton<ConnectionsSettings>(sp =>
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
 builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
+
+// Register services
+builder.Services.AddScoped<UserService>(); // For UserController
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

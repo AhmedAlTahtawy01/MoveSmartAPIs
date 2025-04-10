@@ -6,7 +6,6 @@
 
   - **Level 1**: ApplicationTypesDAL, UsersDAL.
   - **Level 2**: ApplicationsDAL.
-  - **DONE** ✅
 
   ##
 
@@ -14,13 +13,11 @@
 
   - **Level 1**: VehiclesDAL.
   - **Level 2**: BusesDAL, DriversDAL.
-  - **DONE** ✅
 
   ##
 
 - **Kamal**:
   - **Level 1**: VehicleConsumablesDAL, SparePartsDAL.
-  - **DONE** ✅
 
 ##
 
@@ -29,19 +26,17 @@
 - **Hamdy**:
 
   - **Remaining DALs**
-  - **DONE** ✅
 
   ##
 
 - **Abd-Elrahman**:
 
   - **Remaining DALs**
-  - **DONE** ✅
+
   ##
 
 - **Kamal**:
   - **Remaining DALs**
-  - **DONE** ✅
 
 
 ##
@@ -90,3 +85,25 @@
 
   - **Complete the Business Layer Classes**
   - **Make APIs Controllers**
+
+##
+
+
+## Monday 14 April 2025
+
+- **Hamdy**:
+
+  - **Complete the edits on the Repos and Services**
+  - **Finish APIs Controllers**
+
+  ##
+
+- **Abd-Elrahman**:
+
+  - **Make APIs Controllers**
+
+  ##
+
+- **Kamal**:
+
+  - **Finish APIs Controllers**
