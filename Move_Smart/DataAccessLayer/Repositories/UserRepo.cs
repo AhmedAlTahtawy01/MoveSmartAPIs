@@ -11,13 +11,13 @@ namespace DataAccessLayer.Repositories
 {
     public enum EnUserRole
     {
-        SuperUser,
-        HospitalManager,
-        GeneralManager,
-        GeneralSupervisor,
-        PatrolsSupervisor,
-        WorkshopSupervisor,
-        AdministrativeSupervisor
+        SuperUser = 0,
+        HospitalManager = 1,
+        GeneralManager = 2,
+        GeneralSupervisor = 3,
+        PatrolsSupervisor = 4,
+        WorkshopSupervisor = 5,
+        AdministrativeSupervisor = 6
     }
 
     public class UserDTO

@@ -1,171 +1,183 @@
-﻿//using Microsoft.AspNetCore.Mvc;
-//using BusinessLayer.Services;
-//using System.Threading.Tasks;
-//using System.Collections.Generic;
-//using System;
-//using DataAccessLayer.Repositories;
-//using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc;
+using BusinessLayer.Services;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using DataAccessLayer.Repositories;
+using System.ComponentModel.DataAnnotations;
 
-//namespace Move_Smart.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class UsersController : ControllerBase
-//    {
-//        private readonly UserRepo _userRepo;
-//        private readonly ILogger<UserService> _logger;
+[ApiController]
+[Route("api/v1/[controller]")]
+public class UserController : ControllerBase
+{
+    private readonly UserService _service;
+    private readonly ILogger<UserController> _logger;
 
-//        public UsersController(UserRepo userRepo, ILogger<UserService> logger)
-//        {
-//            _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
-//            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-//        }
+    public UserController(UserService service, ILogger<UserController> logger)
+    {
+        _service = service;
+        _logger = logger;
+    }
 
-//        [HttpPost("login")]
-//        public async Task<IActionResult> Login([FromBody] LoginRequest request)
-//        {
-//            try
-//            {
-//                var userService = await new UserService(
-//                    new UserDTO(0, request.NationalNo, "", "", EnUserRole.SuperUser, 0),
-//                    _userRepo,
-//                    _logger
-//                ).LoginAsync(request.NationalNo, request.Password);
+    [HttpGet]
+    public async Task<IActionResult> GetAllUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var users = await _service.GetAllUsersAsync(pageNumber, pageSize);
+            return Ok(users);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching users");
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred");
+            return StatusCode(500, "Internal server error");
+        }
+    }
 
-//                return Ok(new { UserId = userService.UserId, Role = userService.Role });
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest(ex.Message);
-//            }
-//        }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        if (id <= 0)
+        {
+            return BadRequest("Invalid user ID");
+        }
 
-//        [HttpPost]
-//        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
-//        {
-//            try
-//            {
-//                var userDTO = new UserDTO(0, request.NationalNo, request.Password, request.Name, request.Role, 0);
-//                var userService = new UserService(userDTO, _userRepo, _logger, UserService.EnMode.AddNew);
-//                var result = await userService.SaveAsync();
-//                return result ? Ok(new { UserId = userService.UserId }) : BadRequest("Failed to create user");
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest(ex.Message);
-//            }
-//        }
+        try
+        {
+            var user = await _service.GetUserByIdAsync(id);
+            return Ok(user);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving user");
+            return StatusCode(500, "Internal server error");
+        }
+    }
 
-//        [HttpPut("{userId}")]
-//        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateRequest request)
-//        {
-//            try
-//            {
-//                var existingUser = await _userRepo.GetUserByIdAsync(userId);
-//                if (existingUser == null)
-//                    return NotFound("User not found");
+    [HttpPost]
+    public async Task<IActionResult> CreateUser([FromBody] UserDTO user)
+    {
+        try
+        {
+            int userId = await _service.CreateUserAsync(user);
+            return CreatedAtAction(nameof(GetUserById), new { id = userId }, user);
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating user.");
+            return StatusCode(500, "Internal server error");
+        }
+    }
 
-//                var userDTO = new UserDTO(
-//                    userId,
-//                    request.NationalNo,
-//                    request.Password,
-//                    request.Name,
-//                    existingUser.Role,
-//                    existingUser.AccessRight
-//                );
-//                var userService = new UserService(userDTO, _userRepo, _logger, UserService.EnMode.Update);
-//                var result = await userService.SaveAsync();
-//                return result ? Ok() : BadRequest("Failed to update user");
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest(ex.Message);
-//            }
-//        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO user)
+    {
+        if (id != user.UserId)
+        {
+            return BadRequest("User Id mismatch");
+        }
 
-//        [HttpGet]
-//        public async Task<IActionResult> GetAllUsers(int pageNumber = 1, int pageSize = 10)
-//        {
-//            try
-//            {
-//                var tempUserService = new UserService(
-//                    new UserDTO(0, "", "", "", EnUserRole.GeneralSupervisor, 0),
-//                    _userRepo,
-//                    _logger
-//                );
-//                var users = await tempUserService.GetAllUsersAsync(pageNumber, pageSize);
-//                var response = users.Select(u => new { u.UserId, u.NationalNo, u.Name, u.Role });
-//                return Ok(response);
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest(ex.Message);
-//            }
-//        }
+        try
+        {
+            bool updated = await _service.UpdateUserInfoAsync(user);
+            return NoContent();
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user");
+            return StatusCode(500, "Internal server error");
+        }
+    }
 
-//        [HttpGet("{userId}")]
-//        public async Task<IActionResult> GetUserById(int userId)
-//        {
-//            try
-//            {
-//                var tempUserService = new UserService(
-//                    new UserDTO(0, "", "", "", EnUserRole.GeneralSupervisor, 0),
-//                    _userRepo,
-//                    _logger
-//                );
-//                var user = await tempUserService.GetUserByIdAsync(userId);
-//                if (user == null)
-//                    return NotFound();
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser(int id, [FromHeader] int requestingUserId)
+    {
+        try
+        {
+            bool deleted = await _service.DeleteUserAsync(id, requestingUserId);
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting user");
+            return StatusCode(500, "Internal server error");
+        }
+    }
 
-//                return Ok(new { user.UserId, user.NationalNo, user.Name, user.Role });
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest(ex.Message);
-//            }
-//        }
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
+    {
+        try
+        {
+            var user = await _service.LoginAsync(loginModel.NationalNo, loginModel.Password);
+            return Ok(user);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error logging in user");
+            return StatusCode(500, "Internal server error");
+        }
+    }
 
-//        [HttpDelete("{userId}")]
-//        public async Task<IActionResult> DeleteUser(int userId)
-//        {
-//            try
-//            {
-//                var tempUserService = new UserService(
-//                    new UserDTO(0, "", "", "", EnUserRole.SuperUser, (int)EnPermissions.All),
-//                    _userRepo,
-//                    _logger
-//                );
-//                var result = await tempUserService.DeleteUserAsync(userId);
-//                return result ? Ok() : NotFound();
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest(ex.Message);
-//            }
-//        }
+    public class LoginModel
+    {
+        [Required]
+        public required string NationalNo { get; set; }
 
-//        [HttpPut("change-password")]
-//        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
-//        {
-//            try
-//            {
-//                var userDTO = await _userRepo.GetUserByIdAsync(request.UserId);
-//                if (userDTO == null)
-//                    return NotFound("User not found");
+        [Required, MinLength(6)]
+        public required string Password { get; set; }
+    }
 
-//                var userService = new UserService(userDTO, _userRepo, _logger, UserService.EnMode.Update);
-//                var result = await userService.ChangePasswordAsync(request.NewPassword);
-//                return result ? Ok() : BadRequest("Failed to change password");
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest(ex.Message);
-//            }
-//        }
-//    }
-
-//    public record LoginRequest(string NationalNo, string Password);
-//    public record UserCreateRequest(string NationalNo, string Password, string Name, EnUserRole Role);
-//    public record UserUpdateRequest(string NationalNo, string Password, string Name);
-//    public record ChangePasswordRequest(int UserId, string NewPassword);
-//}
+}

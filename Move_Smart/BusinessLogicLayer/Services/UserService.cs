@@ -13,7 +13,6 @@ namespace BusinessLayer.Services
 {
     public enum EnPermissions
     {
-        All = ~0,
         None = 0,
         ReadAll = 1,
         ApproveApplications = 2,
@@ -29,7 +28,8 @@ namespace BusinessLayer.Services
         ManipulateConsumablesWithdrawApplicationsAndSparePartsWithdrawApplications = 2048,
         ManipulateMissions = 4096,
         ManipulateSubscriptions = 8192,
-        ViewReports = 16384
+        ViewReports = 16384,
+        All = 32768
     }
 
 
