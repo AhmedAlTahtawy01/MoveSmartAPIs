@@ -25,7 +25,7 @@ namespace DataAccessLayer.Repositories
         public Sparepartspurchaseorder() { }
 
     }
-    class SparePartsPurchaseOrderRepo
+    public partial class SparePartsPurchaseOrderRepo
     {
         private readonly appDBContext _appDbContext;
 
