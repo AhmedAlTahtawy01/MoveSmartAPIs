@@ -30,12 +30,12 @@ namespace DataAccessLayer.Repositories
 
     public class MaintenanceRepo
     {
-        private readonly ConnectionsSettings _connectionsSettings;
+        private readonly ConnectionSettings _ConnectionSettings;
         private readonly ILogger<MaintenanceRepo> _logger;
 
-        public MaintenanceRepo(ConnectionsSettings connectionsSettings, ILogger<MaintenanceRepo> logger)
+        public MaintenanceRepo(ConnectionSettings ConnectionSettings, ILogger<MaintenanceRepo> logger)
         {
-            _connectionsSettings = connectionsSettings ?? throw new ArgumentNullException(nameof(connectionsSettings));
+            _ConnectionSettings = ConnectionSettings ?? throw new ArgumentNullException(nameof(ConnectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -60,7 +60,7 @@ namespace DataAccessLayer.Repositories
                 FROM maintenance";
             int offset = (pageNumber - 1) * pageSize;
 
-            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var maintenancesList = new List<MaintenanceDTO>();
                 using var reader = await cmd.ExecuteReaderAsync();
@@ -77,7 +77,7 @@ namespace DataAccessLayer.Repositories
                 FROM maintenance
                 WHERE MaintenanceID = @maintenanceId;";
 
-            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 using var reader = await cmd.ExecuteReaderAsync();
                 return await reader.ReadAsync() ? MapMaintenance(reader) : null;
@@ -93,7 +93,7 @@ namespace DataAccessLayer.Repositories
             if (!string.IsNullOrEmpty(filter))
                 query += " WHERE " + filter;
 
-            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 var maintenancesList = new List<MaintenanceDTO>();
                 using var reader = await cmd.ExecuteReaderAsync();
@@ -121,7 +121,7 @@ namespace DataAccessLayer.Repositories
                 INSERT INTO maintenance (MaintenanceDate, Description, MaintenanceApplicationID)
                 VALUES (@maintenanceDate, @description, @maintenanceApplicationId);
                 SELECT LAST_INSERT_ID();";
-            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync());
             },
@@ -138,7 +138,7 @@ namespace DataAccessLayer.Repositories
                     Description = @description,
                     MaintenanceApplicationID = @maintenanceApplicationId
                 WHERE MaintenanceID = @maintenanceId;";
-            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return await cmd.ExecuteNonQueryAsync() > 0;
             },
@@ -153,7 +153,7 @@ namespace DataAccessLayer.Repositories
             const string query = @"
                 DELETE FROM maintenance
                 WHERE MaintenanceID = @maintenanceId;";
-            return await _connectionsSettings.ExecuteQueryAsync(query, async cmd =>
+            return await _ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return await cmd.ExecuteNonQueryAsync() > 0;
             }, new MySqlParameter("@maintenanceId", maintenanceId));

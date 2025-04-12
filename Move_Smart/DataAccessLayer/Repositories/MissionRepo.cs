@@ -36,10 +36,10 @@ namespace DataAccessLayer.Repositories
 
     public class MissionRepo
     {
-        private readonly ConnectionsSettings _connectionSettings;
+        private readonly ConnectionSettings _connectionSettings;
         private readonly ILogger<MissionRepo> _logger;
 
-        public MissionRepo(ConnectionsSettings connectionSettings, ILogger<MissionRepo> logger)
+        public MissionRepo(ConnectionSettings connectionSettings, ILogger<MissionRepo> logger)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

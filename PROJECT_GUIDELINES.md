@@ -25,7 +25,7 @@
 
   - **Level 1**: Vehicles.
   - **Level 2**: Buses, Drivers.
-  - **Level 3**: Employees, Patrols, Vacations, MaintenanceApplications, MissionsNotes.
+  - **Level 3**: Employees, Patrols, Vacations, MaintenanceApplications, MissionsNotes, PatrolsSubscriptions.
 
   ##
 

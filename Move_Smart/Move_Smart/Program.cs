@@ -27,11 +27,11 @@ builder.Services.AddLogging(logging =>
 });
 
 // ConnectionSettings for raw SQL
-builder.Services.AddSingleton<ConnectionsSettings>(sp =>
+builder.Services.AddSingleton<ConnectionSettings>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
-    var logger = sp.GetRequiredService<ILogger<ConnectionsSettings>>();
-    return new ConnectionsSettings(config, logger);
+    var logger = sp.GetRequiredService<ILogger<ConnectionSettings>>();
+    return new ConnectionSettings(config, logger);
 });
 
 // Register repositories

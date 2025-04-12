@@ -1,251 +1,261 @@
-﻿//using DataAccessLayer.Util;
-//using MySqlConnector;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using DataAccessLayer.Util;
+using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace DataAccessLayer
-//{
-//    public class MaintenanceApplicationDTO
-//    {
-//        public int? MaintenanceApplicationID { get; set; }
-//        public int ApplicationID { get; set; }
-//        public short VehicleID { get; set; }
-//        public bool ApprovedByGeneralSupervisor { get; set; }
-//        public bool ApprovedByGeneralManager { get; set; }
+namespace DataAccessLayer
+{
+    public class MaintenanceApplicationDTO
+    {
+        public int? MaintenanceApplicationID { get; set; }
+        public int ApplicationID { get; set; }
+        public short VehicleID { get; set; }
+        public bool ApprovedByGeneralSupervisor { get; set; }
+        public bool ApprovedByGeneralManager { get; set; }
 
-//        public MaintenanceApplicationDTO(int? maintenanceApplicationID, int applicationID,
-//            short vehicleID, bool approvedByGeneralSupervisor, bool approvedByGeneralManager)
-//        {
-//            MaintenanceApplicationID = maintenanceApplicationID;
-//            ApplicationID = applicationID;
-//            VehicleID = vehicleID;
-//            ApprovedByGeneralSupervisor = approvedByGeneralSupervisor;
-//            ApprovedByGeneralManager = approvedByGeneralManager;
-//        }
-//    }
+        public MaintenanceApplicationDTO(int? maintenanceApplicationID, int applicationID,
+            short vehicleID, bool approvedByGeneralSupervisor, bool approvedByGeneralManager)
+        {
+            MaintenanceApplicationID = maintenanceApplicationID;
+            ApplicationID = applicationID;
+            VehicleID = vehicleID;
+            ApprovedByGeneralSupervisor = approvedByGeneralSupervisor;
+            ApprovedByGeneralManager = approvedByGeneralManager;
+        }
+    }
 
-//    public class MaintenanceApplicationRepo
-//    {
-//        public static async Task<List<MaintenanceApplicationDTO>> GetAllMaintenanceApplicationsAsync()
-//        {
-//            List<MaintenanceApplicationDTO> applicationsList = new List<MaintenanceApplicationDTO>();
+    public class MaintenanceApplicationRepo
+    {
+        private readonly ConnectionSettings _connectionSettings;
+        private readonly ILogger<MaintenanceApplicationRepo> _logger;
 
-//            string query = @"SELECT * FROM MaintenanceApplications
-//                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
+        public MaintenanceApplicationRepo(ConnectionSettings connectionSettings, ILogger<MaintenanceApplicationRepo> logger)
+        {
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        await conn.OpenAsync();
+        public async Task<List<MaintenanceApplicationDTO>> GetAllMaintenanceApplicationsAsync()
+        {
+            List<MaintenanceApplicationDTO> applicationsList = new List<MaintenanceApplicationDTO>();
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while (await reader.ReadAsync())
-//                            {
-//                                applicationsList.Add(new MaintenanceApplicationDTO(
-//                                    Convert.ToInt32(reader["MaintenanceApplicationID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToInt16(reader["VehicleID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+            string query = @"SELECT * FROM MaintenanceApplications
+                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
 
-//            return applicationsList;
-//        }
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
 
-//        public static async Task<List<MaintenanceApplicationDTO>> GetAllMaintenanceApplicationsForVehicleAsync(short vehicleID)
-//        {
-//            List<MaintenanceApplicationDTO> applicationsList = new List<MaintenanceApplicationDTO>();
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                applicationsList.Add(new MaintenanceApplicationDTO(
+                                    Convert.ToInt32(reader["MaintenanceApplicationID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//            string query = @"SELECT * FROM MaintenanceApplications
-//                            WHERE VehicleID = @VehicleID
-//                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
+            return applicationsList;
+        }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("VehicleID", vehicleID);
+        public async Task<List<MaintenanceApplicationDTO>> GetAllMaintenanceApplicationsForVehicleAsync(short vehicleID)
+        {
+            List<MaintenanceApplicationDTO> applicationsList = new List<MaintenanceApplicationDTO>();
 
-//                        await conn.OpenAsync();
+            string query = @"SELECT * FROM MaintenanceApplications
+                            WHERE VehicleID = @VehicleID
+                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while (await reader.ReadAsync())
-//                            {
-//                                applicationsList.Add(new MaintenanceApplicationDTO(
-//                                    Convert.ToInt32(reader["MaintenanceApplicationID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToInt16(reader["VehicleID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("VehicleID", vehicleID);
 
-//            return applicationsList;
-//        }
+                        await conn.OpenAsync();
 
-//        public static async Task<MaintenanceApplicationDTO> GetMaintenanceApplicationByMaintenanceApplicationIDAsync(int maintenanceApplicationID)
-//        {
-//            string query = @"SELECT * FROM MaintenanceApplications
-//                            WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                applicationsList.Add(new MaintenanceApplicationDTO(
+                                    Convert.ToInt32(reader["MaintenanceApplicationID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", maintenanceApplicationID);
+            return applicationsList;
+        }
 
-//                        await conn.OpenAsync();
-                        
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            if (await reader.ReadAsync())
-//                            {
-//                                return new MaintenanceApplicationDTO(
-//                                    Convert.ToInt32(reader["MaintenanceApplicationID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToInt16(reader["VehicleID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                );
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<MaintenanceApplicationDTO> GetMaintenanceApplicationByMaintenanceApplicationIDAsync(int maintenanceApplicationID)
+        {
+            string query = @"SELECT * FROM MaintenanceApplications
+                            WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
 
-//            return null;
-//        }
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", maintenanceApplicationID);
 
-//        public static async Task<int?> AddNewMaintenanceApplicationAsync(MaintenanceApplicationDTO newMaintenanceApplication)
-//        {
-//            string query = @"INSERT INTO MaintenanceApplications
-//                            (ApplicationID, VehicleID, ApprovedByGeneralSupervisor, ApprovedByGeneralManager)
-//                            VALUES
-//                            (@ApplicationID, @VehicleID, @ApprovedByGeneralSupervisor, @ApprovedByGeneralManager);
-//                            SELECT LAST_INSERT_ID();";
+                        await conn.OpenAsync();
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("ApplicationID", newMaintenanceApplication.ApplicationID);
-//                        cmd.Parameters.AddWithValue("VehicleID", newMaintenanceApplication.VehicleID);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", newMaintenanceApplication.ApprovedByGeneralSupervisor);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", newMaintenanceApplication.ApprovedByGeneralManager);
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                return new MaintenanceApplicationDTO(
+                                    Convert.ToInt32(reader["MaintenanceApplicationID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        await conn.OpenAsync();
+            return null;
+        }
 
-//                        object? result = await cmd.ExecuteScalarAsync();
-//                        if (result != null && int.TryParse(result.ToString(), out int id))
-//                        {
-//                            return id;
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<int?> AddNewMaintenanceApplicationAsync(MaintenanceApplicationDTO newMaintenanceApplication)
+        {
+            string query = @"INSERT INTO MaintenanceApplications
+                            (ApplicationID, VehicleID, ApprovedByGeneralSupervisor, ApprovedByGeneralManager)
+                            VALUES
+                            (@ApplicationID, @VehicleID, @ApprovedByGeneralSupervisor, @ApprovedByGeneralManager);
+                            SELECT LAST_INSERT_ID();";
 
-//            return null;
-//        }
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("ApplicationID", newMaintenanceApplication.ApplicationID);
+                        cmd.Parameters.AddWithValue("VehicleID", newMaintenanceApplication.VehicleID);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", newMaintenanceApplication.ApprovedByGeneralSupervisor);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", newMaintenanceApplication.ApprovedByGeneralManager);
 
-//        public static async Task<bool> UpdateMaintenanceApplicationAsync(MaintenanceApplicationDTO updatedMaintenanceApplication)
-//        {
-//            string query = @"UPDATE MaintenanceApplications SET
-//                            ApplicationID = @ApplicationID,
-//                            VehicleID = @VehicleID,
-//                            ApprovedByGeneralSupervisor = @ApprovedByGeneralSupervisor,
-//                            ApprovedByGeneralManager = @ApprovedByGeneralManager
-//                            WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
+                        await conn.OpenAsync();
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", updatedMaintenanceApplication.MaintenanceApplicationID ?? 0);
-//                        cmd.Parameters.AddWithValue("ApplicationID", updatedMaintenanceApplication.ApplicationID);
-//                        cmd.Parameters.AddWithValue("VehicleID", updatedMaintenanceApplication.VehicleID);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", updatedMaintenanceApplication.ApprovedByGeneralSupervisor);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", updatedMaintenanceApplication.ApprovedByGeneralManager);
+                        object? result = await cmd.ExecuteScalarAsync();
+                        if (result != null && int.TryParse(result.ToString(), out int id))
+                        {
+                            return id;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        await conn.OpenAsync();
+            return null;
+        }
 
-//                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<bool> UpdateMaintenanceApplicationAsync(MaintenanceApplicationDTO updatedMaintenanceApplication)
+        {
+            string query = @"UPDATE MaintenanceApplications SET
+                            ApplicationID = @ApplicationID,
+                            VehicleID = @VehicleID,
+                            ApprovedByGeneralSupervisor = @ApprovedByGeneralSupervisor,
+                            ApprovedByGeneralManager = @ApprovedByGeneralManager
+                            WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
 
-//            return false;
-//        }
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", updatedMaintenanceApplication.MaintenanceApplicationID ?? 0);
+                        cmd.Parameters.AddWithValue("ApplicationID", updatedMaintenanceApplication.ApplicationID);
+                        cmd.Parameters.AddWithValue("VehicleID", updatedMaintenanceApplication.VehicleID);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", updatedMaintenanceApplication.ApprovedByGeneralSupervisor);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", updatedMaintenanceApplication.ApprovedByGeneralManager);
 
-//        public static async Task<bool> DeleteMaintenanceApplicationAsync(int maintenanceApplicationID)
-//        {
-//            string query = @"DELETE FROM MaintenanceApplications
-//                            WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
+                        await conn.OpenAsync();
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", maintenanceApplicationID);
-                        
-//                        await conn.OpenAsync();
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+            return false;
+        }
 
-//            return false;
-//        }
-//    }
-//}
+        public async Task<bool> DeleteMaintenanceApplicationAsync(int maintenanceApplicationID)
+        {
+            string query = @"DELETE FROM MaintenanceApplications
+                            WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", maintenanceApplicationID);
+
+                        await conn.OpenAsync();
+
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
+    }
+}
