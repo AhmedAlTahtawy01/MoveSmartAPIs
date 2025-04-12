@@ -53,10 +53,10 @@ namespace DataAccessLayer.Repositories
     public class ApplicationRepo
     {
 
-        private readonly ConnectionsSettings _connectionSettings;
+        private readonly ConnectionSettings _connectionSettings;
         private readonly ILogger<ApplicationRepo> _logger;
 
-        public ApplicationRepo(ConnectionsSettings connectionSettings, ILogger<ApplicationRepo> logger)
+        public ApplicationRepo(ConnectionSettings connectionSettings, ILogger<ApplicationRepo> logger)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

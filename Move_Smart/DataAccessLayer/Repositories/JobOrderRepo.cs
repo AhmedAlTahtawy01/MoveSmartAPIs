@@ -47,11 +47,11 @@ namespace DataAccessLayer.Repositories
 
     public class JobOrderRepo
     {
-        private readonly ConnectionsSettings _connectionSettings;
+        private readonly ConnectionSettings _connectionSettings;
         private readonly ApplicationRepo _repo;
         private readonly ILogger<JobOrderRepo> _logger;
 
-        public JobOrderRepo(ConnectionsSettings connectionSettings, ApplicationRepo repo, ILogger<JobOrderRepo> logger)
+        public JobOrderRepo(ConnectionSettings connectionSettings, ApplicationRepo repo, ILogger<JobOrderRepo> logger)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));

@@ -1,210 +1,220 @@
-﻿//using DataAccessLayer.Util;
-//using MySqlConnector;
-//using System;
-//using System.Collections.Concurrent;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using DataAccessLayer.Util;
+using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace DataAccessLayer
-//{
-//    public class PatrolDTO
-//    {
-//        public short? PatrolID { get; set; }
-//        public string Description { get; set; }
-//        public TimeOnly MovingAt { get; set; }
-//        public short ApproximatedTime { get; set; }
-//        public byte BusID { get; set; }
+namespace DataAccessLayer
+{
+    public class PatrolDTO
+    {
+        public short? PatrolID { get; set; }
+        public string Description { get; set; }
+        public TimeOnly MovingAt { get; set; }
+        public short ApproximatedTime { get; set; }
+        public byte BusID { get; set; }
 
-//        public PatrolDTO(short? patrolID, string description, TimeOnly movingAt, short approximatedTime,
-//            byte busID)
-//        {
-//            PatrolID = patrolID;
-//            Description = description;
-//            MovingAt = movingAt;
-//            ApproximatedTime = approximatedTime;
-//            BusID = busID;
-//        }
-//    }
+        public PatrolDTO(short? patrolID, string description, TimeOnly movingAt, short approximatedTime,
+            byte busID)
+        {
+            PatrolID = patrolID;
+            Description = description;
+            MovingAt = movingAt;
+            ApproximatedTime = approximatedTime;
+            BusID = busID;
+        }
+    }
 
-//    public class PatrolRepo
-//    {
-//        public static async Task<List<PatrolDTO>> GetAllPatrolsAsync()
-//        {
-//            List<PatrolDTO> patrolsList = new List<PatrolDTO>();
+    public class PatrolRepo
+    {
+        private readonly ConnectionSettings _connectionSettings;
+        private readonly ILogger<PatrolRepo> _logger;
 
-//            string query = @"SELECT * FROM Patrols
-//                            ORDER BY ApproximatedTime DESC";
+        public PatrolRepo(ConnectionSettings connectionSettings, ILogger<PatrolRepo> logger)
+        {
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        await conn.OpenAsync();
+        public async Task<List<PatrolDTO>> GetAllPatrolsAsync()
+        {
+            List<PatrolDTO> patrolsList = new List<PatrolDTO>();
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while (await reader.ReadAsync())
-//                            {
-//                                patrolsList.Add(new PatrolDTO(
-//                                    Convert.ToInt16(reader["PatrolID"]),
-//                                    (string)reader["Description"],
-//                                    (TimeOnly)reader["MovingAt"],
-//                                    Convert.ToInt16(reader["ApproximatedTime"]),
-//                                    Convert.ToByte(reader["BusID"])
-//                                    ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+            string query = @"SELECT * FROM Patrols
+                            ORDER BY ApproximatedTime DESC";
 
-//            return patrolsList;
-//        }
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
 
-//        public static async Task<PatrolDTO> GetPatrolByIDAsync(short patrolID)
-//        {
-//            string query = @"SELECT * FROM Patrols
-//                            WHERE PatrolID = @PatrolID";
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("PatrolID", patrolID);
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                patrolsList.Add(new PatrolDTO(
+                                    Convert.ToInt16(reader["PatrolID"]),
+                                    (string)reader["Description"],
+                                    (TimeOnly)reader["MovingAt"],
+                                    Convert.ToInt16(reader["ApproximatedTime"]),
+                                    Convert.ToByte(reader["BusID"])
+                                    ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        await conn.OpenAsync();
-                        
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            if (await reader.ReadAsync())
-//                            {
-//                                return new PatrolDTO(
-//                                    Convert.ToInt16(reader["PatrolID"]),
-//                                    (string)reader["Description"],
-//                                    (TimeOnly)reader["MovingAt"],
-//                                    Convert.ToInt16(reader["ApproximatedTime"]),
-//                                    Convert.ToByte(reader["BusID"])
-//                                    );
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+            return patrolsList;
+        }
 
-//            return null;
-//        }
+        public async Task<PatrolDTO> GetPatrolByIDAsync(short patrolID)
+        {
+            string query = @"SELECT * FROM Patrols
+                            WHERE PatrolID = @PatrolID";
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PatrolID", patrolID);
 
-//        public static async Task<short?> AddNewPatrolAsync(PatrolDTO newPatrol)
-//        {
-//            string query = @"INSERT INTO Patrols
-//                            (Description, MovingAt, ApproximatedTime, BusID)
-//                            VALUES
-//                            (@Description, @MovingAt, @ApproximatedTime, @BusID);
-//                            SELECT LAST_INSERT_ID();";
+                        await conn.OpenAsync();
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("Description", newPatrol.Description);
-//                        cmd.Parameters.AddWithValue("MovingAt", newPatrol.MovingAt);
-//                        cmd.Parameters.AddWithValue("ApproximatedTime", newPatrol.ApproximatedTime);
-//                        cmd.Parameters.AddWithValue("BusID", newPatrol.BusID);
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                return new PatrolDTO(
+                                    Convert.ToInt16(reader["PatrolID"]),
+                                    (string)reader["Description"],
+                                    (TimeOnly)reader["MovingAt"],
+                                    Convert.ToInt16(reader["ApproximatedTime"]),
+                                    Convert.ToByte(reader["BusID"])
+                                    );
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        await conn.OpenAsync();
-                        
-//                        object? result = await cmd.ExecuteScalarAsync();
-//                        if (result != null && short.TryParse(result.ToString(), out short id))
-//                        {
-//                            return id;
-//                        }
-//                    }
-//                }
+            return null;
+        }
 
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<short?> AddNewPatrolAsync(PatrolDTO newPatrol)
+        {
+            string query = @"INSERT INTO Patrols
+                            (Description, MovingAt, ApproximatedTime, BusID)
+                            VALUES
+                            (@Description, @MovingAt, @ApproximatedTime, @BusID);
+                            SELECT LAST_INSERT_ID();";
 
-//            return null;
-//        }
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("Description", newPatrol.Description);
+                        cmd.Parameters.AddWithValue("MovingAt", newPatrol.MovingAt);
+                        cmd.Parameters.AddWithValue("ApproximatedTime", newPatrol.ApproximatedTime);
+                        cmd.Parameters.AddWithValue("BusID", newPatrol.BusID);
 
-//        public static async Task<bool> UpdatePatrolAsync(PatrolDTO updatedPatrol)
-//        {
-//            string query = @"UPDATE Patrols SET 
-//                            Description = @Description,
-//                            MovingAt = @MovingAt,
-//                            ApproximatedTime = @ApproximatedTime,
-//                            BusID = @BusID
-//                            WHERE PatrolID = @PatrolID";
+                        await conn.OpenAsync();
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("PatrolID", updatedPatrol.PatrolID ?? 0);
-//                        cmd.Parameters.AddWithValue("Description", updatedPatrol.Description);
-//                        cmd.Parameters.AddWithValue("MovingAt", updatedPatrol.MovingAt);
-//                        cmd.Parameters.AddWithValue("ApproximatedTime", updatedPatrol.ApproximatedTime);
-//                        cmd.Parameters.AddWithValue("BusID", updatedPatrol.BusID);
+                        object? result = await cmd.ExecuteScalarAsync();
+                        if (result != null && short.TryParse(result.ToString(), out short id))
+                        {
+                            return id;
+                        }
+                    }
+                }
 
-//                        await conn.OpenAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+            return null;
+        }
 
-//            return false;
-//        }
+        public async Task<bool> UpdatePatrolAsync(PatrolDTO updatedPatrol)
+        {
+            string query = @"UPDATE Patrols SET 
+                            Description = @Description,
+                            MovingAt = @MovingAt,
+                            ApproximatedTime = @ApproximatedTime,
+                            BusID = @BusID
+                            WHERE PatrolID = @PatrolID";
 
-//        public static async Task<bool> DeletePatrolAsync(short patrolID)
-//        {
-//            string query = @"DELETE FROM Patrols
-//                            WHERE PatrolID = @PatrolID";
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PatrolID", updatedPatrol.PatrolID ?? 0);
+                        cmd.Parameters.AddWithValue("Description", updatedPatrol.Description);
+                        cmd.Parameters.AddWithValue("MovingAt", updatedPatrol.MovingAt);
+                        cmd.Parameters.AddWithValue("ApproximatedTime", updatedPatrol.ApproximatedTime);
+                        cmd.Parameters.AddWithValue("BusID", updatedPatrol.BusID);
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("PatrolID", patrolID);
+                        await conn.OpenAsync();
 
-//                        await conn.OpenAsync();
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
-         
-//            return false;
-//        }
-//    }
-//}
+            return false;
+        }
+
+        public async Task<bool> DeletePatrolAsync(short patrolID)
+        {
+            string query = @"DELETE FROM Patrols
+                            WHERE PatrolID = @PatrolID";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PatrolID", patrolID);
+
+                        await conn.OpenAsync();
+
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
+    }
+}

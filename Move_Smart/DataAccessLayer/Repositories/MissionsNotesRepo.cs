@@ -1,391 +1,403 @@
-﻿//using DataAccessLayer.Util;
-//using MySqlConnector;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using DataAccessLayer.Repositories;
+using DataAccessLayer.Util;
+using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace DataAccessLayer
-//{
-//    public class MissionsNotesDTO
-//    {
-//        public int NoteID { get; set; }
-//        public int ApplicationID { get; set; }
-//        public bool ApprovedByGeneralSupervisor { get; set; }
-//        public bool ApprovedByGeneralManager { get; set; }
+namespace DataAccessLayer
+{
+    public class MissionsNotesDTO
+    {
+        public int NoteID { get; set; }
+        public int ApplicationID { get; set; }
+        public bool ApprovedByGeneralSupervisor { get; set; }
+        public bool ApprovedByGeneralManager { get; set; }
 
-//        public MissionsNotesDTO(int noteID, int applicationID, bool approvedByGeneralSupervisor,
-//            bool approvedByGeneralManager)
-//        {
-//            NoteID = noteID;
-//            ApplicationID = applicationID;
-//            ApprovedByGeneralSupervisor = approvedByGeneralSupervisor;
-//            ApprovedByGeneralManager = approvedByGeneralManager;
-//        }
-//    }
+        public MissionsNotesDTO(int noteID, int applicationID, bool approvedByGeneralSupervisor,
+            bool approvedByGeneralManager)
+        {
+            NoteID = noteID;
+            ApplicationID = applicationID;
+            ApprovedByGeneralSupervisor = approvedByGeneralSupervisor;
+            ApprovedByGeneralManager = approvedByGeneralManager;
+        }
+    }
 
-//    public class MissionsNotesRepo
-//    {
-//        public static async Task<List<MissionsNotesDTO>> GetAllMissionsNotesAsync()
-//        {
-//            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
+    public class MissionsNotesRepo
+    {
 
-//            string query = @"SELECT * FROM MissionsNotes
-//                            ORDER ApprovedByGeneralSupervisor DESC, BY ApprovedByGeneralManager DESC;";
+        private readonly ConnectionSettings _connectionSettings;
+        private readonly ILogger<MissionsNotesRepo> _logger;
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        await conn.OpenAsync();
+        public MissionsNotesRepo(ConnectionSettings connectionSettings, ILogger<MissionsNotesRepo> logger)
+        {
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while(await reader.ReadAsync())
-//                            {
-//                                notesList.Add(new MissionsNotesDTO(
-//                                    Convert.ToInt32(reader["NoteID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                    ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<List<MissionsNotesDTO>> GetAllMissionsNotesAsync()
+        {
+            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
 
-//            return notesList;
-//        }
+            string query = @"SELECT * FROM MissionsNotes
+                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
 
-//        public static async Task<List<MissionsNotesDTO>> GetAllApprovedNotesAsync()
-//        {
-//            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
 
-//            string query = @"SELECT * FROM MissionsNotes
-//                            WHERE ApprovedByGeneralSupervisor = 1 AND ApprovedByGeneralManager = 1;";
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                notesList.Add(new MissionsNotesDTO(
+                                    Convert.ToInt32(reader["NoteID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        await conn.OpenAsync();
+            return notesList;
+        }
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while (await reader.ReadAsync())
-//                            {
-//                                notesList.Add(new MissionsNotesDTO(
-//                                    Convert.ToInt32(reader["NoteID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                    ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<List<MissionsNotesDTO>> GetAllApprovedNotesAsync()
+        {
+            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
 
-//            return notesList;
-//        }
+            string query = @"SELECT * FROM MissionsNotes
+                            WHERE ApprovedByGeneralSupervisor = 1 AND ApprovedByGeneralManager = 1;";
 
-//        public static async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesAsync()
-//        {
-//            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
 
-//            string query = @"SELECT * FROM MissionsNotes
-//                            WHERE ApprovedByGeneralSupervisor = 0 OR ApprovedByGeneralManager = 0
-//                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                notesList.Add(new MissionsNotesDTO(
+                                    Convert.ToInt32(reader["NoteID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        await conn.OpenAsync();
+            return notesList;
+        }
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while (await reader.ReadAsync())
-//                            {
-//                                notesList.Add(new MissionsNotesDTO(
-//                                    Convert.ToInt32(reader["NoteID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                    ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesAsync()
+        {
+            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
 
-//            return notesList;
-//        }
+            string query = @"SELECT * FROM MissionsNotes
+                            WHERE ApprovedByGeneralSupervisor = 0 OR ApprovedByGeneralManager = 0
+                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
 
-//        public static async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesFromGeneralSupervisorsAsync()
-//        {
-//            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
 
-//            string query = @"SELECT * FROM MissionsNotes
-//                            WHERE ApprovedByGeneralSupervisor = 0;";
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                notesList.Add(new MissionsNotesDTO(
+                                    Convert.ToInt32(reader["NoteID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        await conn.OpenAsync();
+            return notesList;
+        }
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while (await reader.ReadAsync())
-//                            {
-//                                notesList.Add(new MissionsNotesDTO(
-//                                    Convert.ToInt32(reader["NoteID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                    ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesFromGeneralSupervisorsAsync()
+        {
+            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
 
-//            return notesList;
-//        }
+            string query = @"SELECT * FROM MissionsNotes
+                            WHERE ApprovedByGeneralSupervisor = 0;";
 
-//        public static async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesFromGeneralManagerAsync()
-//        {
-//            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
 
-//            string query = @"SELECT * FROM MissionsNotes
-//                            WHERE ApprovedByGeneralManager = 0;";
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                notesList.Add(new MissionsNotesDTO(
+                                    Convert.ToInt32(reader["NoteID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        await conn.OpenAsync();
+            return notesList;
+        }
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            while (await reader.ReadAsync())
-//                            {
-//                                notesList.Add(new MissionsNotesDTO(
-//                                    Convert.ToInt32(reader["NoteID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                    ));
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+        public async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesFromGeneralManagerAsync()
+        {
+            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
 
-//            return notesList;
-//        }
+            string query = @"SELECT * FROM MissionsNotes
+                            WHERE ApprovedByGeneralManager = 0;";
 
-//        public static async Task<MissionsNotesDTO> GetMissionNoteByNoteIDAsync(int noteID)
-//        {
-//            string query = @"SELECT * FROM MissionsNotes
-//                            WHERE NoteID = @NoteID;";
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("NoteID", noteID);
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                notesList.Add(new MissionsNotesDTO(
+                                    Convert.ToInt32(reader["NoteID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        await conn.OpenAsync();
-                        
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            if (await reader.ReadAsync())
-//                            {
-//                                return new MissionsNotesDTO(
-//                                    Convert.ToInt32(reader["NoteID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                    );
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
-//            return null;
-//        }
+            return notesList;
+        }
 
-//        public static async Task<MissionsNotesDTO> GetMissionNoteByApplicationIDAsync(int applicationID)
-//        {
-//            string query = @"SELECT * FROM MissionsNotes
-//                            WHERE ApplicationID = @ApplicationID;";
+        public async Task<MissionsNotesDTO> GetMissionNoteByNoteIDAsync(int noteID)
+        {
+            string query = @"SELECT * FROM MissionsNotes
+                            WHERE NoteID = @NoteID;";
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("ApplicationID", applicationID);
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("NoteID", noteID);
 
-//                        await conn.OpenAsync();
+                        await conn.OpenAsync();
 
-//                        using (MySqlDataReader reader = await cmd.ExecuteReaderAsync())
-//                        {
-//                            if (await reader.ReadAsync())
-//                            {
-//                                return new MissionsNotesDTO(
-//                                    Convert.ToInt32(reader["NoteID"]),
-//                                    Convert.ToInt32(reader["ApplicationID"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-//                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-//                                    );
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
-//            return null;
-//        }
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                return new MissionsNotesDTO(
+                                    Convert.ToInt32(reader["NoteID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    );
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return null;
+        }
 
-//        public static async Task<int?> AddNewMissionNoteAsync(MissionsNotesDTO newNote)
-//        {
-//            string query = @"INSERT INTO MissionsNotes
-//                            (ApplicationID, ApprovedByGeneralSupervisor, ApprovedByGeneralManager)
-//                            VALUES
-//                            (@ApplicationID, @ApprovedByGeneralSupervisor, @ApprovedByGeneralManager);
-//                            SELECT LAST_INSERT_ID();";
+        public async Task<MissionsNotesDTO> GetMissionNoteByApplicationIDAsync(int applicationID)
+        {
+            string query = @"SELECT * FROM MissionsNotes
+                            WHERE ApplicationID = @ApplicationID;";
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("ApplicationID", newNote.ApplicationID);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", newNote.ApprovedByGeneralSupervisor);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", newNote.ApprovedByGeneralManager);
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("ApplicationID", applicationID);
 
-//                        await conn.OpenAsync();
+                        await conn.OpenAsync();
 
-//                        object? result = await cmd.ExecuteScalarAsync();
-//                        if(result != null && int.TryParse(result.ToString(), out int id))
-//                        {
-//                            return id;
-//                        }
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                return new MissionsNotesDTO(
+                                    Convert.ToInt32(reader["NoteID"]),
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    );
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return null;
+        }
 
-//            return null;
-//        }
+        public async Task<int?> AddNewMissionNoteAsync(MissionsNotesDTO newNote)
+        {
+            string query = @"INSERT INTO MissionsNotes
+                            (ApplicationID, ApprovedByGeneralSupervisor, ApprovedByGeneralManager)
+                            VALUES
+                            (@ApplicationID, @ApprovedByGeneralSupervisor, @ApprovedByGeneralManager);
+                            SELECT LAST_INSERT_ID();";
 
-//        public static async Task<bool> UpdateMissionNoteAsync(MissionsNotesDTO updatedNote)
-//        {
-//            string query = @"UPDATE MissionsNotes SET
-//                            ApplicationID = @ApplicationID,
-//                            ApprovedByGeneralSupervisor = @ApprovedByGeneralSupervisor,
-//                            ApprovedByGeneralManager = @ApprovedByGeneralManager
-//                            WHERE NoteID = @NoteID;";
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("ApplicationID", newNote.ApplicationID);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", newNote.ApprovedByGeneralSupervisor);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", newNote.ApprovedByGeneralManager);
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("NoteID", updatedNote.NoteID);
-//                        cmd.Parameters.AddWithValue("ApplicationID", updatedNote.ApplicationID);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", updatedNote.ApprovedByGeneralSupervisor);
-//                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", updatedNote.ApprovedByGeneralManager);
+                        await conn.OpenAsync();
 
-//                        await conn.OpenAsync();
+                        object? result = await cmd.ExecuteScalarAsync();
+                        if (result != null && int.TryParse(result.ToString(), out int id))
+                        {
+                            return id;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-//                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
-         
-//            return false;
-//        }
+            return null;
+        }
 
-//        public static async Task<bool> DeleteMissionNoteAsync(int noteID)
-//        {
-//            string query = @"DELETE FROM MissionsNotes
-//                            WHERE NoteID = @NoteID;";
+        public async Task<bool> UpdateMissionNoteAsync(MissionsNotesDTO updatedNote)
+        {
+            string query = @"UPDATE MissionsNotes SET
+                            ApplicationID = @ApplicationID,
+                            ApprovedByGeneralSupervisor = @ApprovedByGeneralSupervisor,
+                            ApprovedByGeneralManager = @ApprovedByGeneralManager
+                            WHERE NoteID = @NoteID;";
 
-//            try
-//            {
-//                using (MySqlConnection conn = new MySqlConnection(ConnectionsSettings.ConnectionString))
-//                {
-//                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-//                    {
-//                        cmd.Parameters.AddWithValue("NoteID", noteID);
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("NoteID", updatedNote.NoteID);
+                        cmd.Parameters.AddWithValue("ApplicationID", updatedNote.ApplicationID);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", updatedNote.ApprovedByGeneralSupervisor);
+                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", updatedNote.ApprovedByGeneralManager);
 
-//                        await conn.OpenAsync();
-                        
-//                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
-//                    }
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.Message);
-//            }
+                        await conn.OpenAsync();
 
-//            return false;
-//        }
-//    }
-//}
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> DeleteMissionNoteAsync(int noteID)
+        {
+            string query = @"DELETE FROM MissionsNotes
+                            WHERE NoteID = @NoteID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("NoteID", noteID);
+
+                        await conn.OpenAsync();
+
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
+    }
+}

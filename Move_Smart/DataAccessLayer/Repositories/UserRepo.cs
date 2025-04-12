@@ -42,10 +42,10 @@ namespace DataAccessLayer.Repositories
 
     public class UserRepo
     {
-        private readonly ConnectionsSettings _connectionSettings;
+        private readonly ConnectionSettings _connectionSettings;
         private readonly ILogger<UserRepo> _logger;
 
-        public UserRepo(ConnectionsSettings connectionSettings, ILogger<UserRepo> logger)
+        public UserRepo(ConnectionSettings connectionSettings, ILogger<UserRepo> logger)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

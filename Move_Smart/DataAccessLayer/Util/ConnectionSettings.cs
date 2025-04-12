@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.Util
 {
-    public class ConnectionsSettings
+    public class ConnectionSettings
     {
         private readonly string _connectionString;
-        private readonly ILogger<ConnectionsSettings> _logger;
+        private readonly ILogger<ConnectionSettings> _logger;
 
-        public ConnectionsSettings(IConfiguration configuration, ILogger<ConnectionsSettings> logger)
+        public ConnectionSettings(IConfiguration configuration, ILogger<ConnectionSettings> logger)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException(nameof(configuration), "Connection string 'DefaultConnection' is missing.");
