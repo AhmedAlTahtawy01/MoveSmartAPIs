@@ -14,16 +14,11 @@ namespace DataAccessLayer
     {
         public int NoteID { get; set; }
         public int ApplicationID { get; set; }
-        public bool ApprovedByGeneralSupervisor { get; set; }
-        public bool ApprovedByGeneralManager { get; set; }
 
-        public MissionsNotesDTO(int noteID, int applicationID, bool approvedByGeneralSupervisor,
-            bool approvedByGeneralManager)
+        public MissionsNotesDTO(int noteID, int applicationID)
         {
             NoteID = noteID;
             ApplicationID = applicationID;
-            ApprovedByGeneralSupervisor = approvedByGeneralSupervisor;
-            ApprovedByGeneralManager = approvedByGeneralManager;
         }
     }
 
@@ -43,8 +38,7 @@ namespace DataAccessLayer
         {
             List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
 
-            string query = @"SELECT * FROM MissionsNotes
-                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
+            string query = @"SELECT * FROM MissionsNotes;";
 
             try
             {
@@ -60,162 +54,7 @@ namespace DataAccessLayer
                             {
                                 notesList.Add(new MissionsNotesDTO(
                                     Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-                                    ));
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return notesList;
-        }
-
-        public async Task<List<MissionsNotesDTO>> GetAllApprovedNotesAsync()
-        {
-            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
-
-            string query = @"SELECT * FROM MissionsNotes
-                            WHERE ApprovedByGeneralSupervisor = 1 AND ApprovedByGeneralManager = 1;";
-
-            try
-            {
-                using (MySqlConnection conn = _connectionSettings.GetConnection())
-                {
-                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
-                    {
-                        await conn.OpenAsync();
-
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                notesList.Add(new MissionsNotesDTO(
-                                    Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-                                    ));
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return notesList;
-        }
-
-        public async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesAsync()
-        {
-            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
-
-            string query = @"SELECT * FROM MissionsNotes
-                            WHERE ApprovedByGeneralSupervisor = 0 OR ApprovedByGeneralManager = 0
-                            ORDER BY ApprovedByGeneralSupervisor DESC, ApprovedByGeneralManager DESC;";
-
-            try
-            {
-                using (MySqlConnection conn = _connectionSettings.GetConnection())
-                {
-                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
-                    {
-                        await conn.OpenAsync();
-
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                notesList.Add(new MissionsNotesDTO(
-                                    Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-                                    ));
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return notesList;
-        }
-
-        public async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesFromGeneralSupervisorsAsync()
-        {
-            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
-
-            string query = @"SELECT * FROM MissionsNotes
-                            WHERE ApprovedByGeneralSupervisor = 0;";
-
-            try
-            {
-                using (MySqlConnection conn = _connectionSettings.GetConnection())
-                {
-                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
-                    {
-                        await conn.OpenAsync();
-
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                notesList.Add(new MissionsNotesDTO(
-                                    Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
-                                    ));
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return notesList;
-        }
-
-        public async Task<List<MissionsNotesDTO>> GetAllNonApprovedNotesFromGeneralManagerAsync()
-        {
-            List<MissionsNotesDTO> notesList = new List<MissionsNotesDTO>();
-
-            string query = @"SELECT * FROM MissionsNotes
-                            WHERE ApprovedByGeneralManager = 0;";
-
-            try
-            {
-                using (MySqlConnection conn = _connectionSettings.GetConnection())
-                {
-                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
-                    {
-                        await conn.OpenAsync();
-
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                notesList.Add(new MissionsNotesDTO(
-                                    Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    Convert.ToInt32(reader["ApplicationID"])
                                     ));
                             }
                         }
@@ -251,9 +90,7 @@ namespace DataAccessLayer
                             {
                                 return new MissionsNotesDTO(
                                     Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    Convert.ToInt32(reader["ApplicationID"])
                                     );
                             }
                         }
@@ -288,9 +125,7 @@ namespace DataAccessLayer
                             {
                                 return new MissionsNotesDTO(
                                     Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    Convert.ToInt32(reader["ApplicationID"])
                                     );
                             }
                         }
@@ -307,9 +142,9 @@ namespace DataAccessLayer
         public async Task<int?> AddNewMissionNoteAsync(MissionsNotesDTO newNote)
         {
             string query = @"INSERT INTO MissionsNotes
-                            (ApplicationID, ApprovedByGeneralSupervisor, ApprovedByGeneralManager)
+                            (ApplicationID)
                             VALUES
-                            (@ApplicationID, @ApprovedByGeneralSupervisor, @ApprovedByGeneralManager);
+                            (@ApplicationID);
                             SELECT LAST_INSERT_ID();";
 
             try
@@ -319,8 +154,6 @@ namespace DataAccessLayer
                     using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("ApplicationID", newNote.ApplicationID);
-                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", newNote.ApprovedByGeneralSupervisor);
-                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", newNote.ApprovedByGeneralManager);
 
                         await conn.OpenAsync();
 
@@ -344,8 +177,6 @@ namespace DataAccessLayer
         {
             string query = @"UPDATE MissionsNotes SET
                             ApplicationID = @ApplicationID,
-                            ApprovedByGeneralSupervisor = @ApprovedByGeneralSupervisor,
-                            ApprovedByGeneralManager = @ApprovedByGeneralManager
                             WHERE NoteID = @NoteID;";
 
             try
@@ -356,8 +187,6 @@ namespace DataAccessLayer
                     {
                         cmd.Parameters.AddWithValue("NoteID", updatedNote.NoteID);
                         cmd.Parameters.AddWithValue("ApplicationID", updatedNote.ApplicationID);
-                        cmd.Parameters.AddWithValue("ApprovedByGeneralSupervisor", updatedNote.ApprovedByGeneralSupervisor);
-                        cmd.Parameters.AddWithValue("ApprovedByGeneralManager", updatedNote.ApprovedByGeneralManager);
 
                         await conn.OpenAsync();
 

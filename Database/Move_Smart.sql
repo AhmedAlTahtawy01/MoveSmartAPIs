@@ -301,8 +301,6 @@ COLLATE = utf8mb4_0900_ai_ci;
 CREATE TABLE IF NOT EXISTS `move_smart`.`missionsnotes` (
   `NoteID` INT NOT NULL AUTO_INCREMENT,
   `ApplicationID` INT NOT NULL,
-  `ApprovedByGeneralSupervisor` BIT(1) NOT NULL,
-  `ApprovedByGeneralManager` BIT(1) NOT NULL,
   PRIMARY KEY (`NoteID`),
   INDEX `FK_MissionsNotes_Applications` (`ApplicationID` ASC) VISIBLE,
   CONSTRAINT `FK_MissionsNotes_Applications`
