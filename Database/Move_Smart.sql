@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS `move_smart`.`users` (
   `UserID` INT NOT NULL AUTO_INCREMENT,
   `NationalNo` CHAR(14) NOT NULL,
   `Name` VARCHAR(150) CHARACTER SET 'utf8mb3' NOT NULL,
-  `Role` ENUM('HospitalManager', 'GeneralManager', 'GeneralSupervisor', 'PatrolsSupervisor', 'WorkshopSupervisor', 'AdministrativeSupervisor') NOT NULL,
+  `Role` ENUM('SuperUser','HospitalManager', 'GeneralManager', 'GeneralSupervisor', 'PatrolsSupervisor', 'WorkshopSupervisor', 'AdministrativeSupervisor') NOT NULL,
   `AccessRight` INT NOT NULL,
-  `Password` VARCHAR(50) CHARACTER SET 'utf8mb3' NOT NULL,
+  `Password` VARCHAR(200) CHARACTER SET 'utf8mb3' NOT NULL,
   PRIMARY KEY (`UserID`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
