@@ -22,8 +22,9 @@ namespace DataAccessLayer.Repositories
         public ulong ApprovedByGeneralManager { get; set; }
 
         public virtual Vehicleconsumable RequiredItemNavigation { get; set; }
+        public Consumablespurchaseorder(){}
     }
-    public class consumablespurchaseorderRepo
+    public partial class consumablespurchaseorderRepo
     {
         private readonly appDBContext _appDbContext;
         private readonly ApplicationRepo _iapplication;

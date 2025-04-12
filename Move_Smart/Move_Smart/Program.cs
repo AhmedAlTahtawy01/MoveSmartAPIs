@@ -39,6 +39,9 @@ builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
 builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
 builder.Services.AddScoped<SparePartsPurchaseOrderRepo>(); // Kept for Kamal
+builder.Services.AddScoped<consumablespurchaseorderRepo>(); // Kept for Kamal
+builder.Services.AddScoped<ApplicationRepo>(); // Kept for Kamal
+
 
 // Register services
 builder.Services.AddScoped<UserService>(); // For UserController
