@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace BusinessLogicLayer.Services
 {
-    public class MissionService
+    public class MissionsVehicleService
     {
-        private readonly MissionRepo _repo;
-        private readonly ILogger<MissionService> _logger;
+        private readonly MissionsVehicleRepo _repo;
+        private readonly ILogger<MissionsVehicleService> _logger;
 
-        public MissionService(MissionRepo repo, ILogger<MissionService> logger)
+        public MissionsVehicleService(MissionsVehicleRepo repo, ILogger<MissionsVehicleService> logger)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
