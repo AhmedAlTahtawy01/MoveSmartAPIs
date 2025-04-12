@@ -45,6 +45,7 @@ builder.Services.AddScoped<ApplicationRepo>(); // Kept for Kamal
 
 // Register services
 builder.Services.AddScoped<UserService>(); // For UserController
+builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

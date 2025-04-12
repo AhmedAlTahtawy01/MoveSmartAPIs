@@ -162,7 +162,7 @@ namespace BusinessLayer.Services
             return await _repo.GetJobOrdersByStatusAsync(status);
         }
 
-        public async Task<List<JobOrderDTO>> GetJobOrdersByDateRange(DateTime startDate, DateTime endDate)
+        public async Task<List<JobOrderDTO>> GetJobOrdersByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             if (startDate == default || endDate == default)
             {
