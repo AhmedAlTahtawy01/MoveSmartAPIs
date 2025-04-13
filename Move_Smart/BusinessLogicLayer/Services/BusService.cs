@@ -1,119 +1,94 @@
-﻿//using DataAccessLayer;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using DataAccessLayer;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace BusinessLayer
-//{
-//    public class Bus : Vehicle
-//    {
-//        public new enum enMode { Add, Update };
-//        public new enMode mode = enMode.Add;
-//        public byte? BusID { get; set; }
-//        public byte Capacity { get; set; }
-//        public byte AvailableSpace { get; set; }
+namespace BusinessLayer
+{
+    public class BusService : VehicleService
+    {
+        protected readonly BusRepo _busRepo;
+        protected readonly ILogger<BusService> _busLogger;
 
-//        public BusDTO BusDTO => new BusDTO(BusID, Capacity, AvailableSpace, VehicleID ?? 0);
+        public BusService(BusRepo busRepo, ILogger<BusService> busLogger, VehicleRepo vehicleRepo, ILogger<VehicleService> vehicleLogger)
+            : base(vehicleRepo, vehicleLogger)
+        {
+            _busRepo = busRepo ?? throw new ArgumentNullException(nameof(busRepo), "Data access layer cannot be null.");
+            _busLogger = busLogger ?? throw new ArgumentNullException(nameof(busLogger), "Logger cannot be null.");
+        }
 
-//        public Bus(BusDTO busDTO, VehicleDTO vehicleDTO, enMode mode = enMode.Add)
-//            : base(vehicleDTO, Vehicle.enMode.Update)
-//        {
-//            this.BusID = busDTO.BusID;
-//            this.Capacity = busDTO.Capacity;
-//            this.AvailableSpace = busDTO.AvailableSpace;
-//            this.mode = mode;
-//        }
+        private async void _ValidateBusDTO(BusDTO dto)
+        {
+            if (dto == null)
+            {
+                _busLogger.LogError("BusDTO cannot be null.");
+                throw new ArgumentNullException(nameof(dto), "BusDTO cannot be null.");
+            }
 
-//        private async Task<bool> _AddNewAsync()
-//        {
-//            this.BusID = await BusRepo.AddNewBusAsync(BusDTO);
+            if(dto.AvailableSpace > dto.Capacity)
+            {
+                _busLogger.LogError("AvailableSpace Can't Exceed Bus Capacity be null.");
+                throw new ArgumentException(nameof(dto), "AvailableSpace Can't Exceed Bus Capacity be null.");
+            }
 
-//            return this.BusID.HasValue;
-//        }
+            if(!await _vehicleRepo.IsVehicleExistsAsync(dto.VehicleID))
+            {
+                _busLogger.LogError($"Vehicle No[{dto.VehicleID}] Doesn't Existes.");
+                throw new ArgumentException(nameof(dto), $"Vehicle No[{dto.VehicleID}] Doesn't Existes.");
+            }
+        }
 
-//        private async Task<bool> _UpdateAsync()
-//        {
-//            return await BusRepo.UpdateBusAsync(BusDTO);
-//        }
+        public async Task<byte?> AddNewBusAsync(BusDTO dto)
+        {
+            try
+            {
+                _ValidateBusDTO(dto);
+            }
+            catch (Exception ex)
+            {
+                _busLogger.LogError(ex, "Validation Failed For BusDTO");
+            }
 
-//        public static async Task<List<Bus>> GetAllBusesAsync()
-//        {
-//            List<BusDTO> busDTOs = await BusRepo.GetAllBusesAsync();
+            if(await _busRepo.IsBusExistsAsync(dto.BusID ?? 0))
+            {
+                _busLogger.LogError($"Bus with PlateNumbers {dto.Vehicle.PlateNumbers} already exists.");
+                return null;
+            }
 
-//            List<Bus> buses = new List<Bus>();
+            return await _busRepo.AddNewBusAsync(dto);
+        }
 
-//            foreach(BusDTO busDTO in busDTOs)
-//            {
-//                buses.Add(new Bus(busDTO, await VehicleRepo.GetVehicleByIDAsync(busDTO.VehicleID), enMode.Update));
-//            }
+        public async Task<bool> UpdateBusAsync(BusDTO dto)
+        {
+           return await _busRepo.UpdateBusAsync(dto);
+        }
 
-//            return buses;
-//        }
+        public async Task<List<BusDTO>> GetAllBusesAsync()
+        {
+            return await _busRepo.GetAllBusesAsync();
+        }
 
-//        public static async Task<List<Bus>> GetBusesByCapacityAsync(byte capacity)
-//        {
-//            List<BusDTO> busDTOs = await BusRepo.GetBusesByCapacityAsync(capacity);
+        public async Task<List<BusDTO>> GetBusesByCapacityAsync(byte capacity)
+        {
+            return await _busRepo.GetBusesByCapacityAsync(capacity);
+        }
 
-//            List<Bus> buses = new List<Bus>();
+        public async Task<List<BusDTO>> GetBusesByAvailableSpaceAsync(byte availableSpace)
+        {
+            return await _busRepo.GetBusesByAvailableSpaceAsync(availableSpace);
+        }
 
-//            foreach (BusDTO busDTO in busDTOs)
-//            {
-//                buses.Add(new Bus(busDTO, await VehicleRepo.GetVehicleByIDAsync(busDTO.VehicleID), enMode.Update));
-//            }
+        public async Task<BusDTO?> GetBusByIDAsync(byte id)
+        {
+            return await _busRepo.GetBusByIDAsync(id);
+        }
 
-//            return buses;
-//        }
-
-//        public static async Task<List<Bus>> GetBusesByAvailableSpaceAsync(byte availableSpace)
-//        {
-//            List<BusDTO> busDTOs = await BusRepo.GetBusesByAvailableSpaceAsync(availableSpace);
-
-//            List<Bus> buses = new List<Bus>();
-
-//            foreach (BusDTO busDTO in busDTOs)
-//            {
-//                buses.Add(new Bus(busDTO, await VehicleRepo.GetVehicleByIDAsync(busDTO.VehicleID), enMode.Update));
-//            }
-
-//            return buses;
-//        }
-
-//        public static async Task<Bus?> GetBusByIDAsync(byte id)
-//        {
-//            BusDTO busDTO = await BusRepo.GetBusByIDAsync(id);
-//            VehicleDTO vehicleDTO = await VehicleRepo.GetVehicleByIDAsync(busDTO.VehicleID);
-
-//            return vehicleDTO != null && busDTO != null ? new Bus(busDTO, vehicleDTO, enMode.Update) : null;
-//        }
-
-//        public override async Task<bool> SaveAsync()
-//        {
-//            if(!await base.SaveAsync())
-//                return false;
-
-//            switch(mode)
-//            {
-//                case enMode.Add:
-//                    if (await _AddNewAsync())
-//                    {
-//                        mode = enMode.Update;
-//                        return true;
-//                    }
-//                    else
-//                        return false;
-
-//                case enMode.Update:
-//                    return await _UpdateAsync();
-//            }
-
-//            return false;
-//        }
-
-//        public async Task<bool> DeleteAsync()
-//        {
-//            return this.BusID.HasValue ? await BusRepo.DeleteBusAsync(this.BusID.Value) : false;
-//        }
-//    }
-//}
+        public async Task<bool> DeleteBusAsync(byte busID)
+        {
+            return await _busRepo.DeleteBusAsync(busID);
+        }
+    }
+}

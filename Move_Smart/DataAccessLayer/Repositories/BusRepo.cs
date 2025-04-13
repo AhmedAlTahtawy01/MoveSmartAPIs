@@ -18,21 +18,23 @@ namespace DataAccessLayer
         public byte Capacity { get; set; }
         public byte AvailableSpace { get; set; }
         public short VehicleID { get; set; }
+        public VehicleDTO Vehicle { get; set; }
 
-        public BusDTO(byte? busID, byte capacity, byte availableSpace, short vehicleID)
+        public BusDTO(byte? busID, byte capacity, byte availableSpace, short vehicleID, VehicleDTO vehicle)
         {
             BusID = busID;
             Capacity = capacity;
             AvailableSpace = availableSpace;
             VehicleID = vehicleID;
+            Vehicle = vehicle;
         }
     }
 
     public class BusRepo
     {
-
         private readonly ConnectionSettings _connectionSettings;
         private readonly ILogger<BusRepo> _logger;
+        private readonly VehicleRepo _vehicleRepo;
 
         public BusRepo(ConnectionSettings connectionSettings, ILogger<BusRepo> logger)
         {
@@ -63,8 +65,9 @@ namespace DataAccessLayer
                                     Convert.ToByte(reader["BusID"]),
                                     Convert.ToByte(reader["Capacity"]),
                                     Convert.ToByte(reader["AvailableSpace"]),
-                                    Convert.ToInt16(reader["VehicleID"]))
-                                    );
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    await _vehicleRepo.GetVehicleByIDAsync(Convert.ToInt16(reader["VehicleID"]))
+                                    ));
                             }
                         }
                     }
@@ -101,7 +104,8 @@ namespace DataAccessLayer
                                     Convert.ToByte(reader["BusID"]),
                                     Convert.ToByte(reader["Capacity"]),
                                     Convert.ToByte(reader["AvailableSpace"]),
-                                    Convert.ToInt16(reader["VehicleID"])
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    await _vehicleRepo.GetVehicleByIDAsync(Convert.ToInt16(reader["VehicleID"]))
                                     );
                             }
                         }
@@ -141,7 +145,8 @@ namespace DataAccessLayer
                                     Convert.ToByte(reader["BusID"]),
                                     Convert.ToByte(reader["Capacity"]),
                                     Convert.ToByte(reader["AvailableSpace"]),
-                                    Convert.ToInt16(reader["VehicleID"])
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    await _vehicleRepo.GetVehicleByIDAsync(Convert.ToInt16(reader["VehicleID"]))
                                     ));
                             }
                         }
@@ -181,7 +186,8 @@ namespace DataAccessLayer
                                     Convert.ToByte(reader["BusID"]),
                                     Convert.ToByte(reader["Capacity"]),
                                     Convert.ToByte(reader["AvailableSpace"]),
-                                    Convert.ToInt16(reader["VehicleID"])
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    await _vehicleRepo.GetVehicleByIDAsync(Convert.ToInt16(reader["VehicleID"]))
                                     ));
                             }
                         }
@@ -288,6 +294,32 @@ namespace DataAccessLayer
                 Console.WriteLine($"Error: {ex.Message}");
             }
 
+            return false;
+        }
+
+        public async Task<bool> IsBusExistsAsync(byte busID)
+        {
+            string query = @"SELECT Found=1 FROM Buses
+                            WHERE BusID = @BusID";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("BusID", busID);
+
+                        await conn.OpenAsync();
+                        
+                        return Convert.ToByte(await cmd.ExecuteScalarAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
             return false;
         }
     }

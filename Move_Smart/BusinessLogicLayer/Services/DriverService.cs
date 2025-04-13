@@ -1,183 +1,154 @@
-﻿//using DataAccessLayer;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using static DataAccessLayer.DriverDTO;
+﻿using DataAccessLayer;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static DataAccessLayer.DriverDTO;
 
-//namespace BusinessLayer
-//{
-//    public class Driver
-//    {
-//        public enum enMode { Add, Update };
-//        public enMode mode = enMode.Add;
-//        public int? DriverID { get; set; }
-//        public string NationalNo { get; set; }
-//        public string Name { get; set; }
-//        public string Phone { get; set; }
-//        public enDriverStatus Status { get; set; }
-//        public short VehicleID { get; set; }
+namespace BusinessLayer
+{
+    public class DriverService
+    {
+        protected readonly ILogger<DriverService> _driverLogger;
+        protected readonly DriverRepo _driverRepo;
 
-//        public DriverDTO DriverDTO => new DriverDTO(
-//            DriverID,
-//            NationalNo,
-//            Name,
-//            Phone,
-//            Status,
-//            VehicleID
-//            );
+        private DriverService(DriverRepo driverRepo, ILogger<DriverService> driverLogger)
+        {
+            _driverRepo = driverRepo ?? throw new ArgumentNullException(nameof(driverRepo), "Data access layer cannot be null.");
+            _driverLogger = driverLogger ?? throw new ArgumentNullException(nameof(driverLogger), "Logger cannot be null.");
+        }
 
-//        private Driver(DriverDTO driverDTO, enMode mode = enMode.Add)
-//        {
-//            this.DriverID = driverDTO.DriverID;
-//            this.NationalNo = driverDTO.NationalNo;
-//            this.Name = driverDTO.Name;
-//            this.Phone = driverDTO.Phone;
-//            this.Status = driverDTO.Status;
-//            this.VehicleID = driverDTO.VehicleID;
-//        }
+        private void _ValidateDriverDTO(DriverDTO dto)
+        {
+            if (dto == null)
+            {
+                _driverLogger.LogError("DriverDTO cannot be null.");
+                throw new ArgumentNullException(nameof(dto), "DriverDTO cannot be null.");
+            }
 
-//        private async Task<bool> _AddNewAsync()
-//        {
-//            if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(NationalNo) || string.IsNullOrWhiteSpace(Phone))
-//                return false;
+            if(string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.NationalNo) || string.IsNullOrWhiteSpace(dto.Phone))
+            {
+                _driverLogger.LogError("Name, NationalNo, Phone Can't Be Empty.");
+                throw new ArgumentException("Name, NationalNo, Phone Can't Be Empty.");
+            }
 
-//            if (NationalNo.Length != 14)
-//                return false;
+            if(dto.NationalNo.Any(char.IsLetter))
+            {
+                _driverLogger.LogError("NationalNo Must Be 14 Numbers.");
+                throw new ArgumentException("NationalNo Must Be 14 Numbers.");
+            }
 
-//            if (Phone.Length != 11)
-//                return false;
+            if(dto.NationalNo.Length != 14)
+            {
+                _driverLogger.LogError("NationalNo Must Be 14 Numbers.");
+                throw new ArgumentException("NationalNo Must Be 14 Numbers.");
+            }
 
-//            this.DriverID = await DriverRepo.AddNewDriverAsync(DriverDTO);
+            if (dto.Phone.Any(char.IsLetter))
+            {
+                _driverLogger.LogError("Phone Must Be 11 Numbers.");
+                throw new ArgumentException("Phone Must Be 11 Numbers.");
+            }
 
-//            return this.DriverID.HasValue;
-//        }
+            if (dto.Phone.Length != 11)
+            {
+                _driverLogger.LogError("Phone Must Be 11 Numbers.");
+                throw new ArgumentException("Phone Must Be 11 Numbers.");
+            }
+        }
 
-//        private async Task<bool> _UpdateAsync()
-//        {
-//            if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(NationalNo) || string.IsNullOrWhiteSpace(Phone))
-//                return false;
+        public async Task<int?> AddNewDriverAsync(DriverDTO dto)
+        {
+            try
+            {
+                _ValidateDriverDTO(dto);
+            }
+            catch (Exception ex)
+            {
+                _driverLogger.LogError(ex, "Validation failed for DriverDTO.");
+                return null;
+            }
 
-//            if (NationalNo.Length != 14)
-//                return false;
+            if(await _driverRepo.IsDriverExistsAsync(dto.NationalNo))
+            {
+                _driverLogger.LogError($"Driver with NationalNo [{dto.NationalNo}] already exists.");
+                return null;
+            }
 
-//            if (Phone.Length != 11)
-//                return false;
+            return await _driverRepo.AddNewDriverAsync(dto);
+        }
 
-//            return await DriverRepo.UpdateDriverAsync(DriverDTO);
-//        }
+        public async Task<bool> UpdateDriverAsync(DriverDTO dto)
+        {
+            try
+            {
+                _ValidateDriverDTO(dto);
+            }
+            catch (Exception ex)
+            {
+                _driverLogger.LogError(ex, "Validation failed for DriverDTO.");
+                return false;
+            }
 
-//        public static async Task<List<Driver>> GetAllDriversAsync()
-//        {
-//            List<DriverDTO> driverDTOs = await DriverRepo.GetAllDriversAsync();
+            if (!await _driverRepo.IsDriverExistsAsync(dto.NationalNo))
+            {
+                _driverLogger.LogError($"Driver with National No {dto.NationalNo} doesn't exist.");
+                return false;
+            }
 
-//            List<Driver> drivers = new List<Driver>();
+            return await _driverRepo.UpdateDriverAsync(dto);
+        }
 
-//            foreach (DriverDTO driverDTO in driverDTOs)
-//            {
-//                drivers.Add(new Driver(driverDTO, enMode.Update));
-//            }
+        public async Task<List<DriverDTO>> GetAllDriversAsync()
+        {
+            return await _driverRepo.GetAllDriversAsync();
+        }
 
-//            return drivers;
-//        }
+        public async Task<List<DriverDTO>> GetAllDriversWorkingOnVehicleAsync(short vehicleID)
+        {
+            return await _driverRepo.GetDriversByVehicleIDAsync(vehicleID);
+        }
 
-//        public static async Task<List<Driver>> GetAllDriversWorkingOnVehicleAsync(short vehicleID)
-//        {
-//            List<DriverDTO> driverDTOs = await DriverRepo.GetDriversByVehicleIDAsync(vehicleID);
+        public async Task<List<DriverDTO>> GetAllDriversWorkingOnVehicleAsync(string plateNumbers)
+        {
+            return await _driverRepo.GetDriversByVehiclePlateNumbersAsync(plateNumbers);
+        }
 
-//            List<Driver> drivers = new List<Driver>();
+        public async Task<List<DriverDTO>> GetAllDriversWithStatusAsync(enDriverStatus status)
+        {
+            return await _driverRepo.GetDriversByStatusAsync(status);
+        }
 
-//            foreach (DriverDTO driverDTO in driverDTOs)
-//            {
-//                drivers.Add(new Driver(driverDTO, enMode.Update));
-//            }
+        public async Task<DriverDTO?> GetDriverByIDAsync(int driverID)
+        {
+            return await _driverRepo.GetDriverByIDAsync(driverID);
+        }
 
-//            return drivers;
-//        }
+        public async Task<DriverDTO?> GetDriverByNationalNoAsync(string nationalNo)
+        {
+            return await _driverRepo.GetDriverByNationalNoAsync(nationalNo);
+        }
 
-//        public static async Task<List<Driver>> GetAllDriversWorkingOnVehicleAsync(string plateNumbers)
-//        {
-//            List<DriverDTO> driverDTOs = await DriverRepo.GetDriversByVehiclePlateNumbersAsync(plateNumbers);
+        public async Task<DriverDTO?> GetDriverByPhoneAsync(string phone)
+        {
+            return await _driverRepo.GetDriverByPhoneAsync(phone);
+        }
 
-//            List<Driver> drivers = new List<Driver>();
+        public async Task<short> GetNumberOfDriversAsync()
+        {
+            return await _driverRepo.GetNumberOfDriversAsync();
+        }
 
-//            foreach (DriverDTO driverDTO in driverDTOs)
-//            {
-//                drivers.Add(new Driver(driverDTO, enMode.Update));
-//            }
+        public async Task<short> GetNumberOfDriversByStatusAsync(enDriverStatus status)
+        {
+            return await _driverRepo.GetNumberOfDriversByStatusAsync(status);
+        }
 
-//            return drivers;
-//        }
-
-//        public static async Task<List<Driver>> GetAllDriversWithStatusAsync(enDriverStatus status)
-//        {
-//            List<DriverDTO> driverDTOs = await DriverRepo.GetDriversByStatusAsync(status);
-
-//            List<Driver> drivers = new List<Driver>();
-
-//            foreach (DriverDTO driverDTO in driverDTOs)
-//            {
-//                drivers.Add(new Driver(driverDTO, enMode.Update));
-//            }
-
-//            return drivers;
-//        }
-
-//        public static async Task<Driver?> GetDriverByIDAsync(int driverID)
-//        {
-//            DriverDTO driverDTO = await DriverRepo.GetDriverByIDAsync(driverID);
-
-//            return driverDTO != null ? new Driver(driverDTO, enMode.Update) : null;
-//        }
-
-//        public static async Task<Driver?> GetDriverByNationalNoAsync(string nationalNo)
-//        {
-//            DriverDTO driverDTO = await DriverRepo.GetDriverByNationalNoAsync(nationalNo);
-
-//            return driverDTO != null ? new Driver(driverDTO, enMode.Update) : null;
-//        }
-
-//        public static async Task<Driver?> GetDriverByPhoneAsync(string phone)
-//        {
-//            DriverDTO driverDTO = await DriverRepo.GetDriverByPhoneAsync(phone);
-
-//            return driverDTO != null ? new Driver(driverDTO, enMode.Update) : null;
-//        }
-
-//        public static async Task<short> GetNumberOfDriversAsync()
-//        {
-//            return await DriverRepo.GetNumberOfDriversAsync();
-//        }
-
-//        public static async Task<short> GetNumberOfDriversByStatusAsync(enDriverStatus status)
-//        {
-//            return await DriverRepo.GetNumberOfDriversByStatusAsync(status);
-//        }
-
-//        public async Task<bool> SaveAsync()
-//        {
-//            switch(mode)
-//            {
-//                case enMode.Add:
-//                    if (await _AddNewAsync())
-//                    {
-//                        mode = enMode.Update;
-//                        return true;
-//                    }
-//                    else
-//                        return false;
-
-//                case enMode.Update:
-//                    return await _UpdateAsync();
-//            }
-
-//            return false;
-//        }
-
-//        public async Task<bool> DeleteAsync()
-//        {
-//            return await DriverRepo.DeleteDriverAsync(this.NationalNo);
-//        }
-//    }
-//}
+        public async Task<bool> DeleteDriverAsync(string nationalNo)
+        {
+            return await _driverRepo.DeleteDriverAsync(nationalNo);
+        }
+    }
+}

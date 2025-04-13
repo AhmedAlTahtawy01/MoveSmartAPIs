@@ -280,7 +280,7 @@ namespace DataAccessLayer
             return vehiclesList;
         }
 
-        public async Task<short> GetNumbersVehiclesAsync()
+        public async Task<short> GetNumberOfVehiclesAsync()
         {
             List<VehicleDTO> vehiclesList = new List<VehicleDTO>();
 
@@ -306,7 +306,7 @@ namespace DataAccessLayer
             return 0;
         }
 
-        public async Task<short> GetNumbersVehiclesByStatusAsync(enVehicleStatus status)
+        public async Task<short> GetNumberOfVehiclesByStatusAsync(enVehicleStatus status)
         {
             List<VehicleDTO> vehiclesList = new List<VehicleDTO>();
 
@@ -494,7 +494,7 @@ namespace DataAccessLayer
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                _logger.LogError(ex, $"Error: {ex.Message}");
             }
 
             return null;
