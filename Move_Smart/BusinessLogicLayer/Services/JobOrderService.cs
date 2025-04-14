@@ -21,12 +21,6 @@ namespace BusinessLayer.Services
 
         public async Task<int> CreateJobOrderAsync(JobOrderDTO dto)
         {
-            if (dto == null)
-            {
-                _logger.LogWarning("Attempted to create a null job order DTO.");
-                throw new ArgumentNullException(nameof(dto), "Job order DTO cannot be null.");
-            }
-
             if (dto.OrderId != 0)
             {
                 _logger.LogWarning("Attempted to create a job order with a non-zero ID.");
@@ -44,11 +38,6 @@ namespace BusinessLayer.Services
 
         public async Task<bool> UpdateJobOrderAsync(JobOrderDTO dto)
         {
-            if (dto == null)
-            {
-                _logger.LogWarning("Attempted to update a null job order DTO.");
-                throw new ArgumentNullException(nameof(dto), "Job order DTO cannot be null.");
-            }
             if (dto.OrderId <= 0)
             {
                 _logger.LogWarning("Attempted to update a job order with invalid ID.");
@@ -116,10 +105,10 @@ namespace BusinessLayer.Services
         {
             if (vehicleId <= 0)
             {
-                _logger.LogWarning("Attempted to retrieve job orders with invalid vehicle ID.");
+                _logger.LogWarning("Attempted to retrieve job orders with invalid Vehicle ID.");
                 throw new ArgumentException("Vehicle ID must be greater than 0.");
             }
-            _logger.LogInformation($"Retrieving job orders for vehicle ID {vehicleId}.");
+            _logger.LogInformation($"Retrieving job orders for Vehicle ID {vehicleId}.");
             return await _repo.GetJobOrdersByVehicleIdAsync(vehicleId);
         }
 
