@@ -322,5 +322,32 @@ namespace DataAccessLayer
 
             return false;
         }
+
+        public async Task<bool> IsVacationExistsAsync(int vacationID)
+        {
+            string query = @"SELECT Found=1 FROM Vacations
+                            WHERE VacationID = @VacationID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("VacationID", vacationID);
+
+                        await conn.OpenAsync();
+                        
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
     }
 }

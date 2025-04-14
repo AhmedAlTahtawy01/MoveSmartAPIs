@@ -1,141 +1,123 @@
-﻿//using DataAccessLayer;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using DataAccessLayer;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace BusinessLayer
-//{
-//    public class Vacation
-//    {
-//        public enum enMode { Add, Update };
-//        public enMode mode = enMode.Add;
-//        public int? VacationID { get; set; }
-//        public DateOnly StartDate { get; set; }
-//        public DateOnly EndDate { get; set; }
-//        public int VacationOwnerID { get; set; }
-//        public int SubstituteDriverID { get; set; }
+namespace BusinessLayer
+{
+    public class VacationService
+    {
+        protected readonly ILogger<VacationService> _vacationLogger;
+        protected readonly VacationRepo _vacationRepo;
+        protected readonly DriverRepo _driverRepo;
 
-//        public VacationDTO VacationDTO => new VacationDTO(
-//            VacationID,
-//            StartDate,
-//            EndDate,
-//            VacationOwnerID,
-//            SubstituteDriverID
-//            );
+        public VacationService(VacationRepo vacationRepo, DriverRepo driverRepo, ILogger<VacationService> vacationLogger)
+        {
+            _vacationRepo = vacationRepo ?? throw new ArgumentNullException(nameof(vacationRepo), "Data access layer cannot be null.");
+            _driverRepo = driverRepo ?? throw new ArgumentNullException(nameof(driverRepo), "Data access layer cannot be null.");
+            _vacationLogger = vacationLogger ?? throw new ArgumentNullException(nameof(vacationLogger), "Logger cannot be null.");
+        }
 
-//        public Vacation(VacationDTO vacationDTO, enMode mode = enMode.Add)
-//        {
-//            this.VacationID = vacationDTO.VacationID;
-//            this.StartDate = vacationDTO.StartDate;
-//            this.EndDate = vacationDTO.EndDate;
-//            this.VacationOwnerID = vacationDTO.VacationOwnerID;
-//            this.SubstituteDriverID = vacationDTO.SubstituteDriverID;
-//            this.mode = mode;
-//        }
+        private async void _ValidateVacationDTO(VacationDTO dto)
+        {
+            if (dto == null)
+            {
+                _vacationLogger.LogError("VacationDTO cannot be null.");
+                throw new ArgumentNullException(nameof(dto), "VacationDTO cannot be null.");
+            }
 
-//        private async Task<bool> _AddNewAsync()
-//        {
-//            if (this.StartDate.CompareTo(this.EndDate) > 0)
-//                return false;
+            if(!await _driverRepo.IsDriverExistsAsync(dto.VacationOwnerID))
+            {
+                _vacationLogger.LogError($"VacationOwner with ID [{dto.VacationOwnerID}] does not exist.");
+                throw new ArgumentException($"VacationOwner with ID [{dto.VacationOwnerID}] does not exist.");
+            }
 
-//            if (this.StartDate.CompareTo(DateTime.Now.Date) < 0)
-//                return false;
+            if (!await _driverRepo.IsDriverExistsAsync(dto.SubstituteDriverID))
+            {
+                _vacationLogger.LogError($"SubstituteDriver with ID [{dto.SubstituteDriverID}] does not exist.");
+                throw new ArgumentException($"SubstituteDriver with ID [{dto.SubstituteDriverID}] does not exist.");
+            }
 
-//            this.VacationID = await VacationRepo.AddNewVacationAsync(VacationDTO);
+            if(dto.StartDate.CompareTo(dto.EndDate) > 0)
+            {
+                _vacationLogger.LogError("StartDate cannot be greater than EndDate.");
+                throw new ArgumentException("StartDate cannot be greater than EndDate.");
+            }
+        }
 
-//            return this.VacationID.HasValue;
-//        }
+        public async Task<int?> AddNewVacationAsync(VacationDTO dto)
+        {
+            try
+            {
+                _ValidateVacationDTO(dto);
+            }
+            catch (ArgumentException ex)
+            {
+                _vacationLogger.LogError(ex.Message);
+                return null;
+            }
+            
+            if(await _vacationRepo.IsVacationExistsAsync(dto.VacationID ?? 0))
+            {
+                _vacationLogger.LogError($"Vacation with ID [{dto.VacationID}] already exists.");
+                return null;
+            }
 
-//        private async Task<bool> _UpdateAsync()
-//        {
-//            if (this.StartDate.CompareTo(this.EndDate) > 0)
-//                return false;
+            return await _vacationRepo.AddNewVacationAsync(dto);
+        }
 
-//            if (this.StartDate.CompareTo(DateTime.Now.Date) < 0)
-//                return false;
+        public async Task<bool> UpdateVacationAsync(VacationDTO dto)
+        {
+            try
+            {
+                _ValidateVacationDTO(dto);
+            }
+            catch (ArgumentException ex)
+            {
+                _vacationLogger.LogError(ex.Message);
+                return false;
+            }
 
-//            return await VacationRepo.UpdateVacationAsync(VacationDTO);
-//        }
+            if (!await _vacationRepo.IsVacationExistsAsync(dto.VacationID ?? 0))
+            {
+                _vacationLogger.LogError($"Vacation with ID [{dto.VacationID}] doesn't exists.");
+                return false;
+            }
 
-//        public static async Task<List<Vacation>> GetAllVacationsAsync()
-//        {
-//            List<VacationDTO> vacationDTOs = await VacationRepo.GetAllVacationsAsync();
+            return await _vacationRepo.UpdateVacationAsync(dto);
+        }
 
-//            List<Vacation> vacations = new List<Vacation>();
+        public async Task<List<VacationDTO>> GetAllVacationsAsync()
+        {
+            return await _vacationRepo.GetAllVacationsAsync();
+        }
 
-//            foreach(VacationDTO vacationDTO in vacationDTOs)
-//            {
-//                vacations.Add(new Vacation(vacationDTO, enMode.Update));
-//            }
+        public async Task<List<VacationDTO>> GetAllVacationsForDriverAsync(int driverID)
+        {
+            return await _vacationRepo.GetAllVacationsForDriverAsync(driverID);
+        }
 
-//            return vacations;
-//        }
+        public async Task<List<VacationDTO>> GetAllFutureVacationsForDriverAsync(int driverID)
+        {
+            return await _vacationRepo.GetAllFutureVacationsForDriverAsync(driverID);
+        }
 
-//        public static async Task<List<Vacation>> GetAllVacationsForDriverAsync(int driverID)
-//        {
-//            List<VacationDTO> vacationDTOs = await VacationRepo.GetAllVacationsForDriverAsync(driverID);
+        public async Task<VacationDTO?> GetVacationByIDAsync(int vacationID)
+        {
+            return await _vacationRepo.GetVacationByIDAsync(vacationID);
+        }
 
-//            List<Vacation> vacations = new List<Vacation>();
+        public async Task<bool> IsDriverInVacationAsync(int driverID)
+        {
+            return await _vacationRepo.IsDriverinVacationAsync(driverID);
+        }
 
-//            foreach (VacationDTO vacationDTO in vacationDTOs)
-//            {
-//                vacations.Add(new Vacation(vacationDTO, enMode.Update));
-//            }
-
-//            return vacations;
-//        }
-
-//        public static async Task<List<Vacation>> GetAllFutureVacationsForDriverAsync(int driverID)
-//        {
-//            List<VacationDTO> vacationDTOs = await VacationRepo.GetAllFutureVacationsForDriverAsync(driverID);
-
-//            List<Vacation> vacations = new List<Vacation>();
-
-//            foreach (VacationDTO vacationDTO in vacationDTOs)
-//            {
-//                vacations.Add(new Vacation(vacationDTO, enMode.Update));
-//            }
-
-//            return vacations;
-//        }
-
-//        public static async Task<Vacation?> GetVacationByIDAsync(int vacationID)
-//        {
-//            VacationDTO vacationDTO = await VacationRepo.GetVacationByIDAsync(vacationID);
-
-//            return vacationDTO != null ? new Vacation(vacationDTO, enMode.Update) : null;
-//        }
-
-//        public static async Task<bool> IsDriverInVacationAsync(int driverID)
-//        {
-//            return await VacationRepo.IsDriverinVacationAsync(driverID);
-//        }
-
-//        public async Task<bool> SaveAsync()
-//        {
-//            switch(mode)
-//            {
-//                case enMode.Add:
-//                    if (await _AddNewAsync())
-//                    {
-//                        mode = enMode.Update;
-//                        return true;
-//                    }
-//                    else
-//                        return false;
-
-//                case enMode.Update:
-//                    return await _UpdateAsync();
-//            }
-
-//            return false;
-//        }
-
-//        public async Task<bool> DeleteAsync()
-//        {
-//            return this.VacationID.HasValue ? await VacationRepo.DeleteVacationAsync(this.VacationID.Value) : false;
-//        }
-//    }
-//}
+        public async Task<bool> DeleteVacationAsync(int vacationID)
+        {
+            return await _vacationRepo.DeleteVacationAsync(vacationID);
+        }
+    }
+}

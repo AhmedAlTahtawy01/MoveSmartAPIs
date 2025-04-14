@@ -15,10 +15,10 @@ namespace DataAccessLayer
         public short? PatrolID { get; set; }
         public string Description { get; set; }
         public TimeOnly MovingAt { get; set; }
-        public short ApproximatedTime { get; set; }
+        public float ApproximatedTime { get; set; }
         public byte BusID { get; set; }
 
-        public PatrolDTO(short? patrolID, string description, TimeOnly movingAt, short approximatedTime,
+        public PatrolDTO(short? patrolID, string description, TimeOnly movingAt, float approximatedTime,
             byte busID)
         {
             PatrolID = patrolID;
@@ -63,7 +63,7 @@ namespace DataAccessLayer
                                     Convert.ToInt16(reader["PatrolID"]),
                                     (string)reader["Description"],
                                     (TimeOnly)reader["MovingAt"],
-                                    Convert.ToInt16(reader["ApproximatedTime"]),
+                                    Convert.ToSingle(reader["ApproximatedTime"]),
                                     Convert.ToByte(reader["BusID"])
                                     ));
                             }
@@ -101,7 +101,7 @@ namespace DataAccessLayer
                                     Convert.ToInt16(reader["PatrolID"]),
                                     (string)reader["Description"],
                                     (TimeOnly)reader["MovingAt"],
-                                    Convert.ToInt16(reader["ApproximatedTime"]),
+                                    Convert.ToSingle(reader["ApproximatedTime"]),
                                     Convert.ToByte(reader["BusID"])
                                     );
                             }
@@ -206,6 +206,33 @@ namespace DataAccessLayer
                         await conn.OpenAsync();
 
                         return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> IsPatrolExistsAsync(short patrolID)
+        {
+            string query = @"SELECT Found=1 FROM Patrols
+                            WHERE PatrolID = @PatrolID";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PatrolID", patrolID);
+
+                        await conn.OpenAsync();
+                        
+                        return await cmd.ExecuteScalarAsync() != null;
                     }
                 }
             }

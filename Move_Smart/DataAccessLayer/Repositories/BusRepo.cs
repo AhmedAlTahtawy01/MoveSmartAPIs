@@ -312,7 +312,7 @@ namespace DataAccessLayer
 
                         await conn.OpenAsync();
                         
-                        return Convert.ToByte(await cmd.ExecuteScalarAsync()) > 0;
+                        return await cmd.ExecuteScalarAsync() != null;
                     }
                 }
             }
@@ -320,6 +320,7 @@ namespace DataAccessLayer
             {
                 Console.WriteLine($"Error: {ex.Message}");
             }
+
             return false;
         }
     }
