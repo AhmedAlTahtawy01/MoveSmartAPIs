@@ -24,6 +24,12 @@ namespace Move_Smart.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllJobOrders([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1 || pageSize < 1)
+            {
+                _logger.LogWarning("Invalid pagination parameters.");
+                return BadRequest("Page number and page size must be greater than 0.");
+            }
+
             try
             {
                 var jobOrders = await _service.GetAllJobOrdersAsync(pageNumber, pageSize);
@@ -46,7 +52,7 @@ namespace Move_Smart.Controllers
         {
             if (id <= 0)
             {
-                return BadRequest("Invalid user ID");
+                return BadRequest("Invalid jobOrder ID");
             }
 
             try
@@ -64,7 +70,7 @@ namespace Move_Smart.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving user");
+                _logger.LogError(ex, "Error retrieving jobOrder");
                 return StatusCode(500, "Internal server error.");
             }
         }
@@ -92,7 +98,7 @@ namespace Move_Smart.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving vehicle");
+                _logger.LogError(ex, $"Error retrieving jobOrders for vehicle ID {vehicleId}.");
                 return StatusCode(500, "Internal server error");
             }
 
@@ -120,7 +126,7 @@ namespace Move_Smart.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving driver");
+                _logger.LogError(ex, $"Error retrieving job orders by driver ID {driverId}");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -182,6 +188,11 @@ namespace Move_Smart.Controllers
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetJobOrdersByStatus(enStatus status)
         {
+            if (!Enum.IsDefined(typeof(enStatus), status))
+            {
+                return BadRequest("Invalid status");
+            }
+
             try
             {
                 var jobOrders = await _service.GetJobOrdersByStatusAsync(status);
@@ -205,7 +216,7 @@ namespace Move_Smart.Controllers
         [HttpGet("daterange")]
         public async Task<IActionResult> GetJobOrdersByDateRange([Required] DateTime startDate, [Required] DateTime endDate)
         {
-            if (startDate == default || endDate == default)
+            if (!ModelState.IsValid || startDate == default || endDate == default)
             {
                 return BadRequest("Invalid date range");
             }
@@ -233,9 +244,11 @@ namespace Move_Smart.Controllers
         public async Task<IActionResult> CreateJobOrder([FromBody] JobOrderDTO jobOrder)
         {
             if (jobOrder == null)
-            {
                 return BadRequest("Job order cannot be null");
-            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 var jobOrderId = await _service.CreateJobOrderAsync(jobOrder);
@@ -260,9 +273,11 @@ namespace Move_Smart.Controllers
         public async Task<IActionResult> UpdateJobOrder(int id, [FromBody] JobOrderDTO jobOrder)
         {
             if (id <= 0 || jobOrder == null || id != jobOrder.OrderId)
-            {
                 return BadRequest("Invalid job order ID or job order data");
-            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 await _service.UpdateJobOrderAsync(jobOrder);

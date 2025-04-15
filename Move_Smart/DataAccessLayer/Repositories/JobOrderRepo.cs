@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
@@ -14,16 +15,34 @@ namespace DataAccessLayer.Repositories
 {
     public class JobOrderDTO
     {
+        [Range(0, int.MaxValue, ErrorMessage = "OrderId must be a non-negative integer.")]
         public int OrderId { get; set; }
+
+        [Required(ErrorMessage = "Application is required.")]
         public ApplicationDTO Application { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "VehicleId must be greater than 0.")]
         public int VehicleId { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "DriverId must be greater than 0.")]
         public int DriverId { get; set; }
+
+        [Required(ErrorMessage = "StartDate is required.")]
         public DateTime StartDate { get; set; }
+
+        [Required(ErrorMessage = "StartDate is required.")]
         public DateTime EndDate { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
+
+        [Required(ErrorMessage = "Destination is required.")]
+        [StringLength(100, ErrorMessage = "Destination cannot exceed 100 characters.")]
         public string Destination { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "OdometerBefore must be non-negative.")]
         public int OdometerBefore { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "OdometerAfter must be non-negative if provided.")]
         public int? OdometerAfter { get; set; }
 
         public JobOrderDTO(int orderId, ApplicationDTO application, int vehicleId, int driverId, DateTime startDate, DateTime endDate, TimeSpan startTime, TimeSpan endTime, string destination,

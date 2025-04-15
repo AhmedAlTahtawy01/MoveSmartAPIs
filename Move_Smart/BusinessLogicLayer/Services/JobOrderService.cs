@@ -29,11 +29,19 @@ namespace BusinessLayer.Services
 
             _ValidateJobOrderDTO(dto);
             
-            dto.Application.ApplicationId = await CreateApplicationAsync(dto.Application);
-            _logger.LogInformation($"Created application with ID {dto.Application.ApplicationId} for job order.");
+            try
+            {
+                dto.Application.ApplicationId = await CreateApplicationAsync(dto.Application);
+                _logger.LogInformation($"Created application with ID {dto.Application.ApplicationId} for job order.");
 
-            _logger.LogInformation("Creating new job order.");
-            return await _repo.CreateJobOrderAsync(dto);
+                _logger.LogInformation("Creating new job order.");
+                return await _repo.CreateJobOrderAsync(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to create job order: {ex.Message}.");
+                throw;
+            }
         }
 
         public async Task<bool> UpdateJobOrderAsync(JobOrderDTO dto)
@@ -54,16 +62,13 @@ namespace BusinessLayer.Services
             }
 
 
-            if ((dto.Application.Status != existingJobOrder.Application.Status) || (dto.Application.ApplicationDescription != existingJobOrder.Application.ApplicationDescription))
+            if (dto.Application != null && dto.Application.ApplicationId > 0)
             {
                 dto.Application.CreationDate = existingJobOrder.Application.CreationDate;
+                dto.Application.UserId = existingJobOrder.Application.UserId;
+
                 await UpdateApplicationAsync(dto.Application);
                 _logger.LogInformation($"Updated application with ID {dto.Application.ApplicationId} for job order.");
-            }
-            else if (dto.Application.ApplicationId != 0)
-            {
-                _logger.LogWarning("Cannot change the application associated with the job order.");
-                throw new InvalidOperationException("Changing the application is not allowed.");
             }
 
             _logger.LogInformation("Updating job order.");
@@ -224,7 +229,7 @@ namespace BusinessLayer.Services
             if (dto.OdometerBefore < 0)
                 throw new InvalidOperationException("Odometer before must be greater than or equal to 0.");
 
-            if (dto.OdometerAfter < 0)
+            if (dto.OdometerAfter.HasValue && dto.OdometerAfter < 0)
                 throw new InvalidOperationException("Odometer after must be greater than or equal to 0.");
         }
 

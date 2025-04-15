@@ -112,7 +112,41 @@ namespace BusinessLogicLayer.Services
             return await _repo.GetMissionsByVehicleIdAsync(missionVehicleId);
         }
 
+        public async Task<List<MissionDTO>> GetMissionsByStartDateAsync(DateTime startDate)
+        {
+            if (startDate == default)
+            {
+                _logger.LogWarning("Attempted to retieve missions with invalid Date.");
+                throw new ArgumentException("Mission Start Date must has a value.");
+            }
 
+            _logger.LogInformation($"Retrieving missions with start date {startDate}");
+            return await _repo.GetMissionsByStartDateAsync(startDate);
+        }
+
+        public async Task<List<MissionDTO>> GetMissionsByDestinationAsync(string destination)
+        {
+            if (string.IsNullOrEmpty(destination))
+            {
+                _logger.LogWarning("Attempted to retrieve missions with invalid destination.");
+                throw new ArgumentException("Mission Destination must has a value.");
+            }
+
+            _logger.LogInformation($"Retrieving missions with destination {destination}.");
+            return await _repo.GetMissionsByDestinationAsync(destination);
+        }
+
+        public async Task<bool> DeleteMissionAsync(int missionId)
+        {
+            if (missionId <= 0)
+            {
+                _logger.LogWarning("Attempted to delete a mission with invalid ID.");
+                throw new ArgumentException("Mission ID must be greater than 0.");
+            }
+
+            _logger.LogWarning($"Deleting mission with ID {missionId}.");
+            return await _repo.DeleteMissionAsync(missionId);
+        }
 
         private void _ValidateMissionDTO(MissionDTO mission)
         {
