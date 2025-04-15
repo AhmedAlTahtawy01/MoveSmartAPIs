@@ -54,10 +54,7 @@ namespace DataAccessLayer.Repositories
             ApplicationDescription = applicationDescription;
             CreatedByUserID = createdByUser;
         }
-        public ApplicationDTO()
-        {
-       
-        }
+        public ApplicationDTO(){}
 
     }
 

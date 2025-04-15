@@ -2,6 +2,7 @@
 using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Mysqlx.Crud;
 
 namespace Move_Smart.Controllers
 {
@@ -33,6 +34,18 @@ namespace Move_Smart.Controllers
                 return Ok(new { message = "Spare part purchase order and linked application deleted successfully." });
             
             
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Upadate(int id , [FromBody] Sparepartspurchaseorder order)
+        {
+            await _sparePartPurchaseOrderService.UpdateSparePartsPurchaseOrderAsync(id, order);
+            return Ok(new { message = "Spare part purchase order and linked application updated successfully." });
+        }
+        [HttpGet("{ID}")]
+        public async Task<IActionResult> GetByID(int ID)
+        {
+            var data = await _sparePartPurchaseOrderService.GetSparePartPurchaseOrderByID(ID);
+            return Ok(data);
         }
     }
 }

@@ -76,6 +76,40 @@ namespace BusinessLogicLayer.Services
 
            
         }
+        public async Task UpdateSparePartsPurchaseOrderAsync(int orderId, Sparepartspurchaseorder updatedOrder)
+        {
+            var existingOrder = await _appDbContext.Sparepartspurchaseorders
+                .Include(o => o.Application)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (existingOrder == null)
+                throw new InvalidOperationException("Order not found.");
+
+            // Update SparePartPurchaseOrder fields
+            existingOrder.ApprovedByGeneralSupervisor = updatedOrder.ApprovedByGeneralSupervisor;
+            existingOrder.ApprovedByGeneralManager = updatedOrder.ApprovedByGeneralManager;
+            existingOrder.RequiredItem = updatedOrder.RequiredItem;
+            existingOrder.RequiredQuantity = updatedOrder.RequiredQuantity;
+
+            // Update Application fields via service
+            if (existingOrder.Application != null && updatedOrder.Application != null)
+            {
+                updatedOrder.Application.ApplicationId = existingOrder.Application.ApplicationId; // Ensure the ID is set
+                await _applicationService.UpdateApplicationAsync(updatedOrder.Application);
+            }
+
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        public async Task<Sparepartspurchaseorder?> GetSparePartPurchaseOrderByID(int orderId)
+        {
+            return await _appDbContext.Sparepartspurchaseorders
+                .AsNoTracking()
+                .Include(o => o.Application)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+        }
+
+
 
     }
 }
