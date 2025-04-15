@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
@@ -28,16 +30,20 @@ namespace DataAccessLayer.Repositories
         ConsumablePurchaseOrder,
         MaintenanceApplication
     }
-
+    [Table("applications")]
     public class ApplicationDTO
     {
-
+        [Key]
         public int ApplicationId { get; set; }
         public DateTime CreationDate { get; set; }
         public enStatus Status { get; set; }
         public enApplicationType ApplicationType { get; set; }
         public string ApplicationDescription { get; set; }
-        public int UserId { get; set; }
+        public int CreatedByUserID { get; set; }
+      // this two commands for me !! just for testing only 😊✨
+        public virtual ICollection<Sparepartspurchaseorder> Sparepartspurchaseorders { get; set; } = new List<Sparepartspurchaseorder>();
+
+        public virtual ICollection<Sparepartswithdrawapplication> Sparepartswithdrawapplications { get; set; } = new List<Sparepartswithdrawapplication>();
 
         public ApplicationDTO(int applicationId, DateTime creationDate, enStatus status, enApplicationType applicationType, string applicationDescription, int createdByUser)
         {
@@ -46,8 +52,13 @@ namespace DataAccessLayer.Repositories
             Status = status;
             ApplicationType = applicationType;
             ApplicationDescription = applicationDescription;
-            UserId = createdByUser;
+            CreatedByUserID = createdByUser;
         }
+        public ApplicationDTO()
+        {
+       
+        }
+
     }
 
     public class ApplicationRepo
@@ -219,7 +230,7 @@ namespace DataAccessLayer.Repositories
                 new MySqlParameter("@status", enStatus.Pending.ToString()),
                 new MySqlParameter("@applicationType", application.ApplicationType.ToString()),
                 new MySqlParameter("@applicationDescription", application.ApplicationDescription),
-                new MySqlParameter("@createdByUser", application.UserId)
+                new MySqlParameter("@createdByUser", application.CreatedByUserID)
             );
         }
 
@@ -240,7 +251,7 @@ namespace DataAccessLayer.Repositories
                 new MySqlParameter("@status", application.Status.ToString()),
                 new MySqlParameter("@applicationType", application.ApplicationType.ToString()),
                 new MySqlParameter("@applicationDescription", application.ApplicationDescription),
-                new MySqlParameter("@createdByUser", application.UserId)
+                new MySqlParameter("@createdByUser", application.CreatedByUserID)
             );
         }
         

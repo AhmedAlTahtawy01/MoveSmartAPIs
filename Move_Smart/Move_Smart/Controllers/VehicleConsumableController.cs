@@ -11,7 +11,7 @@ namespace Move_Smart.Controllers
         private readonly Vehicleconsumable _vehicleconsumable;
         public VehicleConsumableController(Vehicleconsumable vehicleconsumable)
         {
-         _vehicleconsumable = vehicleconsumable;   
+            _vehicleconsumable = vehicleconsumable;
         }
         [HttpGet]
         public async Task<IActionResult> GetAllVehicleConsumable()
@@ -28,14 +28,14 @@ namespace Move_Smart.Controllers
         [HttpPost]
         public async Task<IActionResult> AddVehicleConsumable([FromBody] Vehicleconsumable consume)
         {
-           await _vehicleconsumable.AddVehicleConsumable(consume);
+            await _vehicleconsumable.AddVehicleConsumable(consume);
             return Ok();
         }
         [HttpDelete]
         [Route("{ConsumableName}")]
         public async Task<IActionResult> DeleteVehicleConsumable(string ConsumableName)
         {
-             await _vehicleconsumable.DeleteVehicleConsumable(ConsumableName);
+            await _vehicleconsumable.DeleteVehicleConsumable(ConsumableName);
             return Ok();
         }
         [HttpPut]

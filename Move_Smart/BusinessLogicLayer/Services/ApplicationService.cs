@@ -11,13 +11,13 @@ namespace BusinessLayer.Services
         private readonly ApplicationRepo _repo;
         private readonly ILogger<ApplicationService> _logger;
 
-        protected ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger)
+        public ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
-        protected async Task<int> CreateApplicationAsync(ApplicationDTO dto)
+        public async Task<int> CreateApplicationAsync(ApplicationDTO dto)
         {
             if (dto.ApplicationId != 0)
             {
@@ -32,7 +32,7 @@ namespace BusinessLayer.Services
             return await _repo.CreateApplicationAsync(dto);
         }
 
-        protected async Task<bool> UpdateApplicationAsync(ApplicationDTO dto)
+        public async Task<bool> UpdateApplicationAsync(ApplicationDTO dto)
         {
             if (dto.ApplicationId <= 0)
             {
@@ -51,13 +51,13 @@ namespace BusinessLayer.Services
             }
 
             dto.CreationDate = existingApplication.CreationDate;
-            dto.UserId = existingApplication.UserId;
+            dto.CreatedByUserID = existingApplication.CreatedByUserID;
 
             _logger.LogInformation($"Updating application with ID {dto.ApplicationId}.");
             return await _repo.UpdateApplicationAsync(dto);
         }
 
-        protected async Task<List<ApplicationDTO>> GetAllApplicationsAsync(int pageNumber = 1, int pageSize = 10)
+        public async Task<List<ApplicationDTO>> GetAllApplicationsAsync(int pageNumber = 1, int pageSize = 10)
         {
             if (pageNumber < 1 || pageSize < 1)
             {
@@ -89,13 +89,13 @@ namespace BusinessLayer.Services
             return application;
         }
 
-        protected async Task<List<ApplicationDTO>> GetApplicationsByApplicationTypeAsync(enApplicationType applicationType)
+       public async Task<List<ApplicationDTO>> GetApplicationsByApplicationTypeAsync(enApplicationType applicationType)
         {
             _logger.LogInformation($"Retrieving applications with type {applicationType}.");
             return await _repo.GetApplicationsByApplicationTypeAsync(applicationType);
         }
 
-        protected async Task<List<ApplicationDTO>> GetApplicationsByUserIdAsync(int userId)
+        public async Task<List<ApplicationDTO>> GetApplicationsByUserIdAsync(int userId)
         {
             if (userId <= 0)
             {
@@ -107,7 +107,7 @@ namespace BusinessLayer.Services
             return await _repo.GetApplicationsByUserIdAsync(userId);
         }
 
-        protected async Task<List<ApplicationDTO>> GetApplicationsByStatusAsync(enStatus status)
+        public async Task<List<ApplicationDTO>> GetApplicationsByStatusAsync(enStatus status)
         {
             _logger.LogInformation($"Retrieving applications with status {status}.");
             return await _repo.GetApplicationsByStatusAsync(status);
@@ -143,7 +143,7 @@ namespace BusinessLayer.Services
             return await _repo.UpdateStatusAsync(applicationId, status);
         }
 
-        protected async Task<bool> DeleteApplicationAsync(int applicationId)
+        public async Task<bool> DeleteApplicationAsync(int applicationId)
         {
             if (applicationId <= 0)
             {
@@ -175,7 +175,7 @@ namespace BusinessLayer.Services
                 throw new InvalidOperationException("Application Description is required.");
             }
 
-            if (dto.UserId <= 0)
+            if (dto.CreatedByUserID <= 0)
             {
                 _logger.LogWarning("Validation Failed: User Id must be greater than 0.");
                 throw new InvalidOperationException("User Id must be greater than 0.");

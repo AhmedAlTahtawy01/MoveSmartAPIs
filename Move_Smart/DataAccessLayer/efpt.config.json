@@ -15,6 +15,10 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "applications",
+         "ObjectType": 0
+      },
+      {
          "Name": "consumablespurchaseorders",
          "ObjectType": 0
       },
@@ -40,6 +44,10 @@
       },
       {
          "Name": "sparepartswithdrawapplications",
+         "ObjectType": 0
+      },
+      {
+         "Name": "users",
          "ObjectType": 0
       },
       {

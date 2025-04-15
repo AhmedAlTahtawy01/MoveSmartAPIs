@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using BusinessLogicLayer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,10 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.IncludeFields = true; // Moved from unused variable
     });
+builder.Services.AddControllers()
+    .AddJsonOptions(x =>
+        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+    );
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -38,9 +43,11 @@ builder.Services.AddSingleton<ConnectionSettings>(sp =>
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
 builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
-builder.Services.AddScoped<SparePartsPurchaseOrderRepo>(); // Kept for Kamal
-builder.Services.AddScoped<consumablespurchaseorderRepo>(); // Kept for Kamal
+//builder.Services.AddScoped<SparePartsPurchaseOrderRepo>(); // Kept for Kamal
+//builder.Services.AddScoped<consumablespurchaseorderRepo>(); // Kept for Kamal
 builder.Services.AddScoped<ApplicationRepo>(); // Kept for Kamal
+builder.Services.AddScoped<SparePartPurchaseOrderService>();
+builder.Services.AddScoped<ApplicationService>();
 
 
 // Register services
@@ -50,6 +57,13 @@ builder.Services.AddScoped<UserService>(); // For UserController
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<appDBContext>(options =>
     options.UseMySql(connectionString, ServerVersion.Parse("8.0.36-mysql")));
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.IncludeFields = true;
+    });
+
 
 var app = builder.Build();
 

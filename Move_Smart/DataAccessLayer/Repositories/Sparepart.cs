@@ -5,23 +5,23 @@ using System;
 using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
-{ 
-
-public partial class Sparepart
 {
-    public short SparePartId { get; set; }
 
-    public string PartName { get; set; }
+    public partial class Sparepart
+    {
+        public short SparePartId { get; set; }
 
-    public int ValidityLength { get; set; }
+        public string PartName { get; set; }
 
-    public short Quantity { get; set; }
+        public int ValidityLength { get; set; }
 
-    public virtual ICollection<Sparepartspurchaseorder> Sparepartspurchaseorders { get; set; } = new List<Sparepartspurchaseorder>();
+        public short Quantity { get; set; }
 
-    public virtual ICollection<Sparepartsreplacement> Sparepartsreplacements { get; set; } = new List<Sparepartsreplacement>();
+        public virtual ICollection<Sparepartspurchaseorder> Sparepartspurchaseorders { get; set; } = new List<Sparepartspurchaseorder>();
 
-    public virtual ICollection<Sparepartswithdrawapplication> Sparepartswithdrawapplications { get; set; } = new List<Sparepartswithdrawapplication>();
+        public virtual ICollection<Sparepartsreplacement> Sparepartsreplacements { get; set; } = new List<Sparepartsreplacement>();
+
+        public virtual ICollection<Sparepartswithdrawapplication> Sparepartswithdrawapplications { get; set; } = new List<Sparepartswithdrawapplication>();
         public Sparepart() { }
     }
     public partial class Sparepart
@@ -36,11 +36,11 @@ public partial class Sparepart
             var check = await _appDBContext.Spareparts.FirstOrDefaultAsync(x => x.PartName == spare.PartName);
             if (check != null)
             {
-                throw new InvalidOperationException(" Cannot be null");
+                throw new InvalidOperationException(" Spare Part Is alreay Found!!");
             }
             if (string.IsNullOrEmpty(spare.PartName) && spare.ValidityLength == 0 && spare.Quantity == 0)
             {
-                throw new InvalidOperationException(" Cannot be null");
+                throw new InvalidOperationException(" validitylength & quantity & name Cannot be null");
             }
             _appDBContext.Spareparts.Add(spare);
             await _appDBContext.SaveChangesAsync();
@@ -67,26 +67,37 @@ public partial class Sparepart
             return await _appDBContext.Spareparts.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Sparepart> GetSparePartByName(string PartName)
+        public async Task<Sparepart?> GetSparePartByName(string partName)
         {
-            return await _appDBContext.Spareparts.AsNoTracking().FirstAsync(id => PartName == id.PartName);
+            var part =  await _appDBContext.Spareparts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(sp => sp.PartName == partName);
+            if (part == null)
+            {
+                throw new InvalidOperationException("this is not found!!");
+            }
+            return part;
         }
+
 
         public async Task UpdateByNameSparePart(string PartName, Sparepart spare)
         {
-            var existing = await _appDBContext.Spareparts.AsNoTracking().FirstAsync(k => k.PartName == PartName);
+            var existing = await _appDBContext.Spareparts
+                .FirstOrDefaultAsync(k => k.PartName == PartName);
+
             if (existing == null)
             {
-                throw new InvalidOperationException(" Cannot be null");
+                throw new InvalidOperationException("Could not find a spare part with the given name.");
             }
+
+            // Update the properties
             existing.Quantity = spare.Quantity;
             existing.ValidityLength = spare.ValidityLength;
-            existing.PartName = spare.PartName;
+            
 
-            //_appDBContext.spareparts.Update(existing);
             await _appDBContext.SaveChangesAsync();
-
         }
+
     }
 
 }

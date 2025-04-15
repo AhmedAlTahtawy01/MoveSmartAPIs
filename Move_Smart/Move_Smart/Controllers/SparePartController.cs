@@ -29,13 +29,13 @@ namespace Move_Smart.Controllers
         [HttpPost]
         public async Task<IActionResult> AddSparePart([FromBody] Sparepart spare)
         {
-             await _isparepart.AddSparePart(spare);
+            await _isparepart.AddSparePart(spare);
             return Ok();
         }
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Sparepart spare)
         {
-             await _isparepart.UpdateSparePart(spare);
+            await _isparepart.UpdateSparePart(spare);
             return Ok();
         }
         [HttpDelete]

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DataAccessLayer.Repositories;
 
@@ -179,6 +180,32 @@ public partial class appDBContext : DbContext
                 .HasForeignKey(d => d.SparePartId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SparePartsWithdrawApplications_SpareParts");
+        });
+
+        modelBuilder.Entity<ApplicationDTO>(entity =>
+        {
+            entity.HasKey(e => e.ApplicationId).HasName("PRIMARY");
+
+            entity.ToTable("applications");
+
+            entity.HasIndex(e => e.ApplicationType, "FK_Applications_ApplicationTypes");
+
+            entity.HasIndex(e => e.CreatedByUserID, "FK_Applications_Users");
+
+            entity.Property(e => e.ApplicationId).HasColumnName("ApplicationID");
+            entity.Property(e => e.ApplicationDescription)
+                .IsRequired()
+                .HasMaxLength(2000)
+                .UseCollation("utf8mb3_general_ci")
+                .HasCharSet("utf8mb3");
+            entity.Property(e => e.ApplicationType)
+                .IsRequired()
+                .HasColumnType("enum('MissionNote','SparePartWithdrawApplication','ConsumableWithdrawApplication','SparePartPurchaseOrder','ConsumablePurchaseOrder','MaintenanceApplication')");
+            entity.Property(e => e.CreatedByUserID).HasColumnName("CreatedByUserID");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasColumnType("enum('Confirmed','Rejected','Pending','Cancelled')");
+
         });
 
         modelBuilder.Entity<Vehicleconsumable>(entity =>
