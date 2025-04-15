@@ -72,7 +72,7 @@ namespace BusinessLogicLayer.Services
         {
             if (maintenanceId <= 0)
             {
-                _logger.LogWarning("Attempted to retrieve an maintenane with invalid ID.");
+                _logger.LogWarning("Attempted to retrieve a maintenane with invalid ID.");
                 throw new ArgumentException("Maintenenace ID must be greater than 0.");
             }
 
@@ -122,7 +122,7 @@ namespace BusinessLogicLayer.Services
         {
             if (dto == null)
             {
-                _logger.LogWarning("Attempted to create a null maintenance DTO.");
+                _logger.LogWarning("Attempted to work on null maintenance DTO.");
                 throw new ArgumentNullException(nameof(dto), "Maintenance DTO cannot be null.");
             }
 

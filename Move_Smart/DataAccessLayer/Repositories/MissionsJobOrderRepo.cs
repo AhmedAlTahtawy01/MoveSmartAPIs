@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using DataAccessLayer.Util;
+using Microsoft.Extensions.Logging;
 using System.Data.Common;
 using System.Data;
 using System.Linq;
@@ -9,39 +11,34 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.Repositories
 {
-    public class MissionsJobOrder
+    public class MissionsJobOrderDTO
     {
         public int OrderId { get; set; }
         public int MissionId { get; set; }
         public int JobOrderId { get; set; }
 
-        public MissionsJobOrder(int orderId, int missionId, int jobOrderId)
+        public MissionsJobOrderDTO(int orderId, int missionId, int jobOrderId)
         {
-            this.OrderId = orderId;
-            this.MissionId = missionId;
-            this.JobOrderId = jobOrderId;
+            OrderId = orderId;
+            MissionId = missionId;
+            JobOrderId = jobOrderId;
         }
     }
 
     public class MissionsJobOrderRepo
     {
-        private static readonly string _connectionString = "Server=localhost;Database=MoveSmart;User Id=root;Password=ahmedroot;";
+        private readonly ConnectionSettings _connectionSettings;
+        private readonly ILogger<MissionsJobOrderRepo> _logger;
 
-        private MySqlConnection GetConnection()
+        public MissionsJobOrderRepo(ConnectionSettings connectionSettings, ILogger<MissionsJobOrderRepo> logger)
         {
-            return new MySqlConnection(_connectionString);
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings), "Connection settings cannot be null.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
-        private MySqlCommand GetCommand(string query, MySqlConnection conn)
+        private MissionsJobOrderDTO MapMissionsJobOrder(DbDataReader reader)
         {
-            var cmd = new MySqlCommand(query, conn);
-            cmd.CommandType = CommandType.Text;
-            return cmd;
-        }
-
-        private MissionsJobOrder MapMissionsJobOrder(DbDataReader reader)
-        {
-            return new MissionsJobOrder
+            return new MissionsJobOrderDTO
             (
                 reader.GetInt32("OrderID"),
                 reader.GetInt32("MissionID"),
@@ -49,232 +46,111 @@ namespace DataAccessLayer.Repositories
             );
         }
 
-        public async Task<List<MissionsJobOrder>> GetAllMissionsJobOrdersAsync()
+        public async Task<List<MissionsJobOrderDTO>> GetAllMissionsJobOrdersAsync(int pageNumber = 1, int pageSize = 10)
         {
-            var missionsJobOrders = new List<MissionsJobOrder>();
+            if (pageNumber < 1 || pageSize < 1)
+                throw new ArgumentException("Page number and page size must be greater than 0.");
 
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    SELECT OrderID, MissionID, JobOrderID
-                    FROM missionsjoborders";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missionsJobOrders.Add(MapMissionsJobOrder(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetAllMissionsJobOrdersAsync.", ex);
-                    }
-                }
-
-                return missionsJobOrders;
-            }
-        }
-
-        public async Task<MissionsJobOrder?> GetMissionsJobOrderByIdAsync(int orderId)
-        {
-            await using (var conn = GetConnection())
-            {
-                var query = @"
+            const string query = @"
                     SELECT OrderID, MissionID, JobOrderID
                     FROM missionsjoborders
-                    WHERE OrderID = @orderId";
+                    LIMIT @Offset, @PageSize";
+            int offset = (pageNumber - 1) * pageSize;
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@orderId", orderId);
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                var missionsJobOrdersList = new List<MissionsJobOrderDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
 
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                return MapMissionsJobOrder(reader);
-                            }
-                            else
-                            {
-                                return null;
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsJobOrderByIdAsync.", ex);
-                    }
-                }
-            }
+                while (await reader.ReadAsync()) missionsJobOrdersList.Add(MapMissionsJobOrder(reader));
+                return missionsJobOrdersList;
+            }, new MySqlParameter("@Offset", offset), new MySqlParameter("@PageSize", pageSize));
         }
 
-        public async Task<List<MissionsJobOrder>> GetMissionsJobOrdersByMissionIdAsync(int missionId)
+        public async Task<MissionsJobOrderDTO?> GetMissionsJobOrderByIdAsync(int orderId)
         {
-            var missionsJobOrders = new List<MissionsJobOrder>();
+            const string query = @"
+                SELECT OrderID, MissionID, JobOrderID
+                FROM missionsjoborders
+                WHERE OrderID = @orderId";
 
-            await using (var conn = GetConnection())
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT OrderID, MissionID, JobOrderID
-                    FROM missionsjoborders
-                    WHERE MissionID = @missionId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionId", missionId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missionsJobOrders.Add(MapMissionsJobOrder(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsJobOrdersByMissionIdAsync.", ex);
-                    }
-                }
-            }
-
-            return missionsJobOrders;
+                using var reader = await cmd.ExecuteReaderAsync();
+                return await reader.ReadAsync() ? MapMissionsJobOrder(reader) : null;
+            }, new MySqlParameter("@orderId", orderId));
         }
 
-        public async Task<List<MissionsJobOrder>> GetMissionsJobOrdersByJobOrderIdAsync(int jobOrderId)
+        private async Task<List<MissionsJobOrderDTO>> GetMissionsJobOrdersAsync(string filter, params MySqlParameter[] parameters)
         {
-            var missionsJobOrders = new List<MissionsJobOrder>();
+            string query = @"
+                SELECT OrderID, MissionID, JobOrderID
+                FROM missionsjoborders";
 
-            await using (var conn = GetConnection())
+            if (!string.IsNullOrEmpty(filter))
+                query += " WHERE " + filter;
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT OrderID, MissionID, JobOrderID
-                    FROM missionsjoborders
-                    WHERE JobOrderID = @jobOrderId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@jobOrderId", jobOrderId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missionsJobOrders.Add(MapMissionsJobOrder(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionsJobOrdersByJobOrderIdAsync.", ex);
-                    }
-                }
-            }
-
-            return missionsJobOrders;
+                var missionsJobOrdersList = new List<MissionsJobOrderDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync()) missionsJobOrdersList.Add(MapMissionsJobOrder(reader));
+                return missionsJobOrdersList;
+            }, parameters);
         }
 
-        public async Task<int> CreateMissionsJobOrderAsync(MissionsJobOrder missionsJobOrder)
+        public async Task<List<MissionsJobOrderDTO>> GetMissionsJobOrdersByMissionIdAsync(int missionId)
         {
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    INSERT INTO missionsjoborders (MissionID, JobOrderID)
-                    VALUES (@missionId, @jobOrderId)
-                    SELECT LAST_INSERT_ID();";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionId", missionsJobOrder.MissionId);
-                    cmd.Parameters.AddWithValue("@jobOrderId", missionsJobOrder.JobOrderId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var newMissionsJobOrderId = Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
-
-                        return newMissionsJobOrderId;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in CreateMissionsJobOrderAsync.", ex);
-                    }
-                }
-            }
+            return await GetMissionsJobOrdersAsync("MissionID = @missionId", new MySqlParameter("@missionId", missionId));
         }
 
-        public async Task<bool> UpdateMissionsJobOrderAsync(MissionsJobOrder missionsJobOrder)
+        public async Task<List<MissionsJobOrderDTO>> GetMissionsJobOrdersByJobOrderIdAsync(int jobOrderId)
         {
-            await using (var conn = GetConnection())
+            return await GetMissionsJobOrdersAsync("JobOrderID = @jobOrderId", new MySqlParameter("@jobOrderId", jobOrderId));
+        }
+
+        public async Task<int> CreateMissionsJobOrderAsync(MissionsJobOrderDTO missionsJobOrder)
+        {
+            const string query = @"
+                INSERT INTO missionsjoborders (MissionID, JobOrderID)
+                VALUES (@missionId, @jobOrderId)
+                SELECT LAST_INSERT_ID();";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    UPDATE missionsjoborders
-                    SET 
-                        MissionID = @missionId,
-                        JobOrderID = @jobOrderId
-                    WHERE
-                        OrderID = @orderId";
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            }, new MySqlParameter("@missionId", missionsJobOrder.MissionId),
+                new MySqlParameter("@jobOrderId", missionsJobOrder.JobOrderId)
+            );
+        }
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@orderId", missionsJobOrder.OrderId);
-                    cmd.Parameters.AddWithValue("@missionId", missionsJobOrder.MissionId);
-                    cmd.Parameters.AddWithValue("@jobOrderId", missionsJobOrder.JobOrderId);
+        public async Task<bool> UpdateMissionsJobOrderAsync(MissionsJobOrderDTO missionsJobOrder)
+        {
+            const string query = @"
+                UPDATE missionsjoborders
+                SET 
+                    MissionID = @missionId,
+                    JobOrderID = @jobOrderId
+                WHERE
+                    OrderID = @orderId";
 
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                        return rowsAffected > 0;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in UpdateMissionsJobOrderAsync.", ex);
-                    }
-                }
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@orderId", missionsJobOrder.OrderId),
+                new MySqlParameter("@missionId", missionsJobOrder.MissionId),
+                new MySqlParameter("@jobOrderId", missionsJobOrder.JobOrderId)
+            );
         }
 
         public async Task<bool> DeleteMissionsJobOrderAsync(int orderId)
         {
-            await using (var conn = GetConnection())
+            const string query = "DELETE FROM missionsjoborders WHERE OrderID = @orderId";
+            
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = "DELETE FROM missionsjoborders WHERE OrderID = @orderId";
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@orderId", orderId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                        return rowsAffected > 0;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in DeleteMissionsJobOrderAsync.", ex);
-                    }
-                }
-            }
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@orderId", orderId));
         }
     }
 }

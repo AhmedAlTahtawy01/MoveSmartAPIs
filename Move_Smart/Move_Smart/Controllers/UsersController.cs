@@ -94,14 +94,14 @@ namespace Move_Smart.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO user)
         {
-            if (id != user.UserId)
+            if (id <= 0 || user == null || id != user.UserId)
             {
                 return BadRequest("User Id mismatch");
             }
 
             try
             {
-                bool updated = await _service.UpdateUserInfoAsync(user);
+                await _service.UpdateUserInfoAsync(user);
                 return NoContent();
             }
             catch (ArgumentNullException ex)
@@ -126,6 +126,11 @@ namespace Move_Smart.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id, [FromHeader] int requestingUserId)
         {
+            if (id <= 0 || requestingUserId <= 0)
+            {
+                return BadRequest("Invalid user ID");
+            }
+
             try
             {
                 bool deleted = await _service.DeleteUserAsync(id, requestingUserId);
@@ -137,7 +142,7 @@ namespace Move_Smart.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid();
+                return Forbid(ex.Message);
             }
             catch (Exception ex)
             {

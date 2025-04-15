@@ -490,5 +490,59 @@ namespace DataAccessLayer
 
             return 0;
         }
+
+        public async Task<bool> IsDriverExistsAsync(string nationalNo)
+        {
+            string query = @"SELECT Found=1 FROM Drivers
+                            WHERE NationalNo = @NationalNo;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("NationalNo", nationalNo);
+
+                        await conn.OpenAsync();
+                        
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        public async Task<bool> IsDriverExistsAsync(int driverID)
+        {
+            string query = @"SELECT Found=1 FROM Drivers
+                            WHERE DriverID = @DriverID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("DriverID", driverID);
+
+                        await conn.OpenAsync();
+
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return false;
+        }
     }
 }

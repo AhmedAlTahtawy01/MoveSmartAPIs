@@ -1,102 +1,105 @@
-﻿//using DataAccessLayer;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using DataAccessLayer;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace BusinessLayer
-//{
-//    public class Patrol
-//    {
-//        public enum enMode { Add, Update };
-//        public enMode mode = enMode.Add;
-//        public short? PatrolID { get; set; }
-//        public string Description { get; set; }
-//        public TimeOnly MovingAt { get; set; }
-//        public short ApproximatedTime { get; set; }
-//        public byte BusID { get; set; }
+namespace BusinessLayer
+{
+    public class PatrolService
+    {
+        protected readonly ILogger<PatrolService> _patrolLogger;
+        protected readonly PatrolRepo _patrolRepo;
+        protected readonly BusRepo _busRepo;
 
-//        public PatrolDTO PatrolDTO => new PatrolDTO(
-//            PatrolID,
-//            Description,
-//            MovingAt,
-//            ApproximatedTime,
-//            BusID
-//            );
+        public PatrolService(PatrolRepo patrolRepo, BusRepo busRepo, ILogger<PatrolService> patrolLogger)
+        {
+            _patrolRepo = patrolRepo ?? throw new ArgumentNullException(nameof(patrolRepo), "Data access layer cannot be null.");
+            _busRepo = busRepo ?? throw new ArgumentNullException(nameof(busRepo), "Data access layer cannot be null.");
+            _patrolLogger = patrolLogger ?? throw new ArgumentNullException(nameof(patrolLogger), "Logger cannot be null.");
+        }
 
-//        public Patrol(PatrolDTO patrolDTO, enMode mode = enMode.Add)
-//        {
-//            this.PatrolID = patrolDTO.PatrolID;
-//            this.Description = patrolDTO.Description;
-//            this.MovingAt = patrolDTO.MovingAt;
-//            this.ApproximatedTime = patrolDTO .ApproximatedTime;
-//            this.BusID = patrolDTO.BusID;
-//            this.mode = mode;
-//        }
+        private async void _ValidatePatrolDTO(PatrolDTO dto)
+        {
+            if (dto == null)
+            {
+                _patrolLogger.LogError("PatrolDTO cannot be null.");
+                throw new ArgumentNullException(nameof(dto), "PatrolDTO cannot be null.");
+            }
+            if (string.IsNullOrWhiteSpace(dto.Description))
+            {
+                _patrolLogger.LogError("Description cannot be empty.");
+                throw new ArgumentException("Description cannot be empty.");
+            }
+            if (dto.ApproximatedTime <= 0)
+            {
+                _patrolLogger.LogError("ApproximatedTime must be greater than 0.");
+                throw new ArgumentException("ApproximatedTime must be greater than 0.");
+            }
+            if(!await _busRepo.IsBusExistsAsync(dto.BusID))
+            {
+                _patrolLogger.LogError($"Bus with ID [{dto.BusID}] does not exist.");
+                throw new ArgumentException($"Bus with ID [{dto.BusID}] does not exist.");
+            }
+        }
 
-//        private async Task<bool> _AddNewAsync()
-//        {
-//            if (string.IsNullOrWhiteSpace(Description))
-//                return false;
+        public async Task<short?> AddNewPatrolAsync(PatrolDTO dto)
+        {
+            try
+            {
+                _ValidatePatrolDTO(dto);
+            }
+            catch (Exception ex)
+            {
+                _patrolLogger.LogError(ex.Message);
+                return null;
+            }
 
-//            this.PatrolID = await PatrolRepo.AddNewPatrolAsync(PatrolDTO);
+            if(await _patrolRepo.IsPatrolExistsAsync(dto.PatrolID ?? 0))
+            {
+                _patrolLogger.LogError($"Patrol with ID [{dto.PatrolID}] already exists.");
+                return null;
+            }
 
-//            return this.PatrolID.HasValue;
-//        }
+            return await _patrolRepo.AddNewPatrolAsync(dto);
+        }
 
-//        private async Task<bool> _UpdateAsync()
-//        {
-//            if (string.IsNullOrWhiteSpace(Description))
-//                return false;
+        public async Task<bool> UpdatePatrolAsync(PatrolDTO dto)
+        {
+            try
+            {
+                _ValidatePatrolDTO(dto);
+            }
+            catch (Exception ex)
+            {
+                _patrolLogger.LogError(ex.Message);
+                return false;
+            }
 
-//            return await PatrolRepo.UpdatePatrolAsync(PatrolDTO);
-//        }
+            if(!await _patrolRepo.IsPatrolExistsAsync(dto.PatrolID ?? 0))
+            {
+                _patrolLogger.LogError($"Patrol with ID [{dto.PatrolID}] does not exist.");
+                return false;
+            }
 
-//        public static async Task<List<Patrol>> GetAllPatrolsAsync()
-//        {
-//            List<PatrolDTO> patrolDTOs = await PatrolRepo.GetAllPatrolsAsync();
+            return await _patrolRepo.UpdatePatrolAsync(dto);
+        }
 
-//            List<Patrol> patrols = new List<Patrol>();
+        public async Task<List<PatrolDTO>> GetAllPatrolsAsync()
+        {
+            return await _patrolRepo.GetAllPatrolsAsync();
+        }
 
-//            foreach(PatrolDTO patrolDTO in patrolDTOs)
-//            {
-//                patrols.Add(new Patrol(patrolDTO, enMode.Update));
-//            }
+        public async Task<PatrolDTO?> GetPatrolByIDAsync(short patrolID)
+        {
+            return await _patrolRepo.GetPatrolByIDAsync(patrolID);
+        }
 
-//            return patrols;
-//        }
-
-//        public static async Task<Patrol?> GetPatrolByIDAsync(short patrolID)
-//        {
-//            PatrolDTO patrolDTO = await PatrolRepo.GetPatrolByIDAsync(patrolID);
-
-//            return patrolDTO != null ? new Patrol(patrolDTO, enMode.Update) : null;
-//        }
-
-//        public async Task<bool> SaveAsync()
-//        {
-//            switch(mode)
-//            {
-//                case enMode.Add:
-//                    if (await _AddNewAsync())
-//                    {
-//                        mode = enMode.Update;
-//                        return true;
-//                    }
-//                    else
-//                        return false;
-
-//                case enMode.Update:
-//                    return await _UpdateAsync();
-//            }
-
-//            return false;
-//        }
-
-//        public async Task<bool> DeleteAsync()
-//        {
-//            return this.PatrolID.HasValue ? await PatrolRepo.DeletePatrolAsync(this.PatrolID.Value) : false;
-//        }
-//    }
-//}
+        public async Task<bool> DeletePatrolAsync(short patrolID)
+        {
+            return await _patrolRepo.DeletePatrolAsync(patrolID);
+        }
+    }
+}

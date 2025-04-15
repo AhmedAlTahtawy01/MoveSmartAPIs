@@ -119,7 +119,7 @@ namespace DataAccessLayer.Repositories
                 new MySqlParameter("@missionNoteId", missionNoteId));
         }
 
-        public async Task<List<MissionDTO>> GetMissionsByVehiclesIdAsync(int missionVehiclesId)
+        public async Task<List<MissionDTO>> GetMissionsByVehicleIdAsync(int missionVehiclesId)
         {
             return await GetMissionsAsync("MissionVehiclesID = @missionVehiclesId",
                 new MySqlParameter("@missionVehicleId", missionVehiclesId));

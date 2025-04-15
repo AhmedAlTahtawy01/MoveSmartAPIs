@@ -325,10 +325,10 @@ namespace DataAccessLayer
             return false;
         }
 
-        public async Task<bool> DeleteEmployeeAsync(int employeeID)
+        public async Task<bool> DeleteEmployeeAsync(string nationalNo)
         {
             string query = @"DELETE FROM Employees
-                            WHERE EmployeeID = @EmployeeID;";
+                            WHERE NationalNo = @NationalNo;";
 
             try
             {
@@ -336,7 +336,7 @@ namespace DataAccessLayer
                 {
                     using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("EmployeeID", employeeID);
+                        cmd.Parameters.AddWithValue("NationalNo", nationalNo);
 
                         await conn.OpenAsync();
 
@@ -367,6 +367,33 @@ namespace DataAccessLayer
 
                         await conn.OpenAsync();
 
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> IsEmployeeExists(string nationalNo)
+        {
+            string query = @"SELECT Found=1 FROM Employees
+                            WHERE NationalNo = @NationalNo;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("NationalNo", nationalNo);
+
+                        await conn.OpenAsync();
+                        
                         return await cmd.ExecuteScalarAsync() != null;
                     }
                 }

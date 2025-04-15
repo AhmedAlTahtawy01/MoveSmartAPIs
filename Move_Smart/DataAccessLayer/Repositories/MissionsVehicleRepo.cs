@@ -1,49 +1,44 @@
-﻿using MySql.Data.MySqlClient;
+﻿using DataAccessLayer.Util;
+using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataAccessLayer.Repositories
 {
-    public class MissionsVehicle
+    public class MissionsVehicleDTO
     {
         public int MissionVehicleId { get; set; }
         public int MissionId { get; set; }
         public int VehicleId { get; set; }
 
-        public MissionsVehicle(int missionVehicleId, int missiondId, int vehicleId)
+        public MissionsVehicleDTO(int missionVehicleId, int missiondId, int vehicleId)
         {
-            this.MissionVehicleId = missionVehicleId;
-            this.MissionId = missiondId;
-            this.VehicleId = vehicleId;
+            MissionVehicleId = missionVehicleId;
+            MissionId = missiondId;
+            VehicleId = vehicleId;
         }
-
-
     }
 
     public class MissionsVehicleRepo
     {
-        private static readonly string _connectionString = "Server=localhost;Database=MoveSmart;User Id=root;Password=ahmedroot;";
+        private readonly ConnectionSettings _connectionSettings;
+        private readonly ILogger<MissionsVehicleRepo> _logger;
 
-        private MySqlConnection GetConnection()
+        public MissionsVehicleRepo(ConnectionSettings connectionSettings, ILogger<MissionsVehicleRepo> logger)
         {
-            return new MySqlConnection(_connectionString);
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings), "Connection settings cannot be null.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
-        private MySqlCommand GetCommand(string query, MySqlConnection conn)
+        private MissionsVehicleDTO MapMissionsVehicle(DbDataReader reader)
         {
-            var cmd = new MySqlCommand(query, conn);
-            cmd.CommandType = CommandType.Text;
-            return cmd;
-        }
-
-        private MissionsVehicle MapMissionsVehicle(DbDataReader reader)
-        {
-            return new MissionsVehicle
+            return new MissionsVehicleDTO
             (
                 reader.GetInt32("MissionVehicleID"),
                 reader.GetInt32("MissionID"),
@@ -51,233 +46,112 @@ namespace DataAccessLayer.Repositories
             );
         }
 
-        public async Task<List<MissionsVehicle>> GetAllMissionVehiclesAsync()
+        public async Task<List<MissionsVehicleDTO>> GetAllMissionVehiclesAsync(int pageNumber = 1, int pageSize = 10)
         {
-            var missionsVehicles = new List<MissionsVehicle>();
+            if (pageNumber < 1 || pageSize < 1)
+                throw new ArgumentException("Page number and page size must be greater than 0.");
 
-            await using (var conn = GetConnection())
+            const string query = @"
+                SELECT MissionVehicleID, MissionID, VehicleID
+                FROM missionsvehicles
+                LIMIT @Offset, @PageSize";
+            int offset = (pageNumber - 1) * pageSize;
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT MissionVehicleID, MissionID, VehicleID
-                    FROM missionsvehicles";
+                var missionVehiclesList = new List<MissionsVehicleDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missionsVehicles.Add(MapMissionsVehicle(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetAllMissionVehiclesAsync.", ex);
-                    }
-                }
-
-                return missionsVehicles;
-            }
+                while (await reader.ReadAsync()) missionVehiclesList.Add(MapMissionsVehicle(reader));
+                return missionVehiclesList;
+            }, new MySqlParameter("@Offset", offset), new MySqlParameter("@PageSize", pageSize));
         }
 
-        public async Task<MissionsVehicle?> GetMissionVehicleByIdAsync(int missionVehicleId)
+        public async Task<MissionsVehicleDTO?> GetMissionVehicleByIdAsync(int missionVehicleId)
         {
-            await using (var conn = GetConnection())
+            const string query = @"
+                SELECT MissionVehicleID, MissionID, VehicleID
+                FROM missionsjoborders
+                WHERE MissionVehicleID = @missionVehicleId";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT MissionVehicleID, MissionID, VehicleID
-                    FROM missionsjoborders
-                    WHERE MissionVehicleID = @missionVehicleId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionVehicleId", missionVehicleId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                return MapMissionsVehicle(reader);
-                            }
-                            else
-                            {
-                                return null;
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionVehicleByIdAsync.", ex);
-                    }
-                }
-            }
+                using var reader = await cmd.ExecuteReaderAsync();
+                return await reader.ReadAsync() ? MapMissionsVehicle(reader) : null;
+            }, new MySqlParameter("@missionVehicleId", missionVehicleId));
         }
 
-        public async Task<List<MissionsVehicle>> GetMissionVehiclesByMissionIdAsync(int missionId)
+        private async Task<List<MissionsVehicleDTO>> GetMissionsVehiclesAsync(string filter, params MySqlParameter[] parameters)
         {
-            var missionVehicles = new List<MissionsVehicle>();
+            string query = @"
+                SELECT MissionVehicleID, MissionID, VehicleID
+                FROM missionsjoborders
+                WHERE MissionID = @missionId";
 
-            await using (var conn = GetConnection())
+            if (!string.IsNullOrEmpty(filter))
+                query += " WHERE " + filter;
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    SELECT MissionVehicleID, MissionID, VehicleID
-                    FROM missionsjoborders
-                    WHERE MissionID = @missionId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionId", missionId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missionVehicles.Add(MapMissionsVehicle(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionVehiclesByMissionIdAsync.", ex);
-                    }
-                }
-            }
-
-            return missionVehicles;
+                var missionsVehiclesList = new List<MissionsVehicleDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync()) missionsVehiclesList.Add(MapMissionsVehicle(reader));
+                return missionsVehiclesList;
+            }, parameters);
         }
 
-        public async Task<List<MissionsVehicle>> GetMissionVehiclesByVehicleIdAsync(int vehicleId)
+        public async Task<List<MissionsVehicleDTO>> GetMissionVehiclesByMissionIdAsync(int missionId)
         {
-            var missionVehicles = new List<MissionsVehicle>();
-
-            await using (var conn = GetConnection())
-            {
-                var query = @"
-                    SELECT MissionVehicleID, MissionID, VehicleID
-                    FROM missionsvehicles
-                    WHERE VehicleID = @vehicleId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@vehicleId", vehicleId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                missionVehicles.Add(MapMissionsVehicle(reader));
-                            }
-                        }
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in GetMissionVehiclesByVehicleIdAsync.", ex);
-                    }
-                }
-            }
-
-            return missionVehicles;
+            return await GetMissionsVehiclesAsync("MissionID = @missionId", new MySqlParameter("@missionId", missionId));
         }
 
-        public async Task<int> CreateMissionVehicleAsync(MissionsVehicle missionsVehicle)
+        public async Task<List<MissionsVehicleDTO>> GetMissionVehiclesByVehicleIdAsync(int vehicleId)
         {
-            await using (var conn = GetConnection())
-            {
-                var query = @"
+            return await GetMissionsVehiclesAsync("VehicleID = @vehicleId", new MySqlParameter("@vehicleId", vehicleId));
+        }
+
+        public async Task<int> CreateMissionVehicleAsync(MissionsVehicleDTO missionsVehicle)
+        {
+            const string query = @"
                     INSERT INTO missionsvehicles (MissionID, VehicleID)
                     VALUES (@missionId, @vehicleId)
                     SELECT LAST_INSERT_ID();";
 
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionId", missionsVehicle.MissionId);
-                    cmd.Parameters.AddWithValue("@vehicleId", missionsVehicle.VehicleId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var newMissionsVehicleId = Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
-
-                        return newMissionsVehicleId;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in CreateMissionVehicleAsync.", ex);
-                    }
-                }
-            }
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            }, new MySqlParameter("@missionId", missionsVehicle.MissionId),
+                new MySqlParameter("@vehicleId", missionsVehicle.VehicleId)
+            );
         }
 
-        public async Task<bool> UpdateMissionsVehicleAsync(MissionsVehicle missionsVehicle)
+        public async Task<bool> UpdateMissionsVehicleAsync(MissionsVehicleDTO missionsVehicle)
         {
-            await using (var conn = GetConnection())
+            var query = @"
+                UPDATE missionsvehicles
+                SET 
+                    MissionID = @missionId,
+                    VehicleID = @vehicleId
+                WHERE
+                    MissionVehicleID = @missionVehicleId";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = @"
-                    UPDATE missionsvehicles
-                    SET 
-                        MissionID = @missionId,
-                        VehicleID = @vehicleId
-                    WHERE
-                        MissionVehicleID = @missionVehicleId";
-
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionVehicleId", missionsVehicle.MissionVehicleId);
-                    cmd.Parameters.AddWithValue("@missionId", missionsVehicle.MissionId);
-                    cmd.Parameters.AddWithValue("@vehicleId", missionsVehicle.VehicleId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                        return rowsAffected > 0;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in UpdateMissionsVehicleAsync.", ex);
-                    }
-                }
-            }
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@missionVehicleId", missionsVehicle.MissionVehicleId),
+                new MySqlParameter("@missionId", missionsVehicle.MissionId),
+                new MySqlParameter("@vehicleId", missionsVehicle.VehicleId)
+            );
         }
 
         public async Task<bool> DeleteMissionsVehicleAsync(int missionsVehicleId)
         {
-            await using (var conn = GetConnection())
+            const string query = "DELETE FROM missionsvehicles WHERE MissionVehicleID = @missionsVehicleId";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                var query = "DELETE FROM missionsvehicles WHERE MissionVehicleID = @missionsVehicleId";
-                using (var cmd = GetCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@missionsVehicleId", missionsVehicleId);
-
-                    try
-                    {
-                        await conn.OpenAsync().ConfigureAwait(false);
-                        var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                        return rowsAffected > 0;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        throw new Exception("Database error occurred in DeleteMissionsVehicleAsync.", ex);
-                    }
-                }
-            }
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }, new MySqlParameter("@missionsVehicleId", missionsVehicleId));
         }
-
     }
 }

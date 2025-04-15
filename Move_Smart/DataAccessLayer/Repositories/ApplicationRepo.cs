@@ -69,8 +69,8 @@ namespace DataAccessLayer.Repositories
 
         public ApplicationRepo(ConnectionSettings connectionSettings, ILogger<ApplicationRepo> logger)
         {
-            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings), "Connection settings cannot be null.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
         public ApplicationDTO MapApplication(DbDataReader reader)
@@ -263,8 +263,6 @@ namespace DataAccessLayer.Repositories
             {
                 return await cmd.ExecuteNonQueryAsync() > 0;
             }, new MySqlParameter("@applicationId", applicationId));
-
         }
-
     }
 }

@@ -41,6 +41,8 @@ builder.Services.AddSingleton<ConnectionSettings>(sp =>
 
 // Register repositories
 builder.Services.AddScoped<UserRepo>();
+builder.Services.AddScoped<ApplicationRepo>();
+builder.Services.AddScoped<JobOrderRepo>();
 builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
 builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
 //builder.Services.AddScoped<SparePartsPurchaseOrderRepo>(); // Kept for Kamal
@@ -52,6 +54,8 @@ builder.Services.AddScoped<ApplicationService>();
 
 // Register services
 builder.Services.AddScoped<UserService>(); // For UserController
+//builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
+builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
