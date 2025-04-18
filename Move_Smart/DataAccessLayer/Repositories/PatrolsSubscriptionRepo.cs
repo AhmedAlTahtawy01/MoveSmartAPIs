@@ -245,5 +245,32 @@ namespace DataAccessLayer
 
             return false;
         }
+
+        public async Task<bool> IsPatrolSubscriptionExistsAsync(int subscriptionID)
+        {
+            string query = @"SELECT Found=1 FROM PatrolsSubscriptions
+                            WHERE SubscriptionID = @SubscriptionID"
+            ;
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("SubscriptionID", subscriptionID);
+                        
+                        await conn.OpenAsync();
+
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
     }
 }

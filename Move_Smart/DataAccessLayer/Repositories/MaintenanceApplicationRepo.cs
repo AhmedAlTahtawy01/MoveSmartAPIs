@@ -257,5 +257,31 @@ namespace DataAccessLayer
 
             return false;
         }
+
+        public async Task<bool> IsMaintenanceApplicationExistsAsync(int maintenanceApplicationID)
+        {
+            string query = @"SELECT Found=1 FROM MaintenanceApplications
+                            WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("MaintenanceApplicationID", maintenanceApplicationID);
+            
+                        await conn.OpenAsync();
+                        
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
     }
 }

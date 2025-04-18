@@ -228,5 +228,32 @@ namespace DataAccessLayer
 
             return false;
         }
+
+        public async Task<bool> IsMissionNoteExistsAsync(int noteID)
+        {
+            string query = @"SELECT Found=1 FROM MissionsNotes
+                            WHERE NoteID = @NoteID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("NoteID", noteID);
+            
+                        await conn.OpenAsync();
+                        
+                        return cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
     }
 }

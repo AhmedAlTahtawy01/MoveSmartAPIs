@@ -8,8 +8,8 @@ namespace BusinessLayer.Services
 { 
     public class ApplicationService
     {
-        private readonly ApplicationRepo _repo;
-        private readonly ILogger<ApplicationService> _logger;
+        protected readonly ApplicationRepo _repo;
+        protected readonly ILogger<ApplicationService> _logger;
 
         public ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger)
         {
