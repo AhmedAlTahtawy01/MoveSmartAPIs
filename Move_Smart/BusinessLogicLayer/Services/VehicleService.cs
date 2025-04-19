@@ -83,6 +83,11 @@ namespace BusinessLayer
             return false;
         }
 
+        public async Task<List<VehicleDTO>> GetAllVehiclesAsync()
+        {
+            return await _vehicleRepo.GetAllVehiclesAsync();
+        }
+
         public async Task<List<VehicleDTO>> GetAllVehiclesOfTypeAsync(enVehicleType vehicleType)
         {
             return await _vehicleRepo.GetVehiclesByVehicleTypeAsync(vehicleType);

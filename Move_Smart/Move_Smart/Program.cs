@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using BusinessLogicLayer.Services;
+using DataAccessLayer;
+using BusinessLayer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +50,7 @@ builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
 //builder.Services.AddScoped<SparePartsPurchaseOrderRepo>(); // Kept for Kamal
 //builder.Services.AddScoped<consumablespurchaseorderRepo>(); // Kept for Kamal
 builder.Services.AddScoped<ApplicationRepo>(); // Kept for Kamal
+builder.Services.AddScoped<VehicleRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<ApplicationService>();
 
@@ -56,6 +59,7 @@ builder.Services.AddScoped<ApplicationService>();
 builder.Services.AddScoped<UserService>(); // For UserController
 //builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
 builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
+builder.Services.AddScoped<VehicleService>();
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
