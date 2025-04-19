@@ -34,10 +34,10 @@ namespace BusinessLayer
                 throw new ArgumentException("VehicleDTO properties cannot be null or empty.");
             }
 
-            if (dto.PlateNumbers.Length != 7)
+            if (dto.PlateNumbers.Length != 6 && dto.PlateNumbers.Length != 7)
             {
-                _vehicleLogger.LogError("Plate numbers must be exactly 7 characters long.");
-                throw new ArgumentException("Plate numbers must be exactly 7 characters long.");
+                _vehicleLogger.LogError("Plate numbers must be between 6-7 characters long.");
+                throw new ArgumentException("Plate numbers must be between 6-7 characters long.");
             }
         }
 
@@ -62,7 +62,7 @@ namespace BusinessLayer
             return await _vehicleRepo.AddNewVehicleAsync(dto);
         }
 
-        public async Task<bool> UpdateAsync(VehicleDTO dto)
+        public async Task<bool> UpdateVehicleAsync(VehicleDTO dto)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace BusinessLayer
             return await _vehicleRepo.GetVehiclesByStatusAsync(status);
         }
 
-        public async Task<List<VehicleDTO>> GetAllVehiclesUsingFuelTypeAsync(enFuelType fuelType)
+        public async Task<List<VehicleDTO>> GetAllVehiclesUsingFuelOfTypeAsync(enFuelType fuelType)
         {
             return await _vehicleRepo.GetVehiclesByFuelTypeAsync(fuelType);
         }
@@ -121,6 +121,11 @@ namespace BusinessLayer
         public async Task<bool> DeleteVehicleAsync(string plateNumbers)
         {
             return await _vehicleRepo.DeleteVehicleAsync(plateNumbers);
+        }
+
+        public async Task<bool> DeleteVehicleAsync(short vehicleID)
+        {
+            return await _vehicleRepo.DeleteVehicleAsync(vehicleID);
         }
     }
 }

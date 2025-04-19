@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `move_smart`.`vehicles` (
   `VehicleID` SMALLINT NOT NULL AUTO_INCREMENT,
   `BrandName` VARCHAR(50) CHARACTER SET 'utf8mb3' NOT NULL,
   `ModelName` VARCHAR(50) CHARACTER SET 'utf8mb3' NOT NULL,
-  `PlateNumbers` CHAR(7) NOT NULL,
+  `PlateNumbers` VARCHAR(7) NOT NULL,
   `VehicleType` ENUM('SingleCab', 'DoubleCab', 'Truck', 'Sedan', 'Microbus', 'Minibus', 'Bus', 'Ambulance') NOT NULL,
   `AssociatedHospital` VARCHAR(50) CHARACTER SET 'utf8mb3' NOT NULL,
   `AssociatedTask` VARCHAR(100) CHARACTER SET 'utf8mb3' NOT NULL,

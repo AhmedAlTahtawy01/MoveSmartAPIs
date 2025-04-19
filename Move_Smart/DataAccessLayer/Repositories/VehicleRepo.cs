@@ -574,5 +574,32 @@ namespace DataAccessLayer
 
             return false;
         }
+
+        public async Task<bool> DeleteVehicleAsync(short vehicleID)
+        {
+            string query = @"DELETE FROM Vehicles
+                            WHERE VehicleID = @VehicleID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("VehicleID", vehicleID);
+            
+                        await conn.OpenAsync();
+                        
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+    
+            return false;
+        }
     }
 }
