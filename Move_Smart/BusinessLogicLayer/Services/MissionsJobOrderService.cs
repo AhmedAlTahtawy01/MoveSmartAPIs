@@ -90,6 +90,83 @@ namespace BusinessLogicLayer.Services
             return missionJobOrder;
         }
 
+        public async Task<List<MissionsJobOrderDTO>> GetMissionsJobOrderByMissionIdAsync(int missionId)
+        {
+            if (missionId <= 0)
+            {
+                _logger.LogWarning("Attempted to retrieve missions job orders with invalid Mission ID.");
+                throw new ArgumentException("Mission ID must be greater than 0.");
+            }
+
+            _logger.LogInformation($"Retrieving MissionJobOrder with Mission ID {missionId}.");
+            return await _repo.GetMissionsJobOrdersByMissionIdAsync(missionId);
+        }
+
+        public async Task<List<MissionsJobOrderDTO>> GetMissionsJobOrdersByJobOrderIdAsync(int jobOrderId)
+        {
+            if (jobOrderId <= 0)
+            {
+                _logger.LogWarning("Attempted to retrieve missions job orders with invalid Job Order ID.");
+                throw new ArgumentException("Job Order ID must be greater than 0.");
+            }
+            _logger.LogInformation($"Retrieving MissionJobOrder with Job Order ID {jobOrderId}.");
+            return await _repo.GetMissionsJobOrdersByJobOrderIdAsync(jobOrderId);
+        }
+
+        public async Task<int> CreateMissionsJobOrderAsync(MissionsJobOrderDTO dto)
+        {
+            if (dto.OrderId != 0)
+            {
+                _logger.LogWarning("Attempted to create a MissionJobOrder with a non-zero ID.");
+                throw new InvalidOperationException("MissionJobOrder ID must be 0 for new orders.");
+            }
+
+            _ValidateMissionsJobOrder(dto);
+
+            _logger.LogInformation("Creating new missionJobOrder.");
+            return await _repo.CreateMissionsJobOrderAsync(dto);
+        }
+
+        public async Task<bool> UpdateMissionsJobOrderAsync(MissionsJobOrderDTO dto)
+        {
+            if (dto.OrderId <= 0)
+            {
+                _logger.LogWarning("Attempted to update a missionJobOrder with invalid ID.");
+                throw new InvalidOperationException("MissionJobOrder ID must be greater than 0.");
+            }
+
+            _ValidateMissionsJobOrder(dto);
+
+            var existingMissionJobOrder = await _repo.GetMissionsJobOrderByIdAsync(dto.OrderId);
+            if (existingMissionJobOrder == null)
+            {
+                _logger.LogWarning($"No MissionJobOrder found with ID {dto.OrderId}.");
+                throw new KeyNotFoundException($"No MissionJobOrder found with ID {dto.OrderId}.");
+            }
+
+            _logger.LogInformation($"Updating missionJobOrder with ID {dto.OrderId}.");
+            return await _repo.UpdateMissionsJobOrderAsync(dto);
+        }
+
+        public async Task<bool> DeleteMissionsJobOrderAsync(int orderId)
+        {
+            if (orderId <= 0)
+            {
+                _logger.LogWarning("Attempted to delete a missionJobOrder with invalid ID.");
+                throw new InvalidOperationException("MissionJobOrder ID must be greater than 0.");
+            }
+
+            var existingMissionJobOrder = await _repo.GetMissionsJobOrderByIdAsync(orderId);
+            if (existingMissionJobOrder == null)
+            {
+                _logger.LogWarning($"No MissionJobOrder found with ID {orderId} for deletion.");
+                throw new KeyNotFoundException($"No MissionJobOrder found with ID {orderId}.");
+            }
+
+            _logger.LogInformation($"Deleting missionJobOrder with ID {orderId}.");
+            return await _repo.DeleteMissionsJobOrderAsync(orderId);
+        }
+
         private void _ValidateMissionsJobOrder(MissionsJobOrderDTO dto)
         {
             if (dto == null)

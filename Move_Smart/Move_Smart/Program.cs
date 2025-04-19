@@ -52,12 +52,11 @@ builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
 builder.Services.AddScoped<ApplicationRepo>(); // Kept for Kamal
 builder.Services.AddScoped<VehicleRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
-builder.Services.AddScoped<ApplicationService>();
 
 
 // Register services
 builder.Services.AddScoped<UserService>(); // For UserController
-//builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
+builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
 builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
 builder.Services.AddScoped<VehicleService>();
 

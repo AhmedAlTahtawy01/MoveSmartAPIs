@@ -120,8 +120,8 @@ namespace DataAccessLayer.Repositories
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync());
-            }, new MySqlParameter("@missionId", missionsVehicle.MissionId),
-                new MySqlParameter("@vehicleId", missionsVehicle.VehicleId)
+            }, new MySqlParameter("@missionId", missionId),
+                new MySqlParameter("@vehicleId", vehicleId)
             );
         }
 

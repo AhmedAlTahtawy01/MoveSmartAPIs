@@ -152,6 +152,7 @@ namespace BusinessLogicLayer.Services
         {
             if (mission == null)
             {
+                _logger.LogWarning("MissionDTO is null.");
                 throw new ArgumentNullException(nameof(mission), "Mission cannot be null.");
             }
 
