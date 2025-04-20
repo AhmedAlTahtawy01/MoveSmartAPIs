@@ -22,7 +22,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllJobOrders([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetJobOrders([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             if (pageNumber < 1 || pageSize < 1)
             {
@@ -83,6 +83,7 @@ namespace Move_Smart.Controllers
         {
             if (vehicleId <= 0)
             {
+                _logger.LogWarning("Invalid vehicle ID.");
                 return BadRequest("Invalid vehicle ID");
             }
 
@@ -93,10 +94,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching job orders for vehicle ID");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job orders found for vehicle ID {vehicleId}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -202,6 +205,7 @@ namespace Move_Smart.Controllers
         {
             if (!Enum.IsDefined(typeof(enStatus), status))
             {
+                _logger.LogWarning("Invalid status.");
                 return BadRequest("Invalid status");
             }
 
@@ -212,10 +216,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching job orders by status");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job orders found with status {status}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -239,10 +245,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching job orders by date range");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job orders found in the date range {startDate} to {endDate}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -256,7 +264,10 @@ namespace Move_Smart.Controllers
         public async Task<IActionResult> CreateJobOrder([FromBody] JobOrderDTO jobOrder)
         {
             if (jobOrder == null)
+            {
+                _logger.LogWarning("Received null job order data.");
                 return BadRequest("Job order cannot be null");
+            }
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
