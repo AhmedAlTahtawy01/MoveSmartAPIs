@@ -51,6 +51,7 @@ builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
 //builder.Services.AddScoped<consumablespurchaseorderRepo>(); // Kept for Kamal
 builder.Services.AddScoped<ApplicationRepo>(); // Kept for Kamal
 builder.Services.AddScoped<VehicleRepo>();
+builder.Services.AddScoped<BusRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
 
 
@@ -59,6 +60,7 @@ builder.Services.AddScoped<UserService>(); // For UserController
 builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
 builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
 builder.Services.AddScoped<VehicleService>();
+builder.Services.AddScoped<BusService>();
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

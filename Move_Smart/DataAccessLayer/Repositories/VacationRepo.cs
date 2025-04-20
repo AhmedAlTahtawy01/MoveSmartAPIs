@@ -325,7 +325,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsVacationExistsAsync(int vacationID)
         {
-            string query = @"SELECT Found=1 FROM Vacations
+            string query = @"SELECT 1 AS Found FROM Vacations
                             WHERE VacationID = @VacationID;";
 
             try

@@ -59,7 +59,8 @@ namespace BusinessLayer
                 return null;
             }
 
-            return await _vehicleRepo.AddNewVehicleAsync(dto);
+            dto.VehicleID = await _vehicleRepo.AddNewVehicleAsync(dto);
+            return dto.VehicleID;
         }
 
         public async Task<bool> UpdateVehicleAsync(VehicleDTO dto)
@@ -116,6 +117,16 @@ namespace BusinessLayer
         public async Task<short> GetNumberOfVehiclesWithStatusAsync(enVehicleStatus status)
         {
             return await _vehicleRepo.GetNumberOfVehiclesByStatusAsync(status);
+        }
+
+        public async Task<bool> IsVehicleExistsAsync(short vehicleID)
+        {
+            return await _vehicleRepo.IsVehicleExistsAsync(vehicleID);
+        }
+
+        public async Task<bool> IsVehicleExistsAsync(string plateNumbers)
+        {
+            return await _vehicleRepo.IsVehicleExistsAsync(plateNumbers);
         }
 
         public async Task<bool> DeleteVehicleAsync(string plateNumbers)

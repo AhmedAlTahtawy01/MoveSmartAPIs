@@ -58,12 +58,29 @@ namespace BusinessLayer
                 return null;
             }
 
-            return await _busRepo.AddNewBusAsync(dto);
+            dto.BusID = await _busRepo.AddNewBusAsync(dto);
+            return dto.BusID;
         }
 
         public async Task<bool> UpdateBusAsync(BusDTO dto)
         {
-           return await _busRepo.UpdateBusAsync(dto);
+            try
+            {
+                _ValidateBusDTO(dto);
+            }
+            catch (Exception ex)
+            {
+                _busLogger.LogError(ex, "Validation Failed For BusDTO");
+                return false;
+            }
+
+            if(!await _busRepo.IsBusExistsAsync(dto.BusID ?? 0))
+            {
+                _busLogger.LogError($"Bus with PlateNumbers {dto.Vehicle.PlateNumbers} doesn't exist.");
+                return false;
+            }
+
+            return await _busRepo.UpdateBusAsync(dto);
         }
 
         public async Task<List<BusDTO>> GetAllBusesAsync()
@@ -86,9 +103,29 @@ namespace BusinessLayer
             return await _busRepo.GetBusByIDAsync(id);
         }
 
+        public async Task<BusDTO?> GetBusByPlateNumbersAsync(string plateNumbers)
+        {
+            return await _busRepo.GetBusByPlateNumbersAsync(plateNumbers);
+        }
+
+        public async Task<bool> IsBusExists(byte busID)
+        {
+            return await _busRepo.IsBusExistsAsync(busID);
+        }
+
+        public async Task<bool> IsBusExists(string plateNumbers)
+        {
+            return await _busRepo.IsBusExistsAsync(plateNumbers);
+        }
+
         public async Task<bool> DeleteBusAsync(byte busID)
         {
             return await _busRepo.DeleteBusAsync(busID);
+        }
+
+        public async Task<bool> DeleteBusAsync(string plateNumbers)
+        {
+            return await _busRepo.DeleteBusAsync(plateNumbers);
         }
     }
 }

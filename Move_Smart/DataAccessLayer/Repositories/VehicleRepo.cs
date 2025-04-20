@@ -384,7 +384,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsVehicleExistsAsync(short vehicleID)
         {
-            string query = @"SELECT Found = 1 FROM Vehicles
+            string query = @"SELECT 1 AS Found FROM Vehicles
                             WHERE VehicleID = @VehicleID";
 
             try
@@ -406,6 +406,32 @@ namespace DataAccessLayer
                 Console.WriteLine($"Error: {ex.Message}");
             }
 
+            return false;
+        }
+
+        public async Task<bool> IsVehicleExistsAsync(string plateNumbers)
+        {
+            string query = @"SELECT 1 AS Found FROM Vehicles
+                            WHERE PlateNumbers = @PlateNumbers";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PlateNumbers", plateNumbers);
+                        
+                        await conn.OpenAsync();
+                        
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
             return false;
         }
 

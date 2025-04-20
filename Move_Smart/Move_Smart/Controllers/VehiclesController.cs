@@ -136,9 +136,7 @@ namespace Move_Smart.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<VehicleDTO>> AddNewVehicle(VehicleDTO dto)
         {
-            dto.VehicleID = await _service.AddNewVehicleAsync(dto);
-
-            if (dto.VehicleID == null)
+            if (await _service.AddNewVehicleAsync(dto) == null)
             {
                 return BadRequest("Failed to add new vehicle.");
             }
@@ -177,9 +175,14 @@ namespace Move_Smart.Controllers
                 return BadRequest($"Invalid vehicle ID [{vehicleID}].");
             }
 
+            if (!await _service.IsVehicleExistsAsync(vehicleID))
+            {
+                return NotFound($"Vehicle with ID [{vehicleID}] not found!");
+            }
+            
             if (!await _service.DeleteVehicleAsync(vehicleID))
             {
-                return NotFound($"Vehicle with ID [{vehicleID}] not found.");
+                return BadRequest($"Can't delete vehicle with ID [{vehicleID}]");
             }
 
             return Ok($"Vehicle with ID [{vehicleID}] deleted successfully");
@@ -197,9 +200,14 @@ namespace Move_Smart.Controllers
                 return BadRequest($"Invalid vehicle plate numbers [{plateNumbers}].");
             }
 
-            if (!await _service.DeleteVehicleAsync(plateNumbers))
+            if (!await _service.IsVehicleExistsAsync(plateNumbers))
             {
                 return NotFound($"Vehicle with plate numbers [{plateNumbers}] not found!");
+            }
+            
+            if (!await _service.DeleteVehicleAsync(plateNumbers))
+            {
+                return BadRequest($"Can't delete vehicle with plate numbers [{plateNumbers}]!");
             }
 
             return Ok($"Vehicle with plate numbers [{plateNumbers}] deleted successfully");

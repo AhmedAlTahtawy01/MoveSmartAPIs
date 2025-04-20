@@ -219,7 +219,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsPatrolExistsAsync(short patrolID)
         {
-            string query = @"SELECT Found=1 FROM Patrols
+            string query = @"SELECT 1 AS Found FROM Patrols
                             WHERE PatrolID = @PatrolID";
 
             try

@@ -493,7 +493,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsDriverExistsAsync(string nationalNo)
         {
-            string query = @"SELECT Found=1 FROM Drivers
+            string query = @"SELECT 1 AS Found FROM Drivers
                             WHERE NationalNo = @NationalNo;";
 
             try
@@ -520,7 +520,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsDriverExistsAsync(int driverID)
         {
-            string query = @"SELECT Found=1 FROM Drivers
+            string query = @"SELECT 1 AS Found FROM Drivers
                             WHERE DriverID = @DriverID;";
 
             try

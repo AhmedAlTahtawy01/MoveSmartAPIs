@@ -381,7 +381,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsEmployeeExists(string nationalNo)
         {
-            string query = @"SELECT Found=1 FROM Employees
+            string query = @"SELECT 1 AS Found FROM Employees
                             WHERE NationalNo = @NationalNo;";
 
             try
@@ -408,7 +408,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsEmployeeExistsAsync(int employeeID)
         {
-            string query = @"SELECT Found=1 FROM Employees
+            string query = @"SELECT 1 AS Found FROM Employees
                             WHERE EmployeeID = @EmployeeID;";
 
             try

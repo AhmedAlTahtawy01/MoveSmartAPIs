@@ -260,7 +260,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsMaintenanceApplicationExistsAsync(int maintenanceApplicationID)
         {
-            string query = @"SELECT Found=1 FROM MaintenanceApplications
+            string query = @"SELECT 1 AS Found FROM MaintenanceApplications
                             WHERE MaintenanceApplicationID = @MaintenanceApplicationID;";
 
             try

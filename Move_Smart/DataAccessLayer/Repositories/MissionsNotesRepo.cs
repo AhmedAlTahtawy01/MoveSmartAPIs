@@ -231,7 +231,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsMissionNoteExistsAsync(int noteID)
         {
-            string query = @"SELECT Found=1 FROM MissionsNotes
+            string query = @"SELECT 1 AS Found FROM MissionsNotes
                             WHERE NoteID = @NoteID;";
 
             try

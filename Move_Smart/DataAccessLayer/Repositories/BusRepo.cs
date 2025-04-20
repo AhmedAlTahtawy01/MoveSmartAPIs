@@ -36,10 +36,11 @@ namespace DataAccessLayer
         private readonly ILogger<BusRepo> _logger;
         private readonly VehicleRepo _vehicleRepo;
 
-        public BusRepo(ConnectionSettings connectionSettings, ILogger<BusRepo> logger)
+        public BusRepo(ConnectionSettings connectionSettings, VehicleRepo vehicleRepo, ILogger<BusRepo> logger)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _vehicleRepo = vehicleRepo ?? throw new ArgumentNullException(nameof(vehicleRepo));
         }
 
         public async Task<List<BusDTO>> GetAllBusesAsync()
@@ -117,6 +118,45 @@ namespace DataAccessLayer
                 Console.WriteLine($"Error: {ex.Message}");
             }
 
+            return null;
+        }
+
+        public async Task<BusDTO> GetBusByPlateNumbersAsync(string plateNumbers)
+        {
+            string query = @"SELECT * FROM Buses 
+                            WHERE VehicleID = (SELECT VehicleID FROM Vehicles WHERE PlateNumbers = @PlateNumbers)";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PlateNumbers", plateNumbers);
+                        
+                        await conn.OpenAsync();
+                        
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                return new BusDTO(
+                                    Convert.ToByte(reader["BusID"]),
+                                    Convert.ToByte(reader["Capacity"]),
+                                    Convert.ToByte(reader["AvailableSpace"]),
+                                    Convert.ToInt16(reader["VehicleID"]),
+                                    await _vehicleRepo.GetVehicleByIDAsync(Convert.ToInt16(reader["VehicleID"]))
+                                    );
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+            
             return null;
         }
 
@@ -297,9 +337,35 @@ namespace DataAccessLayer
             return false;
         }
 
+        public async Task<bool> DeleteBusAsync(string plateNumbers)
+        {
+            string query = @"DELETE FROM Buses
+                            WHERE VehicleID = (SELECT VehicleID FROM Vehicles WHERE PlateNumbers = @PlateNumbers)";
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PlateNumbers", plateNumbers);
+                        
+                        await conn.OpenAsync();
+                        
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+         
+            return false;
+        }
+
         public async Task<bool> IsBusExistsAsync(byte busID)
         {
-            string query = @"SELECT Found=1 FROM Buses
+            string query = @"SELECT 1 AS Found FROM Buses
                             WHERE BusID = @BusID";
 
             try
@@ -321,6 +387,33 @@ namespace DataAccessLayer
                 Console.WriteLine($"Error: {ex.Message}");
             }
 
+            return false;
+        }
+
+        public async Task<bool> IsBusExistsAsync(string plateNumbers)
+        {
+            string query = @"SELECT 1 AS Found FROM Buses
+                            WHERE VehicleID = (SELECT VehicleID FROM Vehicles WHERE PlateNumbers = @PlateNumbers)";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("PlateNumbers", plateNumbers);
+                        
+                        await conn.OpenAsync();
+                        
+                        return await cmd.ExecuteScalarAsync() != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+    
             return false;
         }
     }
