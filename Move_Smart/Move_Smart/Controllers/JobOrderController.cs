@@ -52,6 +52,7 @@ namespace Move_Smart.Controllers
         {
             if (id <= 0)
             {
+                _logger.LogWarning("Invalid job order ID.");
                 return BadRequest("Invalid jobOrder ID");
             }
 
@@ -109,6 +110,7 @@ namespace Move_Smart.Controllers
         {
             if (driverId <= 0)
             {
+                _logger.LogWarning("Invalid driver ID.");
                 return BadRequest("Invalid driver ID");
             }
             try
@@ -118,10 +120,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching job orders by driver ID");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job orders found for driver ID {driverId}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -252,7 +256,7 @@ namespace Move_Smart.Controllers
             try
             {
                 var jobOrderId = await _service.CreateJobOrderAsync(jobOrder);
-                return CreatedAtAction(nameof(GetJobOrderById), new { id = jobOrderId }, jobOrder);
+                return CreatedAtAction(nameof(GetJobOrderById), new { jobOrderId }, jobOrder);
             }
             catch (ArgumentException ex)
             {
@@ -303,6 +307,7 @@ namespace Move_Smart.Controllers
         {
             if (id <= 0)
             {
+                _logger.LogWarning("Invalid job order ID.");
                 return BadRequest("Invalid job order ID");
             }
 
@@ -313,10 +318,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while deleting job order");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job order found with ID {id} for deletion");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
