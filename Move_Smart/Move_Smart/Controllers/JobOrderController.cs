@@ -48,7 +48,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetJobOrderById(int id)
+        public async Task<IActionResult> GetJobOrderById([FromRoute] int id)
         {
             if (id <= 0)
             {
@@ -63,10 +63,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching job order by ID");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job order found with ID {id}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -77,7 +79,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpGet("vehicle/{id}")]
-        public async Task<IActionResult> GetJobOrdersByVehicleId(int vehicleId)
+        public async Task<IActionResult> GetJobOrdersByVehicleId([FromRoute] int vehicleId)
         {
             if (vehicleId <= 0)
             {
@@ -106,7 +108,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpGet("driver/{id}")]
-        public async Task<IActionResult> GetJobOrdersByDriverId(int driverId)
+        public async Task<IActionResult> GetJobOrdersByDriverId([FromRoute] int driverId)
         {
             if (driverId <= 0)
             {
@@ -136,10 +138,11 @@ namespace Move_Smart.Controllers
         }
 
         [HttpGet("startdate/{startDate}")]
-        public async Task<IActionResult> GetJobOrdersByStartDate(DateTime startDate)
+        public async Task<IActionResult> GetJobOrdersByStartDate([FromRoute] DateTime startDate)
         {
             if (startDate == default)
             {
+                _logger.LogWarning("Invalid start date.");
                 return BadRequest("Invalid start date");
             }
             try
@@ -149,10 +152,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching job orders by start date");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job orders found with start date {startDate}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -167,6 +172,7 @@ namespace Move_Smart.Controllers
         {
             if (string.IsNullOrWhiteSpace(destination))
             {
+                _logger.LogWarning("Invalid destination.");
                 return BadRequest("Invalid destination");
             }
             try
@@ -176,10 +182,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching job orders by destination");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job orders found with destination {destination}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -260,10 +268,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogWarning(ex, "Invalid argument provided.");
                 return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogWarning($"Invalid Data {ex.Message}");
                 return Conflict(ex.Message);
             }
             catch (Exception ex)
@@ -274,7 +284,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateJobOrder(int id, [FromBody] JobOrderDTO jobOrder)
+        public async Task<IActionResult> UpdateJobOrder([FromRoute] int id, [FromBody] JobOrderDTO jobOrder)
         {
             if (id <= 0 || jobOrder == null || id != jobOrder.OrderId)
                 return BadRequest("Invalid job order ID or job order data");
@@ -284,15 +294,17 @@ namespace Move_Smart.Controllers
 
             try
             {
-                await _service.UpdateJobOrderAsync(jobOrder);
-                return NoContent();
+                var updated = await _service.UpdateJobOrderAsync(jobOrder);
+                return Ok(updated);
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while updating job order");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogError(ex, $"No job order found with ID {id} for update");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -303,7 +315,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteJobOrder(int id)
+        public async Task<IActionResult> DeleteJobOrder([FromRoute] int id)
         {
             if (id <= 0)
             {

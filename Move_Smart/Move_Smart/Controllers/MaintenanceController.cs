@@ -78,7 +78,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetMaintenanceById(int id)
+        public async Task<IActionResult> GetMaintenanceById([FromRoute] int id)
         {
             if (id <= 0)
             {

@@ -100,7 +100,7 @@ namespace BusinessLogicLayer.Services
             return await _repo.GetMissionsByNoteIdAsync(missionNoteId);
         }
 
-        public async Task<List<MissionDTO>> GetMissionsByVehiclesIdAsync(int missionVehicleId)
+        public async Task<List<MissionDTO>> GetMissionsByVehicleIdAsync(int missionVehicleId)
         {
             if (missionVehicleId <= 0)
             {

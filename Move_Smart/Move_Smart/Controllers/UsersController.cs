@@ -41,7 +41,7 @@ namespace Move_Smart.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
             if (id <= 0)
             {
