@@ -45,6 +45,10 @@ builder.Services.AddSingleton<ConnectionSettings>(sp =>
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<ApplicationRepo>();
 builder.Services.AddScoped<JobOrderRepo>();
+builder.Services.AddScoped<MaintenanceRepo>();
+builder.Services.AddScoped<MissionRepo>();
+builder.Services.AddScoped<MissionsJobOrderRepo>();
+builder.Services.AddScoped<MissionsVehicleRepo>();
 builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
 builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
 //builder.Services.AddScoped<SparePartsPurchaseOrderRepo>(); // Kept for Kamal
@@ -59,6 +63,10 @@ builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<UserService>(); // For UserController
 builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
 builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
+builder.Services.AddScoped<MaintenanceService>(); // For MaintenanceController
+builder.Services.AddScoped<MissionService>(); // For MissionController
+builder.Services.AddScoped<MissionsJobOrderService>(); // For MissionsJobOrderController
+builder.Services.AddScoped<MissionsVehicleService>(); // For MissionsVehicleController
 builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<BusService>();
 
