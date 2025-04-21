@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Move_Smart.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class VehicleConsumableController : ControllerBase
     {
         private readonly Vehicleconsumable _vehicleconsumable;
@@ -42,6 +42,12 @@ namespace Move_Smart.Controllers
         public async Task<IActionResult> UpdateSparePart([FromBody] Vehicleconsumable consume)
         {
             await _vehicleconsumable.UpdateVehicleConsumable(consume);
+            return Ok();
+        }
+        [HttpPut("{part}")]
+        public async Task<IActionResult> UpdateVehicleConumable([FromRoute]string part, [FromBody] Vehicleconsumable consume)
+        {
+            await _vehicleconsumable.UpdateConsumableAsynchronously(part, consume);
             return Ok();
         }
     }

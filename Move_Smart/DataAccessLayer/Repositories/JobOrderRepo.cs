@@ -114,7 +114,7 @@ namespace DataAccessLayer.Repositories
 
             const string query = @"
                 SELECT j.OrderID, j.VehicleID, j.DriverID, j.OrderStartDate, j.OrderEndDate, j.OrderStartTime, j.OrderEndTime, j.Destination, j.KilometersCounterBeforeOrder, j.KilometersCounterAfterOrder,
-                       a.ApplicationID, a.CreationDate, a.Status, a.ApplicationType, a.ApplicationDescription, a.CreatedByUser
+                       a.ApplicationID, a.CreationDate, a.Status, a.ApplicationType, a.ApplicationDescription, a.CreatedByUserID
                 FROM joborders j
                 JOIN applications a ON j.ApplicationID = a.ApplicationID
                 LIMIT @Offset, @PageSize";
@@ -135,7 +135,7 @@ namespace DataAccessLayer.Repositories
         {
             const string query = @"
                 SELECT j.OrderID, j.VehicleID, j.DriverID, j.OrderStartDate, j.OrderEndDate, j.OrderStartTime, j.OrderEndTime, j.Destination, j.KilometersCounterBeforeOrder, j.KilometersCounterAfterOrder,
-                       a.ApplicationID, a.CreationDate, a.Status, a.ApplicationType, a.ApplicationDescription, a.CreatedByUser
+                       a.ApplicationID, a.CreationDate, a.Status, a.ApplicationType, a.ApplicationDescription, a.CreatedByUserID
                 FROM joborders j
                 JOIN applications a ON j.ApplicationID = a.ApplicationID
                 WHERE j.OrderID = @orderId";
@@ -151,7 +151,7 @@ namespace DataAccessLayer.Repositories
         {
             string query = @"
                 SELECT j.OrderID, j.VehicleID, j.DriverID, j.OrderStartDate, j.OrderEndDate, j.OrderStartTime, j.OrderEndTime, j.Destination, j.KilometersCounterBeforeOrder, j.KilometersCounterAfterOrder,
-                       a.ApplicationID, a.CreationDate, a.Status, a.ApplicationType, a.ApplicationDescription, a.CreatedByUser
+                       a.ApplicationID, a.CreationDate, a.Status, a.ApplicationType, a.ApplicationDescription, a.CreatedByUserID
                 FROM joborders j
                 JOIN applications a ON j.ApplicationID = a.ApplicationID";
 

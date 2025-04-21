@@ -11,13 +11,13 @@ namespace DataAccessLayer.Repositories
 
     public partial class Vehicleconsumable
     {
-        public sbyte ConsumableId { get; set; }
+        public int ConsumableId { get; set; }
 
         public string ConsumableName { get; set; }
 
         public int ValidityLength { get; set; }
 
-        public short Quantity { get; set; }
+        public int Quantity { get; set; }
 
         public virtual ICollection<Consumablespurchaseorder> Consumablespurchaseorders { get; set; } = new List<Consumablespurchaseorder>();
 

@@ -16,19 +16,21 @@ namespace DataAccessLayer.Repositories
 
     public enum enStatus
     {
-        Confirmed,
-        Rejected,
-        Pending,
-        Canceled
+        Confirmed = 1,
+        Rejected = 2,
+        Pending = 3,
+        Canceled = 4
     }
 
     public enum enApplicationType
     {
-        JobOrder,
-        MissionNote,
-        SparePartWithdrawApplication,
-        ConsumablePurchaseOrder,
-        MaintenanceApplication
+        JobOrder = 1,
+        MissionNote = 2,
+        SparePartWithdrawApplication = 3,
+        SparePartPurchaseOrder = 4,
+        ConsumableWithdrawApplication = 5,
+        ConsumablePurchaseOrder = 6,
+        MaintenanceApplication = 7
     }
     [Table("applications")]
     public class ApplicationDTO

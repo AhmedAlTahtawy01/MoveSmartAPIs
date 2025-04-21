@@ -45,6 +45,7 @@ namespace Move_Smart.Controllers
         {
             if (id <= 0)
             {
+                _logger.LogWarning("Invalid user ID: {Id}", id);
                 return BadRequest("Invalid user ID");
             }
 
@@ -55,10 +56,12 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error occurred while fetching user with ID: {Id}", id);
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogWarning(ex, "User not found with ID: {Id}", id);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
