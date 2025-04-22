@@ -13,7 +13,7 @@ namespace DataAccessLayer.Repositories
 
         public int ApplicationId { get; set; }
 
-        public sbyte RequiredItem { get; set; }
+        public short RequiredItem { get; set; }
 
         public short RequiredQuantity { get; set; }
 

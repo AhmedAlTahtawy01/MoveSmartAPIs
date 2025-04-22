@@ -44,5 +44,11 @@ namespace Move_Smart.Controllers
             await _vehicleconsumable.UpdateVehicleConsumable(consume);
             return Ok();
         }
+        [HttpPut("{name}")]
+        public async Task<IActionResult> UpdateConsume(string name , [FromBody]Vehicleconsumable consume)
+        {
+            await _vehicleconsumable.UpdateConsumableAsynchronously(name, consume);
+            return Ok();
+        }
     }
 }

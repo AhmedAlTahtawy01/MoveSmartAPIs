@@ -11,7 +11,7 @@ namespace DataAccessLayer.Repositories
 
     public partial class Vehicleconsumable
     {
-        public sbyte ConsumableId { get; set; }
+        public short ConsumableId { get; set; }
 
         public string ConsumableName { get; set; }
 

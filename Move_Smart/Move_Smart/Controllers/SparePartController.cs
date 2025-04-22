@@ -46,7 +46,7 @@ namespace Move_Smart.Controllers
             return Ok();
         }
         [HttpPut("{PartName}")]
-        public async Task<IActionResult> UpdateByNameSparePart(string PartName, Sparepart spare)
+        public async Task<IActionResult> UpdateByNameSparePart(string PartName,[FromBody] Sparepart spare)
         {
             await _isparepart.UpdateByNameSparePart(PartName, spare);
             return Ok();
