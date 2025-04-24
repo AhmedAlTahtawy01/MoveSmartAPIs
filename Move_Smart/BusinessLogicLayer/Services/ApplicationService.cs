@@ -89,7 +89,7 @@ namespace BusinessLayer.Services
             return application;
         }
 
-       public async Task<List<ApplicationDTO>> GetApplicationsByApplicationTypeAsync(enApplicationType applicationType)
+        public async Task<List<ApplicationDTO>> GetApplicationsByApplicationTypeAsync(enApplicationType applicationType)
         {
             _logger.LogInformation($"Retrieving applications with type {applicationType}.");
             return await _repo.GetApplicationsByApplicationTypeAsync(applicationType);
@@ -141,6 +141,21 @@ namespace BusinessLayer.Services
 
             _logger.LogInformation($"Updating status of application with ID {applicationId} to {status}.");
             return await _repo.UpdateStatusAsync(applicationId, status);
+        }
+
+        protected async Task<bool> ApproveApplicationAsync(int applicationId)
+        {
+            return await UpdateStatusAsync(applicationId, enStatus.Confirmed);
+        }
+
+        protected async Task<bool> CancelApplicationAsync(int applicationId)
+        {
+            return await UpdateStatusAsync(applicationId, enStatus.Canceled);
+        }
+
+        protected async Task<bool> RejectApplicationAsync(int applicationId)
+        {
+            return await UpdateStatusAsync(applicationId, enStatus.Rejected);
         }
 
         public async Task<bool> DeleteApplicationAsync(int applicationId)

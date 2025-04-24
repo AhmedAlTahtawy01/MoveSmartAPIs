@@ -34,7 +34,7 @@ namespace BusinessLayer
                 throw new ArgumentException("Name, NationalNo, JobTitle, Phone Can't Be Empty.");
             }
 
-            if (dto.NationalNo.Any(char.IsLetter))
+            if (dto.NationalNo.Any(ch => char.IsLetter(ch)))
             {
                 _employeeLogger.LogError("NationalNo Must Be 14 Numbers.");
                 throw new ArgumentException("NationalNo Must Be 14 Numbers.");
@@ -46,7 +46,7 @@ namespace BusinessLayer
                 throw new ArgumentException("NationalNo Must Be 14 Numbers.");
             }
 
-            if (dto.Phone.Any(char.IsLetter))
+            if (dto.Phone.Any(ch => char.IsLetter(ch)))
             {
                 _employeeLogger.LogError("Phone Must Be 11 Numbers.");
                 throw new ArgumentException("Phone Must Be 11 Numbers.");
@@ -71,13 +71,14 @@ namespace BusinessLayer
                 return null;
             }
 
-            if(await _employeeRepo.IsEmployeeExists(dto.NationalNo))
+            if(await _employeeRepo.IsEmployeeExistsAsync(dto.NationalNo))
             {
                 _employeeLogger.LogError($"Employee with NationalNo [{dto.NationalNo}] already exists.");
                 return null;
             }
 
-            return await _employeeRepo.AddNewEmployeeAsync(dto);
+            dto.EmployeeID = await _employeeRepo.AddNewEmployeeAsync(dto);
+            return dto.EmployeeID;
         }
 
         public async Task<bool> UpdateEmployeeAsync(EmployeeDTO dto)
@@ -92,9 +93,9 @@ namespace BusinessLayer
                 return false;
             }
 
-            if (!await _employeeRepo.IsEmployeeExists(dto.NationalNo))
+            if (!await _employeeRepo.IsEmployeeExistsAsync(dto.EmployeeID ?? 0))
             {
-                _employeeLogger.LogError($"Employee with NationalNo [{dto.NationalNo}] doesn't exist.");
+                _employeeLogger.LogError($"Employee with ID [{dto.EmployeeID}] doesn't exist.");
                 return false;
             }
 
@@ -131,9 +132,24 @@ namespace BusinessLayer
             return await _employeeRepo.DeleteEmployeeAsync(nationalNo);
         }
 
+        public async Task<bool> DeleteEmployeeAsync(int employeeID)
+        {
+            return await _employeeRepo.DeleteEmployeeAsync(employeeID);
+        }
+
         public async Task<bool> IsTransportationSubscriptionValidAsync(int employeeID)
         {
             return await _employeeRepo.IsEmployeeTransportationSubscriptionValidAsync(employeeID);
+        }
+
+        public async Task<bool> IsEmployeeExistsAsync(string nationalNo)
+        {
+            return await _employeeRepo.IsEmployeeExistsAsync(nationalNo);
+        }
+
+        public async Task<bool> IsEmployeeExistsAsync(int employeeID)
+        {
+            return await _employeeRepo.IsEmployeeExistsAsync(employeeID);
         }
     }
 }

@@ -436,6 +436,33 @@ namespace DataAccessLayer
             return false;
         }
 
+        public async Task<bool> DeleteDriverAsync(int driverID)
+        {
+            string query = @"DELETE FROM Drivers
+                            WHERE DriverID = @DriverID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("DriverID", driverID);
+            
+                        await conn.OpenAsync();
+                        
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return false;
+        }
+
         public async Task<short> GetNumberOfDriversAsync()
         {
             List<DriverDTO> driversList = new List<DriverDTO>();

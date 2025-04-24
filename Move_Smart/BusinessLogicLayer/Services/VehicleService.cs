@@ -20,7 +20,7 @@ namespace BusinessLayer
             _vehicleLogger = vehicleLogger ?? throw new ArgumentNullException(nameof(vehicleLogger), "Logger cannot be null.");
         }
 
-        private void _ValidateVehicleDTO(VehicleDTO dto)
+        protected void _ValidateVehicleDTO(VehicleDTO dto)
         {
             if(dto == null)
             {

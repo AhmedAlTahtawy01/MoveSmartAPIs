@@ -352,6 +352,33 @@ namespace DataAccessLayer
             return false;
         }
 
+        public async Task<bool> DeleteEmployeeAsync(int employeeID)
+        {
+            string query = @"DELETE FROM Employees
+                            WHERE EmployeeID = @EmployeeID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("EmployeeID", employeeID);
+            
+                        await conn.OpenAsync();
+                        
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return false;
+        }
+
         public async Task<bool> IsEmployeeTransportationSubscriptionValidAsync(int employeeID)
         {
             string query = @"SELECT Valid = 1 FROM Employees
@@ -379,7 +406,7 @@ namespace DataAccessLayer
             return false;
         }
 
-        public async Task<bool> IsEmployeeExists(string nationalNo)
+        public async Task<bool> IsEmployeeExistsAsync(string nationalNo)
         {
             string query = @"SELECT 1 AS Found FROM Employees
                             WHERE NationalNo = @NationalNo;";

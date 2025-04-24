@@ -42,7 +42,7 @@ namespace DataAccessLayer.Repositories
         public enApplicationType ApplicationType { get; set; }
         public string ApplicationDescription { get; set; }
         public int CreatedByUserID { get; set; }
-      // this two commands for me !! just for testing only 😊✨
+      // this two commands for me !! just for testing onlyyyyy 😊✨
         public virtual ICollection<Sparepartspurchaseorder> Sparepartspurchaseorders { get; set; } = new List<Sparepartspurchaseorder>();
 
         public virtual ICollection<Sparepartswithdrawapplication> Sparepartswithdrawapplications { get; set; } = new List<Sparepartswithdrawapplication>();

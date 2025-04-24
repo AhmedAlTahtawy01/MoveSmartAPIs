@@ -108,26 +108,19 @@ namespace Move_Smart.Controllers
                 return BadRequest("BusDTO can't be null.");
             }
 
-            dto.VehicleID = await _service.AddNewVehicleAsync(dto.Vehicle) ?? 0;
-
-            if(dto.VehicleID == 0)
+            if (await _service.AddNewBusAsync(dto) == null)
             {
-                return BadRequest("Failed to add new vehicle.");
+                return BadRequest($"Failed to add new bus with plate numbers [{dto.Vehicle.PlateNumbers}]");
             }
 
-            if(await _service.AddNewBusAsync(dto) == null)
-            {
-                await _service.DeleteVehicleAsync(dto.VehicleID);
-                return BadRequest("Failed to add new bus.");
-            }
-
-            return CreatedAtRoute("GetBusByID", new { busID = dto.BusID}, dto);
+            return CreatedAtRoute("GetBusByPlateNumbers", new { plateNumbers = dto.Vehicle.PlateNumbers }, dto);
         }
 
 
         [HttpPut(Name = "UpdateBus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateBus(BusDTO dto)
         {
             if (dto == null)
@@ -135,22 +128,17 @@ namespace Move_Smart.Controllers
                 return BadRequest("BusDTO can't be null.");
             }
 
-            if (dto.BusID <= 0)
+            if (!await _service.IsBusExists(dto.BusID ?? 0))
             {
-                return BadRequest($"Invalid bus ID [{dto.BusID}]");
-            }
-
-            if (!await _service.UpdateVehicleAsync(dto.Vehicle))
-            {
-                return BadRequest($"Failed to update vehicle with ID [{dto.VehicleID}]");
+                return NotFound($"Bus with ID [{dto.BusID}] not found!");
             }
 
             if (!await _service.UpdateBusAsync(dto))
             {
-                return BadRequest($"Failed to update bus with ID [{dto.BusID}]");
+                return BadRequest($"Failed to update bus with plate numbers [{dto.Vehicle.PlateNumbers}]");
             }
 
-            return Ok($"Bus with plate numbers [{dto.Vehicle.PlateNumbers}] updated successfully");
+            return Ok($"Bus with ID [{dto.BusID}] updated successfully");
         }
 
 
@@ -172,7 +160,15 @@ namespace Move_Smart.Controllers
 
             if (!await _service.DeleteBusAsync(busID))
             {
-                return BadRequest($"Can't delete bus with ID [{busID}]");
+                if(await _service.IsBusExists(busID))
+                {
+                    return BadRequest($"Can't delete bus with ID [{busID}]");
+                }
+
+                if (await _service.IsVehicleExistsAsync(busID))
+                {
+                    return BadRequest($"Can't delete vehicle for Bus with ID [{busID}]");
+                }
             }
             
             return Ok($"Bus with ID [{busID}] deleted successfully");
@@ -197,7 +193,15 @@ namespace Move_Smart.Controllers
             
             if (!await _service.DeleteBusAsync(plateNumbers))
             {
-                return BadRequest($"Can't delete bus with plate numbers [{plateNumbers}]");
+                if(await _service.IsBusExists(plateNumbers))
+                {
+                    return BadRequest($"Can't delete bus with plate numbers [{plateNumbers}]");
+                }
+
+                if(await _service.IsVehicleExistsAsync(plateNumbers))
+                {
+                    return BadRequest($"Can't delete vehicle for Bus with plate numbers [{plateNumbers}]");
+                }
             }
     
             return Ok($"Bus with plate numbers [{plateNumbers}] deleted successfully");

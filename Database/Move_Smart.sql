@@ -230,7 +230,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- Table `move_smart`.`drivers`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `move_smart`.`drivers` (
-  `DriverID` INT NOT NULL,
+  `DriverID` INT NOT NULL AUTO_INCREMENT,
   `NationalNo` CHAR(14) NOT NULL,
   `Name` VARCHAR(150) CHARACTER SET 'utf8mb3' NOT NULL,
   `Phone` CHAR(11) NOT NULL,

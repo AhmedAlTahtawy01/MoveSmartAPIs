@@ -11,7 +11,11 @@ namespace DataAccessLayer.Repositories
 
     public partial class Vehicleconsumable
     {
+//<<<<<<< HEAD
         public int ConsumableId { get; set; }
+        //=======
+        //public short ConsumableId { get; set; }
+//>>>>>>> 2ec77d67c5319da35c5c074b4aa94fd5f5c4a0b6
 
         public string ConsumableName { get; set; }
 

@@ -26,8 +26,8 @@ namespace BusinessLogicLayer.Services
             }
 
             // Create Application via ApplicationService
-            int appId = await _applicationService.CreateApplicationAsync(order.Application);
-            order.ApplicationId = appId;
+            //int appId = await _applicationService.CreateApplicationAsync(order.Application);
+            //order.ApplicationId = appId;
 
             // Check if order already exists
             var existing = await _appDbContext.Sparepartspurchaseorders
@@ -37,6 +37,8 @@ namespace BusinessLogicLayer.Services
             {
                 throw new InvalidOperationException("Spare part order already exists.");
             }
+
+            order.Application.Status = enStatus.Pending;
 
             _appDbContext.Sparepartspurchaseorders.Add(order);
             await _appDbContext.SaveChangesAsync();

@@ -148,11 +148,17 @@ namespace Move_Smart.Controllers
         [HttpPut(Name = "UpdateVehicle")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateVehicle(VehicleDTO dto)
         {
             if (dto.VehicleID <= 0)
             {
                 return BadRequest($"Invalid vehicle ID [{dto.VehicleID}].");
+            }
+
+            if(!await _service.IsVehicleExistsAsync(dto.VehicleID ?? 0))
+            {
+                return NotFound($"Vehicle with ID [{dto.VehicleID}] not found!");
             }
 
             if (!await _service.UpdateVehicleAsync(dto))
