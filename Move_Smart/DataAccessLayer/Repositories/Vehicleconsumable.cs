@@ -81,7 +81,7 @@ namespace DataAccessLayer.Repositories
         }
         public async Task<Vehicleconsumable> UpdateConsumableAsynchronously(string name , Vehicleconsumable consumable)
         {
-            var VehicleConsumable = await _appDBContext.Vehicleconsumables.FindAsync(name);
+            var VehicleConsumable = await _appDBContext.Vehicleconsumables.FirstOrDefaultAsync(v=>v.ConsumableName == name);
             if (VehicleConsumable== null)
             {
                 throw new InvalidOperationException($"Unable to find {name}");
