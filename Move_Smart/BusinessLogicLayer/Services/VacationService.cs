@@ -66,7 +66,8 @@ namespace BusinessLayer
                 return null;
             }
 
-            return await _vacationRepo.AddNewVacationAsync(dto);
+            dto.VacationID = await _vacationRepo.AddNewVacationAsync(dto);
+            return dto.VacationID;
         }
 
         public async Task<bool> UpdateVacationAsync(VacationDTO dto)
@@ -100,9 +101,9 @@ namespace BusinessLayer
             return await _vacationRepo.GetAllVacationsForDriverAsync(driverID);
         }
 
-        public async Task<List<VacationDTO>> GetAllFutureVacationsForDriverAsync(int driverID)
+        public async Task<List<VacationDTO>> GetAllValidVacationsForDriverAsync(int driverID)
         {
-            return await _vacationRepo.GetAllFutureVacationsForDriverAsync(driverID);
+            return await _vacationRepo.GetAllValidVacationsForDriverAsync(driverID);
         }
 
         public async Task<VacationDTO?> GetVacationByIDAsync(int vacationID)
@@ -113,6 +114,11 @@ namespace BusinessLayer
         public async Task<bool> IsDriverInVacationAsync(int driverID)
         {
             return await _vacationRepo.IsDriverinVacationAsync(driverID);
+        }
+
+        public async Task<bool> IsVacationExistsAsync(int vacationID)
+        {
+            return await _vacationRepo.IsVacationExistsAsync(vacationID);
         }
 
         public async Task<bool> DeleteVacationAsync(int vacationID)
