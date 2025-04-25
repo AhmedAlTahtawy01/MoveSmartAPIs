@@ -109,8 +109,10 @@ namespace BusinessLogicLayer.Services
                 .Include(o => o.Application)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
         }
-
-
+        public async Task<int> CountAllSparePartPurchaseOrdersAsync()
+        {
+            return await _appDbContext.Sparepartspurchaseorders.CountAsync();
+        }
 
     }
 }

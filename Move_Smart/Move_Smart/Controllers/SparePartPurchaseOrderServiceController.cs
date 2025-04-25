@@ -47,5 +47,12 @@ namespace Move_Smart.Controllers
             var data = await _sparePartPurchaseOrderService.GetSparePartPurchaseOrderByID(ID);
             return Ok(data);
         }
+        [HttpGet("count")]
+        public async Task<IActionResult> CountOrders()
+        {
+            var count = await _sparePartPurchaseOrderService.CountAllSparePartPurchaseOrdersAsync();
+            return Ok(count);
+        }
+
     }
 }

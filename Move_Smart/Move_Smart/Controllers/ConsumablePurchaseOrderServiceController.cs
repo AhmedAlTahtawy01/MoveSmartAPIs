@@ -44,5 +44,12 @@ namespace Move_Smart.Controllers
             var data = await _consumablespurchaseorderService.GetConsumablePurchaseOrderByID(ID);
             return Ok(data);
         }
+        [HttpGet("count")]
+        public async Task<IActionResult> CountOrders()
+        {
+            var count = await _consumablespurchaseorderService.CountAllConsumablePurchaseOrdersAsync();
+            return Ok(count);
+        }
+
     }
 }

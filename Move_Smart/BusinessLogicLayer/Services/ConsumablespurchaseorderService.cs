@@ -25,7 +25,6 @@ namespace BusinessLogicLayer.Services
             return await _appDBContext.Consumablespurchaseorders
                     .AsNoTracking()
                     .Include(sp => sp.Application)
-                    //.Include(sp => sp.RequiredItemNavigation)
                     .ToListAsync();
         }
         public async Task<Consumablespurchaseorder> GetConsumablePurchaseOrderByID(int ID)
@@ -64,61 +63,61 @@ namespace BusinessLogicLayer.Services
             
             await _appDBContext.SaveChangesAsync();
         }
-        public async Task AddConsumablePurchaseOrderAsync(Consumablespurchaseorder order)
-        {
-            if (order == null || order.Application == null)
+            public async Task AddConsumablePurchaseOrderAsync(Consumablespurchaseorder order)
             {
-                throw new ArgumentNullException("Order or Application data is missing.");
+                if (order == null || order.Application == null)
+                {
+                    throw new ArgumentNullException("Order or Application data is missing.");
+                }
+                // First, add and save the Application
+                var application = order.Application;
+                application.Status = enStatus.Pending;
+
+                int appId = await _applicationService.CreateApplicationAsync(application);
+                order.ApplicationId = appId;
+
+                // Now link the ApplicationId to the order
+                //order.ApplicationId = application.ApplicationId;
+
+                // Ensure the order doesn’t already exist
+                var existingOrder = await _appDBContext.Consumablespurchaseorders
+                    .FirstOrDefaultAsync(x => x.OrderId == order.OrderId);
+
+                if (existingOrder != null)
+                {
+                    throw new InvalidOperationException("Order already exists.");
+                }
+
+                // the problem of navi ....
+                order.Application = null;
+
+                _appDBContext.Consumablespurchaseorders.Add(order);
+                await _appDBContext.SaveChangesAsync();
             }
-            // First, add and save the Application
-            var application = order.Application;
-            application.Status = enStatus.Pending;
-
-            int appId = await _applicationService.CreateApplicationAsync(application);
-            order.ApplicationId = appId;
-
-            // Now link the ApplicationId to the order
-            //order.ApplicationId = application.ApplicationId;
-
-            // Ensure the order doesn’t already exist
-            var existingOrder = await _appDBContext.Consumablespurchaseorders
-                .FirstOrDefaultAsync(x => x.OrderId == order.OrderId);
-
-            if (existingOrder != null)
+            public async Task DeleteConsumablePurchaseOrder(int ID)
             {
-                throw new InvalidOperationException("Order already exists.");
+                var order = await _appDBContext.Consumablespurchaseorders
+                    .Include(o => o.Application)
+                    .FirstOrDefaultAsync(o => o.OrderId == ID);
+
+
+                if (order == null)
+                {
+                    throw new InvalidOperationException(" Order not found.");
+                }
+                // Remove the order itself
+                _appDBContext.Consumablespurchaseorders.Remove(order);
+
+                // Commit the changes
+                await _appDBContext.SaveChangesAsync();
+                // Remove the Application if it exists
+                if (order.Application != null)
+                {
+                    await _applicationService.DeleteApplicationAsync(order.Application.ApplicationId);
+                }
+                await _appDBContext.SaveChangesAsync();
+
             }
-
-            // the problem of navi ....
-            order.Application = null;
-
-            _appDBContext.Consumablespurchaseorders.Add(order);
-            await _appDBContext.SaveChangesAsync();
-        }
-        public async Task DeleteConsumablePurchaseOrder(int ID)
-        {
-            var order = await _appDBContext.Consumablespurchaseorders
-                .Include(o => o.Application)
-                .FirstOrDefaultAsync(o => o.OrderId == ID);
-
-
-            if (order == null)
-            {
-                throw new InvalidOperationException(" Order not found.");
-            }
-            // Remove the order itself
-            _appDBContext.Consumablespurchaseorders.Remove(order);
-
-            // Commit the changes
-            await _appDBContext.SaveChangesAsync();
-            // Remove the Application if it exists
-            if (order.Application != null)
-            {
-                await _applicationService.DeleteApplicationAsync(order.Application.ApplicationId);
-            }
-            await _appDBContext.SaveChangesAsync();
-
-        }
         public async Task UpdateConsumablePurchaseOrderAsync(Consumablespurchaseorder updatedOrder)
         {
             var existingOrder = await _appDBContext.Consumablespurchaseorders
@@ -146,5 +145,10 @@ namespace BusinessLogicLayer.Services
 
             await _appDBContext.SaveChangesAsync();
         }
+        public async Task<int> CountAllConsumablePurchaseOrdersAsync()
+        {
+            return await _appDBContext.Consumablespurchaseorders.CountAsync();
+        }
+
     }
 }

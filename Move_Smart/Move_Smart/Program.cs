@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BusinessLogicLayer.Services;
 using DataAccessLayer;
 using BusinessLayer;
+using Move_Smart.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.AddScoped<EmployeeRepo>();
 builder.Services.AddScoped<PatrolRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<ConsumablespurchaseorderService>();
+builder.Services.AddScoped<CosumableWithdawApplicationService>();
 
 
 

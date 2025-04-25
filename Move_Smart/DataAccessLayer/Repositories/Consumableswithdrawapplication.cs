@@ -21,68 +21,9 @@ namespace DataAccessLayer.Repositories
         public ulong ApprovedByGeneralSupervisor { get; set; }
 
         public ulong ApprovedByGeneralManager { get; set; }
+        public virtual ApplicationDTO Application { get; set; }
 
         public virtual Vehicleconsumable Consumable { get; set; }
     }
-    class ConsumablesWithdrawApplicationRepo
-    {
-
-        private readonly appDBContext _appDBContext;
-        public ConsumablesWithdrawApplicationRepo(appDBContext appDBContext)
-        {
-            _appDBContext = appDBContext;
-        }
-        public Task AddConsumablesWithdrawApplication(Consumableswithdrawapplication order)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task ApproveRequestAsync(int WithdrawApplicationID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task CancelRequestAsync(int WithdrawApplicationID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task CompleteRequestAsync(int WithdrawApplicationID, DateTime endDate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task DeleteConsumablesWithdrawApplication(int WithdrawApplicationID)
-        {
-            var application = await _appDBContext.Consumableswithdrawapplications.AsNoTracking().FirstOrDefaultAsync(id => id.WithdrawApplicationId == WithdrawApplicationID);
-            if (application == null)
-            {
-                throw new InvalidOperationException(" Cannot be null");
-            }
-            _appDBContext.Consumableswithdrawapplications.Remove(application);
-            await _appDBContext.SaveChangesAsync();
-        }
-
-        public async Task<List<Consumableswithdrawapplication>> GetAllConsumablesWithdrawApplication()
-        {
-            return await _appDBContext.Consumableswithdrawapplications.AsNoTracking().ToListAsync();
-        }
-
-        public async Task<Consumableswithdrawapplication> GetConsumablesWithdrawApplicationById(int WithdrawApplicationID)
-        {
-            return await _appDBContext.Consumableswithdrawapplications.AsNoTracking().FirstAsync(id => WithdrawApplicationID == id.WithdrawApplicationId);
-        }
-
-        public Task RejectRequestAsync(int WithdrawApplicationID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task UpdateConsumablesWithdrawApplication(Consumableswithdrawapplication order)
-        {
-            _appDBContext.Consumableswithdrawapplications.Update(order);
-            await _appDBContext.SaveChangesAsync();
-        }
-
-    }
+    
 }
