@@ -108,5 +108,9 @@ namespace BusinessLogicLayer.Services
 
             await _appDBContext.SaveChangesAsync();
         }
+        public async Task<int> CountAllOrdersAsync()
+        {
+            return await _appDBContext.Consumableswithdrawapplications.CountAsync();
+        }
     }
 }

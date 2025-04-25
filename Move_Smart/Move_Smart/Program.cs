@@ -64,6 +64,7 @@ builder.Services.AddScoped<VacationRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<ConsumablespurchaseorderService>();
 builder.Services.AddScoped<CosumableWithdawApplicationService>();
+builder.Services.AddScoped<SparePartWithdrawApplicationService>();
 
 
 

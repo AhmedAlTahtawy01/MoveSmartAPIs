@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Repositories
 {
-    public partial class Sparepartswithdrawapplication
+    public class Sparepartswithdrawapplication
     {
         public int WithdrawApplicationId { get; set; }
 
@@ -15,79 +15,11 @@ namespace DataAccessLayer.Repositories
         public short SparePartId { get; set; }
 
         public short VehicleId { get; set; }
-
+        public virtual ApplicationDTO Application { get; set; }
         public ulong ApprovedByGeneralSupervisor { get; set; }
 
         public ulong ApprovedByGeneralManager { get; set; }
 
         public virtual Sparepart SparePart { get; set; }
-    }
-    class SparepartsWithdrawApplication
-    {
-        private readonly appDBContext _appDBContext;
-        public SparepartsWithdrawApplication(appDBContext appDBContext)
-        {
-            _appDBContext = appDBContext;
-        }
-        public async Task AddSparepartsWithdrawApplication(Sparepartswithdrawapplication order)
-        {
-            var check = await _appDBContext.Sparepartswithdrawapplications.FirstOrDefaultAsync(x => x.WithdrawApplicationId == order.WithdrawApplicationId);
-            if (check != null)
-            {
-                throw new InvalidOperationException(" Cannot be null Sparepartswithdrawapplication!");
-            }
-            _appDBContext.Sparepartswithdrawapplications.Add(order);
-            await _appDBContext.SaveChangesAsync();
-        }
-
-        public async Task DeleteSparepartsWithdrawApplication(int OrderID)
-        {
-            var sparepart = await _appDBContext.Sparepartswithdrawapplications.AsNoTracking().FirstOrDefaultAsync(id => id.WithdrawApplicationId == OrderID);
-            if (sparepart == null)
-            {
-                throw new InvalidOperationException(" Cannot be null");
-            }
-            _appDBContext.Sparepartswithdrawapplications.Remove(sparepart);
-            await _appDBContext.SaveChangesAsync();
-        }
-
-        public async Task<List<Sparepartswithdrawapplication>> GetAllSparepartsWithdrawApplication()
-        {
-            return await _appDBContext.Sparepartswithdrawapplications.AsNoTracking().ToListAsync();
-
-        }
-
-        public async Task<Sparepartswithdrawapplication> GetSparepartsWithdrawApplication(int OrderID)
-        {
-            return await _appDBContext.Sparepartswithdrawapplications.AsNoTracking().FirstAsync(id => OrderID == id.WithdrawApplicationId);
-        }
-
-        public Task<List<Sparepartswithdrawapplication>> GetSparepartsWithdrawApplicationByStatus(string Status)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Sparepartswithdrawapplication>> GetSparepartsWithdrawApplicationByUser(int UserId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RejectRequestAsync(int OrderID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task UpdateSparepartsWithdrawApplication(Consumablespurchaseorder order)
-        {
-
-            _appDBContext.Consumablespurchaseorders.Update(order);
-            await _appDBContext.SaveChangesAsync();
-        }
-
-        public Task UpdateStatusAsync(int orderId, string status)
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }
