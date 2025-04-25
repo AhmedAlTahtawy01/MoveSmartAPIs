@@ -59,8 +59,8 @@ namespace DataAccessLayer
                             {
                                 vacationsList.Add(new VacationDTO(
                                     Convert.ToInt32(reader["VacationID"]),
-                                    (DateOnly)reader["StartDate"],
-                                    (DateOnly)reader["EndDate"],
+                                    DateOnly.FromDateTime((DateTime)reader["StartDate"]),
+                                    DateOnly.FromDateTime((DateTime)reader["EndDate"]),
                                     Convert.ToInt32(reader["VacationOwnerID"]),
                                     Convert.ToInt32(reader["SubstituteDriverID"])
                                     ));
@@ -100,8 +100,8 @@ namespace DataAccessLayer
                             {
                                 vacationsList.Add(new VacationDTO(
                                     Convert.ToInt32(reader["VacationID"]),
-                                    (DateOnly)reader["StartDate"],
-                                    (DateOnly)reader["EndDate"],
+                                    DateOnly.FromDateTime((DateTime)reader["StartDate"]),
+                                    DateOnly.FromDateTime((DateTime)reader["EndDate"]),
                                     Convert.ToInt32(reader["VacationOwnerID"]),
                                     Convert.ToInt32(reader["SubstituteDriverID"])
                                     ));
@@ -118,12 +118,12 @@ namespace DataAccessLayer
             return vacationsList;
         }
 
-        public async Task<List<VacationDTO>> GetAllFutureVacationsForDriverAsync(int driverID)
+        public async Task<List<VacationDTO>> GetAllValidVacationsForDriverAsync(int driverID)
         {
             List<VacationDTO> vacationsList = new List<VacationDTO>();
 
             string query = @"SELECT * FROM Vacations
-                            WHERE VacationOwnerID = @VacationOwnerID AND StartDate > CURDATE() AND EndDate > CURDATE()
+                            WHERE VacationOwnerID = @VacationOwnerID AND EndDate > CURDATE()
                             ORDER BY StartDate ASC, EndDate DESC;";
 
             try
@@ -142,8 +142,8 @@ namespace DataAccessLayer
                             {
                                 vacationsList.Add(new VacationDTO(
                                     Convert.ToInt32(reader["VacationID"]),
-                                    (DateOnly)reader["StartDate"],
-                                    (DateOnly)reader["EndDate"],
+                                    DateOnly.FromDateTime((DateTime)reader["StartDate"]),
+                                    DateOnly.FromDateTime((DateTime)reader["EndDate"]),
                                     Convert.ToInt32(reader["VacationOwnerID"]),
                                     Convert.ToInt32(reader["SubstituteDriverID"])
                                     ));
@@ -180,8 +180,8 @@ namespace DataAccessLayer
                             {
                                 return new VacationDTO(
                                     Convert.ToInt32(reader["VacationID"]),
-                                    (DateOnly)reader["StartDate"],
-                                    (DateOnly)reader["EndDate"],
+                                    DateOnly.FromDateTime((DateTime)reader["StartDate"]),
+                                    DateOnly.FromDateTime((DateTime)reader["EndDate"]),
                                     Convert.ToInt32(reader["VacationOwnerID"]),
                                     Convert.ToInt32(reader["SubstituteDriverID"])
                                     );
@@ -212,8 +212,8 @@ namespace DataAccessLayer
                 {
                     using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("StartDate", newVacation.StartDate);
-                        cmd.Parameters.AddWithValue("EndDate", newVacation.EndDate);
+                        cmd.Parameters.AddWithValue("StartDate", newVacation.StartDate.ToString("yyyy-MM-dd"));
+                        cmd.Parameters.AddWithValue("EndDate", newVacation.EndDate.ToString("yyyy-MM-dd"));
                         cmd.Parameters.AddWithValue("VacationOwnerID", newVacation.VacationOwnerID);
                         cmd.Parameters.AddWithValue("SubstituteDriverID", newVacation.SubstituteDriverID);
 
@@ -251,8 +251,8 @@ namespace DataAccessLayer
                     using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("VacationID", updatedVacation.VacationID ?? 0);
-                        cmd.Parameters.AddWithValue("StartDate", updatedVacation.StartDate);
-                        cmd.Parameters.AddWithValue("EndDate", updatedVacation.EndDate);
+                        cmd.Parameters.AddWithValue("StartDate", updatedVacation.StartDate.ToString("yyyy-MM-dd"));
+                        cmd.Parameters.AddWithValue("EndDate", updatedVacation.EndDate.ToString("yyyy-MM-dd"));
                         cmd.Parameters.AddWithValue("VacationOwnerID", updatedVacation.VacationOwnerID);
                         cmd.Parameters.AddWithValue("SubstituteDriverID", updatedVacation.SubstituteDriverID);
 
@@ -298,7 +298,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsDriverinVacationAsync(int driverID)
         {
-            string query = @"SELECT InVacation = 1 FROM Vacations
+            string query = @"SELECT 1 As InVacation FROM Vacations
                             WHERE VacationOwnerID = @VacationOwnerID AND StartDate <= CURDATE() AND EndDate >= CURDATE();";
 
             try
