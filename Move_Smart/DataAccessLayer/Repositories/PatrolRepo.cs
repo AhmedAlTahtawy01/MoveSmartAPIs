@@ -62,7 +62,7 @@ namespace DataAccessLayer
                                 patrolsList.Add(new PatrolDTO(
                                     Convert.ToInt16(reader["PatrolID"]),
                                     (string)reader["Description"],
-                                    (TimeOnly)reader["MovingAt"],
+                                    TimeOnly.FromTimeSpan((TimeSpan)reader["MovingAt"]),
                                     Convert.ToSingle(reader["ApproximatedTime"]),
                                     Convert.ToByte(reader["BusID"])
                                     ));
@@ -100,7 +100,7 @@ namespace DataAccessLayer
                                 return new PatrolDTO(
                                     Convert.ToInt16(reader["PatrolID"]),
                                     (string)reader["Description"],
-                                    (TimeOnly)reader["MovingAt"],
+                                    TimeOnly.FromTimeSpan((TimeSpan)reader["MovingAt"]),
                                     Convert.ToSingle(reader["ApproximatedTime"]),
                                     Convert.ToByte(reader["BusID"])
                                     );
@@ -132,7 +132,7 @@ namespace DataAccessLayer
                     using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("Description", newPatrol.Description);
-                        cmd.Parameters.AddWithValue("MovingAt", newPatrol.MovingAt);
+                        cmd.Parameters.AddWithValue("MovingAt", newPatrol.MovingAt.ToString("HH:mm:ss"));
                         cmd.Parameters.AddWithValue("ApproximatedTime", newPatrol.ApproximatedTime);
                         cmd.Parameters.AddWithValue("BusID", newPatrol.BusID);
 
@@ -172,7 +172,7 @@ namespace DataAccessLayer
                     {
                         cmd.Parameters.AddWithValue("PatrolID", updatedPatrol.PatrolID ?? 0);
                         cmd.Parameters.AddWithValue("Description", updatedPatrol.Description);
-                        cmd.Parameters.AddWithValue("MovingAt", updatedPatrol.MovingAt);
+                        cmd.Parameters.AddWithValue("MovingAt", updatedPatrol.MovingAt.ToString("HH:mm:ss"));
                         cmd.Parameters.AddWithValue("ApproximatedTime", updatedPatrol.ApproximatedTime);
                         cmd.Parameters.AddWithValue("BusID", updatedPatrol.BusID);
 

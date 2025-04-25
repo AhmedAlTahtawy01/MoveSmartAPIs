@@ -58,6 +58,7 @@ builder.Services.AddScoped<VehicleRepo>();
 builder.Services.AddScoped<BusRepo>();
 builder.Services.AddScoped<DriverRepo>();
 builder.Services.AddScoped<EmployeeRepo>();
+builder.Services.AddScoped<PatrolRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<ConsumablespurchaseorderService>();
 
@@ -75,6 +76,7 @@ builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<BusService>();
 builder.Services.AddScoped<DriverService>();
 builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<PatrolService>();
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

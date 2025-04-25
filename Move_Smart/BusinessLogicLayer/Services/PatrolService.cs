@@ -63,7 +63,8 @@ namespace BusinessLayer
                 return null;
             }
 
-            return await _patrolRepo.AddNewPatrolAsync(dto);
+            dto.PatrolID = await _patrolRepo.AddNewPatrolAsync(dto);
+            return dto.PatrolID;
         }
 
         public async Task<bool> UpdatePatrolAsync(PatrolDTO dto)
@@ -95,6 +96,11 @@ namespace BusinessLayer
         public async Task<PatrolDTO?> GetPatrolByIDAsync(short patrolID)
         {
             return await _patrolRepo.GetPatrolByIDAsync(patrolID);
+        }
+
+        public async Task<bool> IsPatrolExistsAsync(short patrolID)
+        {
+            return await _patrolRepo.IsPatrolExistsAsync(patrolID);
         }
 
         public async Task<bool> DeletePatrolAsync(short patrolID)
