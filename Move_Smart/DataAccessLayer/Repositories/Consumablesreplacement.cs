@@ -16,7 +16,7 @@ namespace DataAccessLayer.Repositories
 
         public virtual Vehicleconsumable Consumable { get; set; }
     }
-    class ConsumablesReplacementRepo
+    public partial class ConsumablesReplacementRepo
     {
         private readonly appDBContext _appDbContext;
         public ConsumablesReplacementRepo(appDBContext appDbContext)
@@ -25,7 +25,7 @@ namespace DataAccessLayer.Repositories
         }
         public async Task AddConsumablesReplacement(Consumablesreplacement order)
         {
-            var check = await _appDbContext.Consumablesreplacements.FirstOrDefaultAsync(x => x.MaintenanceId == order.MaintenanceId);
+            var check = await _appDbContext.Consumablesreplacements.FirstOrDefaultAsync(x => x.ReplacementId == order.ReplacementId);
 
             if (check != null)
             {
@@ -38,9 +38,9 @@ namespace DataAccessLayer.Repositories
 
 
 
-        public async Task DeleteAddConsumablesReplacement(int WithdrawApplicationID)
+        public async Task DeleteAddConsumablesReplacement(int ID)
         {
-            var order = await _appDbContext.Consumablesreplacements.AsNoTracking().FirstOrDefaultAsync(id => id.MaintenanceId == WithdrawApplicationID);
+            var order = await _appDbContext.Consumablesreplacements.AsNoTracking().FirstOrDefaultAsync(id => id.ReplacementId == ID);
             if (order == null)
             {
                 throw new InvalidOperationException(" Cannot be null");
@@ -55,9 +55,16 @@ namespace DataAccessLayer.Repositories
             return await _appDbContext.Consumablesreplacements.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Consumablesreplacement> GetConsumablesReplacementByID(int WithdrawApplicationID)
+        public async Task<Consumablesreplacement> GetConsumablesReplacementByID(int ApplicationID)
         {
-            return await _appDbContext.Consumablesreplacements.AsNoTracking().FirstAsync(id => WithdrawApplicationID == id.MaintenanceId);
+            var order= await _appDbContext.Consumablesreplacements.AsNoTracking().FirstAsync(id => ApplicationID == id.ReplacementId);
+            if(order == null)
+            {
+                throw new InvalidOperationException("cannot be null plz!");
+
+            }
+            return order;
+
         }
 
         public async Task UpdateConsumablesReplacement(Consumablesreplacement order)
@@ -65,5 +72,10 @@ namespace DataAccessLayer.Repositories
             _appDbContext.Consumablesreplacements.Update(order);
             await _appDbContext.SaveChangesAsync();
         }
+        public async Task<int> CountAllOrdersAsync()
+        {
+            return await _appDbContext.Consumablesreplacements.CountAsync();
+        }
+
     }
 }

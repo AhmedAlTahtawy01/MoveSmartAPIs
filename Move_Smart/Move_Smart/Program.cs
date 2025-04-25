@@ -80,6 +80,9 @@ builder.Services.AddScoped<BusService>();
 builder.Services.AddScoped<DriverService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<PatrolService>();
+builder.Services.AddScoped<ConsumablesReplacementRepo>();
+builder.Services.AddScoped<SparePartsReplacement>();
+
 
 // EF Core for Kamal's work
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

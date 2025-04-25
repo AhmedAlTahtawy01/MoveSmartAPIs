@@ -18,7 +18,7 @@ namespace DataAccessLayer.Repositories
         public Sparepartsreplacement() { }
 
     }
-    class SparePartsReplacement
+   public partial class SparePartsReplacement
     {
         private readonly appDBContext _appDBContext;
         public SparePartsReplacement(appDBContext appDBContext)
@@ -37,9 +37,9 @@ namespace DataAccessLayer.Repositories
 
         }
 
-        public async Task DeleteSparePartsReplacement(int WithdrawApplicationID)
+        public async Task DeleteSparePartsReplacement(int ApplicationID)
         {
-            var sparepart = await _appDBContext.Sparepartsreplacements.AsNoTracking().FirstOrDefaultAsync(id => id.ReplacementId == WithdrawApplicationID);
+            var sparepart = await _appDBContext.Sparepartsreplacements.AsNoTracking().FirstOrDefaultAsync(id => id.ReplacementId == ApplicationID);
             if (sparepart == null)
             {
                 throw new InvalidOperationException(" Cannot be null");
@@ -55,13 +55,22 @@ namespace DataAccessLayer.Repositories
 
         public async Task<Sparepartsreplacement> GetSparePartsReplacementByID(int WithdrawApplicationID)
         {
-            return await _appDBContext.Sparepartsreplacements.AsNoTracking().FirstAsync(id => WithdrawApplicationID == id.ReplacementId);
+           var data =  await _appDBContext.Sparepartsreplacements.AsNoTracking().FirstAsync(id => WithdrawApplicationID == id.ReplacementId);
+            if(data == null)
+            {
+                throw new InvalidOperationException("مفيش حد يالاسم دا");
+            }
+            return data;
         }
 
         public async Task UpdateSparePartsReplacement(Sparepartsreplacement order)
         {
             _appDBContext.Sparepartsreplacements.Update(order);
             await _appDBContext.SaveChangesAsync();
+        }
+        public async Task<int> CountAllOrdersAsync()
+        {
+            return await _appDBContext.Sparepartsreplacements.CountAsync();
         }
 
     }
