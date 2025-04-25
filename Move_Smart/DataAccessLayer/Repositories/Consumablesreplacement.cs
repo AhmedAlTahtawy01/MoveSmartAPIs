@@ -12,7 +12,7 @@ namespace DataAccessLayer.Repositories
 
         public int MaintenanceId { get; set; }
 
-        public short ConsumableId { get; set; }
+        public int ConsumableId { get; set; }
 
         public virtual Vehicleconsumable Consumable { get; set; }
     }

@@ -34,7 +34,7 @@ namespace DataAccessLayer.Repositories
             var check = await _appDBContext.Sparepartswithdrawapplications.FirstOrDefaultAsync(x => x.WithdrawApplicationId == order.WithdrawApplicationId);
             if (check != null)
             {
-                throw new InvalidOperationException(" Cannot be null");
+                throw new InvalidOperationException(" Cannot be null Sparepartswithdrawapplication!");
             }
             _appDBContext.Sparepartswithdrawapplications.Add(order);
             await _appDBContext.SaveChangesAsync();

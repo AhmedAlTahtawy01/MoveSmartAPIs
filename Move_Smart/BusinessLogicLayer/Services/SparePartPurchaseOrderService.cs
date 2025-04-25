@@ -55,7 +55,6 @@ namespace BusinessLogicLayer.Services
         }
         public async Task DeleteSparePartsPurchaseOrderAsync(int orderId)
         {
-            // Find the spare part order with its related Application
             var order = await _appDbContext.Sparepartspurchaseorders
                 .Include(o => o.Application)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);

@@ -59,6 +59,8 @@ builder.Services.AddScoped<BusRepo>();
 builder.Services.AddScoped<DriverRepo>();
 builder.Services.AddScoped<EmployeeRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
+builder.Services.AddScoped<ConsumablespurchaseorderService>();
+
 
 
 // Register services

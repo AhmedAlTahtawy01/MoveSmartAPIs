@@ -14,7 +14,7 @@ namespace DataAccessLayer.Repositories
 
         public int ApplicationId { get; set; }
 
-        public short ConsumableId { get; set; }
+        public int ConsumableId { get; set; }
 
         public short VehicleId { get; set; }
 
