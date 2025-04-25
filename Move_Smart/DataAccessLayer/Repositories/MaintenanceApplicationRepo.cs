@@ -1,4 +1,5 @@
-﻿using DataAccessLayer.Util;
+﻿using DataAccessLayer.Repositories;
+using DataAccessLayer.Util;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System;
@@ -16,15 +17,18 @@ namespace DataAccessLayer
         public short VehicleID { get; set; }
         public bool ApprovedByGeneralSupervisor { get; set; }
         public bool ApprovedByGeneralManager { get; set; }
+        public ApplicationDTO Application { get; set; }
 
         public MaintenanceApplicationDTO(int? maintenanceApplicationID, int applicationID,
-            short vehicleID, bool approvedByGeneralSupervisor, bool approvedByGeneralManager)
+            short vehicleID, bool approvedByGeneralSupervisor, bool approvedByGeneralManager,
+            ApplicationDTO application)
         {
             MaintenanceApplicationID = maintenanceApplicationID;
             ApplicationID = applicationID;
             VehicleID = vehicleID;
             ApprovedByGeneralSupervisor = approvedByGeneralSupervisor;
             ApprovedByGeneralManager = approvedByGeneralManager;
+            Application = application;
         }
     }
 
@@ -32,11 +36,13 @@ namespace DataAccessLayer
     {
         private readonly ConnectionSettings _connectionSettings;
         private readonly ILogger<MaintenanceApplicationRepo> _logger;
+        private readonly ApplicationRepo _applicationRepo;
 
-        public MaintenanceApplicationRepo(ConnectionSettings connectionSettings, ILogger<MaintenanceApplicationRepo> logger)
+        public MaintenanceApplicationRepo(ConnectionSettings connectionSettings, ILogger<MaintenanceApplicationRepo> logger, ApplicationRepo applicationRepo)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _applicationRepo = applicationRepo ?? throw new ArgumentNullException(nameof(applicationRepo));
         }
 
         public async Task<List<MaintenanceApplicationDTO>> GetAllMaintenanceApplicationsAsync()
@@ -63,7 +69,8 @@ namespace DataAccessLayer
                                     Convert.ToInt32(reader["ApplicationID"]),
                                     Convert.ToInt16(reader["VehicleID"]),
                                     Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"]),
+                                    await _applicationRepo.GetApplicationByIdAsync(Convert.ToInt32(reader["ApplicationID"]))
                                 ));
                             }
                         }
@@ -105,7 +112,9 @@ namespace DataAccessLayer
                                     Convert.ToInt32(reader["ApplicationID"]),
                                     Convert.ToInt16(reader["VehicleID"]),
                                     Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"]),
+                                    await _applicationRepo.GetApplicationByIdAsync(Convert.ToInt32(reader["ApplicationID"]))
+
                                 ));
                             }
                         }
@@ -144,7 +153,8 @@ namespace DataAccessLayer
                                     Convert.ToInt32(reader["ApplicationID"]),
                                     Convert.ToInt16(reader["VehicleID"]),
                                     Convert.ToBoolean(reader["ApprovedByGeneralSupervisor"]),
-                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"])
+                                    Convert.ToBoolean(reader["ApprovedByGeneralManager"]),
+                                    await _applicationRepo.GetApplicationByIdAsync(Convert.ToInt32(reader["ApplicationID"]))
                                 );
                             }
                         }
