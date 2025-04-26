@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Services;
 using DataAccessLayer.Repositories;
+using DataAccessLayer.SharedFunctions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,13 @@ namespace BusinessLogicLayer.Services
     {
         private readonly MissionRepo _repo;
         private readonly ILogger<MissionService> _logger;
+        private readonly SharedFunctions _shared;
 
-        public MissionService(MissionRepo repo, ILogger<MissionService> logger)
+        public MissionService(MissionRepo repo, ILogger<MissionService> logger, SharedFunctions shared)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _shared = shared ?? throw new ArgumentNullException(nameof(shared), "Shared Functions cannot be null.");
         }
 
         public async Task<int> CreateMissionAsync(int missionNoteId, MissionDTO dto)
@@ -29,6 +32,18 @@ namespace BusinessLogicLayer.Services
             }
 
             _ValidateMissionDTO(dto);
+
+            if (!(await _shared.CheckMissionNoteExistsAsync(missionNoteId)))
+            {
+                _logger.LogWarning($"Mission Note with Id {missionNoteId} not found.");
+                throw new KeyNotFoundException($"Mission Note with Id {missionNoteId} not found.");
+            }
+
+            if (!(await _shared.CheckUserExistsAsync(dto.UserId)))
+            {
+                _logger.LogWarning($"User with Id {dto.UserId} not found.");
+                throw new KeyNotFoundException($"User with Id {dto.UserId} not found.");
+            }
 
             dto.MissionNoteId = missionNoteId;
 

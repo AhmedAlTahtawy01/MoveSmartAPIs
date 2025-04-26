@@ -201,6 +201,16 @@ namespace DataAccessLayer.Repositories
             return await CountApplicationAsync("ApplicationType = @applicationType", new MySqlParameter("@applicationType", applicationType.ToString()));
         }
 
+        public async Task<bool> ExistsAsync(int id)
+        {
+            const string query = "SELECT COUNT(1) FROM applications WHERE ApplicationID = @applicationId";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync()) > 0;
+            }, new MySqlParameter("@applicationId", id));
+        }
+
         public async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)
         {
             const string query = @"

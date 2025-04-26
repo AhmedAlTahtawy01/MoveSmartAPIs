@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataAccessLayer.Repositories;
+using DataAccessLayer.SharedFunctions;
 using Microsoft.Extensions.Logging;
 
 namespace BusinessLogicLayer.Services
@@ -10,11 +11,13 @@ namespace BusinessLogicLayer.Services
     {
         private readonly MaintenanceRepo _repo;
         private readonly ILogger<MaintenanceService> _logger;
+        private readonly SharedFunctions _shared;
 
-        public MaintenanceService(MaintenanceRepo repo, ILogger<MaintenanceService> logger)
+        public MaintenanceService(MaintenanceRepo repo, ILogger<MaintenanceService> logger, SharedFunctions sharedFunctions)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _shared = sharedFunctions ?? throw new ArgumentNullException(nameof(sharedFunctions), "Shared Functions cannot be null.");
         }
 
         public async Task<int> CreateMaintenanceAsync(MaintenanceDTO dto)
@@ -27,6 +30,12 @@ namespace BusinessLogicLayer.Services
             }
             
             _ValidateMaintenanceDTO(dto);
+
+            if (!(await _shared.CheckMaintenanceApplicationExistsAsync(dto.MaintenanceApplicationId)))
+            {
+                _logger.LogWarning($"Maintenance Application with Id {dto.MaintenanceApplicationId} not found.");
+                throw new KeyNotFoundException($"Maintenance Application with Id {dto.MaintenanceApplicationId} not found.");
+            }
             
             _logger.LogInformation("Creating new maintenance.");
             return await _repo.CreateMaintenanceAsync(dto);

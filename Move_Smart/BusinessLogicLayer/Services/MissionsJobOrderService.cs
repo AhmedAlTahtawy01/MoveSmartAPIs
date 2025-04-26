@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Services;
 using DataAccessLayer.Repositories;
+using DataAccessLayer.SharedFunctions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,13 @@ namespace BusinessLogicLayer.Services
     {
         private readonly MissionsJobOrderRepo _repo;
         private readonly ILogger<MissionsJobOrderService> _logger;
+        private readonly SharedFunctions _shared;
 
-        public MissionsJobOrderService(MissionsJobOrderRepo repo, ILogger<MissionsJobOrderService> logger)
+        public MissionsJobOrderService(MissionsJobOrderRepo repo, ILogger<MissionsJobOrderService> logger, SharedFunctions sharedFunctions)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _shared = sharedFunctions ?? throw new ArgumentNullException(nameof(sharedFunctions), "Shared Functions cannot be null.");
         }
 
         public async Task<int> CreateMissionJobOrderAsync(MissionsJobOrderDTO dto)
@@ -29,6 +32,18 @@ namespace BusinessLogicLayer.Services
             }
 
             _ValidateMissionsJobOrder(dto);
+
+            if (!(await _shared.CheckMissionExistsAsync(dto.MissionId)))
+            {
+                _logger.LogWarning($"Mission with Id {dto.MissionId} not found.");
+                throw new KeyNotFoundException($"Mission with Id {dto.MissionId} not found.");
+            }
+
+            if (!(await _shared.CheckJobOrderExistsAsync(dto.JobOrderId)))
+            {
+                _logger.LogWarning($"Job Order with Id {dto.JobOrderId} not found.");
+                throw new KeyNotFoundException($"Job Order with Id {dto.JobOrderId} not found.");
+            }
 
             _logger.LogInformation("Creating new missionJobOrder.");
             return await _repo.CreateMissionsJobOrderAsync(dto);
