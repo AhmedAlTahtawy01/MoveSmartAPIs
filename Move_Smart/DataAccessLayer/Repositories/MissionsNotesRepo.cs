@@ -12,13 +12,15 @@ namespace DataAccessLayer
 {
     public class MissionsNotesDTO
     {
-        public int NoteID { get; set; }
+        public int? NoteID { get; set; }
         public int ApplicationID { get; set; }
+        public ApplicationDTO Application { get; set; }
 
-        public MissionsNotesDTO(int noteID, int applicationID)
+        public MissionsNotesDTO(int? noteID, int applicationID, ApplicationDTO application)
         {
             NoteID = noteID;
             ApplicationID = applicationID;
+            Application = application;
         }
     }
 
@@ -27,11 +29,13 @@ namespace DataAccessLayer
 
         private readonly ConnectionSettings _connectionSettings;
         private readonly ILogger<MissionsNotesRepo> _logger;
+        private readonly ApplicationRepo _applicationRepo;
 
-        public MissionsNotesRepo(ConnectionSettings connectionSettings, ILogger<MissionsNotesRepo> logger)
+        public MissionsNotesRepo(ConnectionSettings connectionSettings, ILogger<MissionsNotesRepo> logger, ApplicationRepo applicationRepo)
         {
             _connectionSettings = connectionSettings ?? throw new ArgumentNullException(nameof(connectionSettings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _applicationRepo = applicationRepo ?? throw new ArgumentNullException(nameof(applicationRepo));
         }
 
         public async Task<List<MissionsNotesDTO>> GetAllMissionsNotesAsync()
@@ -54,7 +58,8 @@ namespace DataAccessLayer
                             {
                                 notesList.Add(new MissionsNotesDTO(
                                     Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"])
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    await _applicationRepo.GetApplicationByIdAsync(Convert.ToInt32(reader["ApplicationID"]))
                                     ));
                             }
                         }
@@ -90,7 +95,8 @@ namespace DataAccessLayer
                             {
                                 return new MissionsNotesDTO(
                                     Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"])
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    await _applicationRepo.GetApplicationByIdAsync(Convert.ToInt32(reader["ApplicationID"]))
                                     );
                             }
                         }
@@ -125,7 +131,8 @@ namespace DataAccessLayer
                             {
                                 return new MissionsNotesDTO(
                                     Convert.ToInt32(reader["NoteID"]),
-                                    Convert.ToInt32(reader["ApplicationID"])
+                                    Convert.ToInt32(reader["ApplicationID"]),
+                                    await _applicationRepo.GetApplicationByIdAsync(Convert.ToInt32(reader["ApplicationID"]))
                                     );
                             }
                         }
@@ -176,7 +183,7 @@ namespace DataAccessLayer
         public async Task<bool> UpdateMissionNoteAsync(MissionsNotesDTO updatedNote)
         {
             string query = @"UPDATE MissionsNotes SET
-                            ApplicationID = @ApplicationID,
+                            ApplicationID = @ApplicationID
                             WHERE NoteID = @NoteID;";
 
             try
@@ -244,7 +251,7 @@ namespace DataAccessLayer
             
                         await conn.OpenAsync();
                         
-                        return cmd.ExecuteScalarAsync() != null;
+                        return await cmd.ExecuteScalarAsync() != null;
                     }
                 }
             }

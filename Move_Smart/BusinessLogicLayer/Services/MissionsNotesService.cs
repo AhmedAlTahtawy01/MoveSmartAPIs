@@ -29,10 +29,15 @@ namespace BusinessLogicLayer.Services
                 _missionsNotesLogger.LogError("MissionsNotesDTO cannot be null.");
                 throw new ArgumentNullException(nameof(dto), "MissionsNotesDTO cannot be null.");
             }
-            if (await _repo.GetApplicationByIdAsync(dto.ApplicationID) == null)
+            
+            try
             {
-                _missionsNotesLogger.LogError($"Application with ID[{dto.ApplicationID}] Doesn't Existes.");
-                throw new ArgumentException(nameof(dto), $"Application with ID[{dto.ApplicationID}] Doesn't Existes.");
+                _ValidateApplicationDTO(dto.Application);
+            }
+            catch (Exception ex)
+            {
+                _missionsNotesLogger.LogError(ex, "Validation Failed For ApplicationDTO");
+                throw new ArgumentException("ApplicationDTO is invalid.", nameof(dto.Application));
             }
         }
 
@@ -47,7 +52,21 @@ namespace BusinessLogicLayer.Services
                 _missionsNotesLogger.LogError(ex, "Validation Failed For MissionsNotesDTO");
             }
 
-            return await _missionsNotesRepo.AddNewMissionNoteAsync(dto);
+            dto.Application.ApplicationId = await CreateApplicationAsync(dto.Application);
+            dto.ApplicationID = dto.Application.ApplicationId;
+
+            try
+            {
+                await GetApplicationByIdAsync(dto.ApplicationID);
+            }
+            catch (Exception ex)
+            {
+                _missionsNotesLogger.LogError(ex, $"Error : {ex.Message}");
+                return null;
+            }
+
+            dto.NoteID = await _missionsNotesRepo.AddNewMissionNoteAsync(dto);
+            return dto.NoteID;
         }
 
         public async Task<bool> UpdateMissionNoteAsync(MissionsNotesDTO dto)
@@ -61,9 +80,15 @@ namespace BusinessLogicLayer.Services
                 _missionsNotesLogger.LogError(ex, "Validation Failed For MissionsNotesDTO");
             }
 
-            if(!await _missionsNotesRepo.IsMissionNoteExistsAsync(dto.NoteID))
+            if(!await _missionsNotesRepo.IsMissionNoteExistsAsync(dto.NoteID ?? 0))
             {
                 _missionsNotesLogger.LogError($"Mission Note with ID {dto.NoteID} doesn't exist.");
+                return false;
+            }
+
+            if(!await UpdateApplicationAsync(dto.Application))
+            {
+                _missionsNotesLogger.LogError($"Failed to update Application with ID {dto.Application.ApplicationId}.");
                 return false;
             }
 
@@ -83,6 +108,11 @@ namespace BusinessLogicLayer.Services
         public async Task<MissionsNotesDTO> GetMissionNoteByApplicationIDAsync(int applicationID)
         {
             return await _missionsNotesRepo.GetMissionNoteByApplicationIDAsync(applicationID);
+        }
+
+        public async Task<bool> IsMissionNoteExistsAsync(int noteID)
+        {
+            return await _missionsNotesRepo.IsMissionNoteExistsAsync(noteID);
         }
 
         public async Task<bool> DeleteMissionNoteAsync(int noteID)

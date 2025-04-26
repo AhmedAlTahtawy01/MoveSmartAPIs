@@ -61,14 +61,17 @@ namespace BusinessLayer
                 return null;
             }
 
+            dto.Application.ApplicationId = await CreateApplicationAsync(dto.Application);
+            dto.ApplicationID = dto.Application.ApplicationId;
+
             try
             {
                 await GetApplicationByIdAsync(dto.ApplicationID);
             }
-            catch(KeyNotFoundException ex)
+            catch(Exception ex)
             {
-                dto.Application.ApplicationId = await CreateApplicationAsync(dto.Application);
-                dto.ApplicationID = dto.Application.ApplicationId;
+                _maintenanceApplicationLogger.LogError(ex, $"Error : {ex.Message}");
+                return null;
             }
 
             dto.MaintenanceApplicationID = await _maintenanceApplicationRepo.AddNewMaintenanceApplicationAsync(dto);
@@ -90,6 +93,12 @@ namespace BusinessLayer
             if (!await _maintenanceApplicationRepo.IsMaintenanceApplicationExistsAsync(dto.MaintenanceApplicationID ?? 0))
             {
                 _maintenanceApplicationLogger.LogError($"MaintenanceApplication with ID {dto.MaintenanceApplicationID} doesn't exist.");
+                return false;
+            }
+
+            if(!await UpdateApplicationAsync(dto.Application))
+            {
+                _maintenanceApplicationLogger.LogError($"Failed to update Application with ID {dto.ApplicationID}");
                 return false;
             }
 

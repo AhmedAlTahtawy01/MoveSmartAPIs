@@ -62,6 +62,7 @@ builder.Services.AddScoped<EmployeeRepo>();
 builder.Services.AddScoped<PatrolRepo>();
 builder.Services.AddScoped<VacationRepo>();
 builder.Services.AddScoped<MaintenanceApplicationRepo>();
+builder.Services.AddScoped<MissionsNotesRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<ConsumablespurchaseorderService>();
 builder.Services.AddScoped<CosumableWithdawApplicationService>();
@@ -86,6 +87,7 @@ builder.Services.AddScoped<ConsumablesReplacementRepo>();
 builder.Services.AddScoped<SparePartsReplacement>();
 builder.Services.AddScoped<VacationService>();
 builder.Services.AddScoped<MaintenanceApplicationService>();
+builder.Services.AddScoped<MissionsNotesService>();
 
 
 // EF Core for Kamal's work
