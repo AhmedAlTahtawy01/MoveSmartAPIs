@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataAccessLayer.Repositories;
+using DataAccessLayer.SharedFunctions;
 using Microsoft.Extensions.Logging;
 
 namespace BusinessLayer.Services
@@ -10,11 +11,13 @@ namespace BusinessLayer.Services
     {
         protected readonly ApplicationRepo _repo;
         protected readonly ILogger<ApplicationService> _logger;
+        protected readonly SharedFunctions _shared;
 
-        public ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger)
+        public ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger, SharedFunctions sharedFunctions)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _shared = sharedFunctions ?? throw new ArgumentNullException(nameof(sharedFunctions), "Shared functions cannot be null.");
         }
 
         public async Task<int> CreateApplicationAsync(ApplicationDTO dto)
@@ -27,6 +30,12 @@ namespace BusinessLayer.Services
 
             
             _ValidateApplicationDTO(dto);
+
+            if (!(await _shared.CheckUserExistsAsync(dto.CreatedByUserID)))
+            {
+                _logger.LogWarning($"User with ID {dto.CreatedByUserID} does not exist.");
+                throw new KeyNotFoundException($"User with ID {dto.CreatedByUserID} does not exist.");
+            }
             
             _logger.LogInformation("Creating new application.");
             return await _repo.CreateApplicationAsync(dto);
@@ -129,6 +138,18 @@ namespace BusinessLayer.Services
         {
             _logger.LogInformation($"Counting applications with type {applicationType}.");
             return await _repo.CountApplicationsByTypeAsync(applicationType);
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Attempted to check existence of an application with invalid ID.");
+                throw new ArgumentException("Application ID must be greater than 0.");
+            }
+
+            _logger.LogInformation($"Checking existence of application with ID {id}.");
+            return await _repo.ExistsAsync(id);
         }
 
         protected async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)

@@ -9,6 +9,7 @@ using BusinessLogicLayer.Services;
 using DataAccessLayer;
 using BusinessLayer;
 using Move_Smart.Controllers;
+using DataAccessLayer.SharedFunctions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,9 @@ builder.Services.AddSingleton<ConnectionSettings>(sp =>
     return new ConnectionSettings(config, logger);
 });
 
+// Register Shared
+builder.Services.AddScoped<SharedFunctions>();
+
 // Register repositories
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<ApplicationRepo>();
@@ -67,8 +71,6 @@ builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<ConsumablespurchaseorderService>();
 builder.Services.AddScoped<CosumableWithdawApplicationService>();
 builder.Services.AddScoped<SparePartWithdrawApplicationService>();
-
-
 
 // Register services
 builder.Services.AddScoped<UserService>(); // For UserController
