@@ -8,8 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BusinessLogicLayer.Services;
 using DataAccessLayer;
 using BusinessLayer;
-using Move_Smart.Controllers;
-
+using Move_Smart.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -84,6 +83,7 @@ builder.Services.AddScoped<PatrolService>();
 builder.Services.AddScoped<ConsumablesReplacementRepo>();
 builder.Services.AddScoped<SparePartsReplacement>();
 builder.Services.AddScoped<VacationService>();
+builder.Services.AddSignalR();
 
 
 // EF Core for Kamal's work
@@ -110,5 +110,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization(); // No auth enforced, but kept for future use
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

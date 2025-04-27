@@ -1,6 +1,8 @@
 ﻿using BusinessLayer.Services;
 using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Move_Smart.Hubs;
 using Mysqlx.Crud;
 using System;
 using System.Collections.Generic;
@@ -15,10 +17,14 @@ namespace BusinessLogicLayer.Services
     {
         private readonly appDBContext _appDBContext;
         private readonly ApplicationService _applicationService;
-        public ConsumablespurchaseorderService(ApplicationService applicationService,appDBContext appDBContext)
+        private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly UserRepo _userRepo;
+        public ConsumablespurchaseorderService(ApplicationService applicationService,appDBContext appDBContext, IHubContext<NotificationHub> hubContext, UserRepo userRepo)
         {
             _appDBContext = appDBContext;
             _applicationService = applicationService;
+            _hubContext = hubContext;
+            _userRepo = userRepo;
         }
         public async Task<List<Consumablespurchaseorder>> GetAllConsumablesPurchaseoOrder()
         {
@@ -62,6 +68,7 @@ namespace BusinessLogicLayer.Services
             }
             
             await _appDBContext.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("NewOrderCreated", $"A new Consumable Purchase Order has been created with ID: {order.OrderId}");
         }
             public async Task AddConsumablePurchaseOrderAsync(Consumablespurchaseorder order)
             {
@@ -93,6 +100,9 @@ namespace BusinessLogicLayer.Services
 
                 _appDBContext.Consumablespurchaseorders.Add(order);
                 await _appDBContext.SaveChangesAsync();
+
+                await SendNotificationBasedOnRole(order.Application.CreatedByUserID, order.OrderId);
+
             }
             public async Task DeleteConsumablePurchaseOrder(int ID)
             {
@@ -148,6 +158,23 @@ namespace BusinessLogicLayer.Services
         public async Task<int> CountAllConsumablePurchaseOrdersAsync()
         {
             return await _appDBContext.Consumablespurchaseorders.CountAsync();
+        }
+        private async Task SendNotificationBasedOnRole(int userId, int orderId)
+        {
+            var user = await _userRepo.GetUserByIdAsync(userId);
+            if (user == null) return;
+
+            var message = $"Order #{orderId} notification.";
+
+            var target = user.Role switch
+            {
+                EnUserRole.GeneralSupervisor => "GeneralSupervisorNotification",
+                EnUserRole.HospitalManager => "HospitalManagerNotification",
+                _ => "GeneralNotification"
+            };
+
+            await _hubContext.Clients.User(userId.ToString())
+                .SendAsync(target, message);
         }
 
     }
