@@ -1,6 +1,7 @@
 ﻿using BusinessLayer.Services;
 using DataAccessLayer;
 using DataAccessLayer.Repositories;
+using DataAccessLayer.SharedFunctions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,8 @@ namespace BusinessLayer
         protected readonly MaintenanceApplicationRepo _maintenanceApplicationRepo;
         protected readonly VehicleRepo _vehicleRepo;
 
-        public MaintenanceApplicationService(MaintenanceApplicationRepo maintenanceApplicationRepo, ApplicationRepo applicationRepo, VehicleRepo vehicleRepo, ILogger<MaintenanceApplicationService> maintenanceApplicationLogger, ILogger<ApplicationService> applicationLogger)
-            : base(applicationRepo, applicationLogger)
+        public MaintenanceApplicationService(MaintenanceApplicationRepo maintenanceApplicationRepo, ApplicationRepo applicationRepo, VehicleRepo vehicleRepo, ILogger<MaintenanceApplicationService> maintenanceApplicationLogger, ILogger<ApplicationService> applicationLogger, SharedFunctions sharedFunctions)
+            : base(applicationRepo, applicationLogger, sharedFunctions)
         {
             _maintenanceApplicationRepo = maintenanceApplicationRepo ?? throw new ArgumentNullException(nameof(maintenanceApplicationRepo), "Data access layer cannot be null.");
             _vehicleRepo = vehicleRepo ?? throw new ArgumentNullException(nameof(vehicleRepo), "Data access layer cannot be null.");
@@ -31,11 +32,17 @@ namespace BusinessLayer
                 _maintenanceApplicationLogger.LogError("MaintenanceApplicationDTO cannot be null.");
                 throw new ArgumentNullException(nameof(dto), "MaintenanceApplicationDTO cannot be null.");
             }
-            if (await _repo.GetApplicationByIdAsync(dto.ApplicationID) == null)
+
+            try
             {
-                _maintenanceApplicationLogger.LogError($"Application with ID[{dto.ApplicationID}] Doesn't Exist.");
-                throw new ArgumentException(nameof(dto), $"Application with ID[{dto.ApplicationID}] Doesn't Exist.");
+                _ValidateApplicationDTO(dto.Application);
             }
+            catch (Exception ex)
+            {
+                _maintenanceApplicationLogger.LogError(ex, "Validation Failed For ApplicationDTO");
+                throw new ArgumentException(nameof(dto), "Validation Failed For ApplicationDTO");
+            }
+
             if (!await _vehicleRepo.IsVehicleExistsAsync(dto.VehicleID))
             {
                 _maintenanceApplicationLogger.LogError($"Vehicle wih ID[{dto.VehicleID}] Doesn't Exist");
@@ -55,7 +62,21 @@ namespace BusinessLayer
                 return null;
             }
 
-            return await _maintenanceApplicationRepo.AddNewMaintenanceApplicationAsync(dto);
+            dto.Application.ApplicationId = await CreateApplicationAsync(dto.Application);
+            dto.ApplicationID = dto.Application.ApplicationId;
+
+            try
+            {
+                await GetApplicationByIdAsync(dto.ApplicationID);
+            }
+            catch(Exception ex)
+            {
+                _maintenanceApplicationLogger.LogError(ex, $"Error : {ex.Message}");
+                return null;
+            }
+
+            dto.MaintenanceApplicationID = await _maintenanceApplicationRepo.AddNewMaintenanceApplicationAsync(dto);
+            return dto.MaintenanceApplicationID;
         }
 
         public async Task<bool> UpdateMaintenanceApplicationAsync(MaintenanceApplicationDTO dto)
@@ -76,6 +97,12 @@ namespace BusinessLayer
                 return false;
             }
 
+            if(!await UpdateApplicationAsync(dto.Application))
+            {
+                _maintenanceApplicationLogger.LogError($"Failed to update Application with ID {dto.ApplicationID}");
+                return false;
+            }
+
             return await _maintenanceApplicationRepo.UpdateMaintenanceApplicationAsync(dto);
         }
 
@@ -92,6 +119,11 @@ namespace BusinessLayer
         public async Task<MaintenanceApplicationDTO?> GetMaintenanceApplicationByMaintenanceApplicationIDAsync(int maintenanceApplicationID)
         {
             return await _maintenanceApplicationRepo.GetMaintenanceApplicationByMaintenanceApplicationIDAsync(maintenanceApplicationID);
+        }
+
+        public async Task<bool> IsMaintenanceApplicationExistsAsync(int maintenanceApplicationID)
+        {
+            return await _maintenanceApplicationRepo.IsMaintenanceApplicationExistsAsync(maintenanceApplicationID);
         }
 
         public async Task<bool> DeleteMaintenanceApplicationAsync(int maintenanceApplicationID)

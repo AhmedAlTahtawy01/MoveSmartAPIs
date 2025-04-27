@@ -43,9 +43,9 @@ namespace DataAccessLayer.Repositories
         public string ApplicationDescription { get; set; }
         public int CreatedByUserID { get; set; }
       // this two commands for me !! just for testing onlyyyyy 😊✨
-        public virtual ICollection<Sparepartspurchaseorder> Sparepartspurchaseorders { get; set; } = new List<Sparepartspurchaseorder>();
+        //public virtual ICollection<Sparepartspurchaseorder> Sparepartspurchaseorders { get; set; } = new List<Sparepartspurchaseorder>();
 
-        public virtual ICollection<Sparepartswithdrawapplication> Sparepartswithdrawapplications { get; set; } = new List<Sparepartswithdrawapplication>();
+        //public virtual ICollection<Sparepartswithdrawapplication> Sparepartswithdrawapplications { get; set; } = new List<Sparepartswithdrawapplication>();
 
         public ApplicationDTO(int applicationId, DateTime creationDate, enStatus status, enApplicationType applicationType, string applicationDescription, int createdByUser)
         {
@@ -199,6 +199,16 @@ namespace DataAccessLayer.Repositories
         public async Task<int> CountApplicationsByTypeAsync(enApplicationType applicationType)
         {
             return await CountApplicationAsync("ApplicationType = @applicationType", new MySqlParameter("@applicationType", applicationType.ToString()));
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            const string query = "SELECT COUNT(1) FROM applications WHERE ApplicationID = @applicationId";
+
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync()) > 0;
+            }, new MySqlParameter("@applicationId", id));
         }
 
         public async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)

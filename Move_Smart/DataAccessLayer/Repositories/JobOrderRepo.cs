@@ -208,6 +208,15 @@ namespace DataAccessLayer.Repositories
                 new MySqlParameter("@date2", date2));
         }
 
+        public async Task<bool> ExistsAsync(int orderId)
+        {
+            const string query = "SELECT COUNT(*) FROM joborders WHERE OrderID = @orderId";
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync()) > 0;
+            }, new MySqlParameter("@orderId", orderId));
+        }
+
         public async Task<int> CreateJobOrderAsync(JobOrderDTO jobOrder)
         {
             const string query = @"

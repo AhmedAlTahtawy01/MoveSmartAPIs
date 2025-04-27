@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer.Repositories;
+using DataAccessLayer.SharedFunctions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,13 @@ namespace BusinessLayer.Services
     {
         private readonly MissionsVehicleRepo _repo;
         private readonly ILogger<MissionsVehicleService> _logger;
+        private readonly SharedFunctions _shared;
 
-        public MissionsVehicleService(MissionsVehicleRepo repo, ILogger<MissionsVehicleService> logger)
+        public MissionsVehicleService(MissionsVehicleRepo repo, ILogger<MissionsVehicleService> logger, SharedFunctions sharedFunctions)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _shared = sharedFunctions ?? throw new ArgumentNullException(nameof(sharedFunctions), "Shared Functions cannot be null.");
         }
 
         private void _ValidateMissionsVehicleDTO(MissionsVehicleDTO dto)
@@ -49,6 +52,18 @@ namespace BusinessLayer.Services
             }
 
             _ValidateMissionsVehicleDTO(dto);
+
+            if (!(await _shared.CheckMissionExistsAsync(dto.MissionId)))
+            {
+                _logger.LogWarning($"Mission with Id {dto.MissionId} not found.");
+                throw new KeyNotFoundException($"Mission with Id {dto.MissionId} not found.");
+            }
+
+            if (!(await _shared.CheckVehicleExistsAsync(dto.VehicleId)))
+            {
+                _logger.LogWarning($"Vehicle with Id {dto.VehicleId} not found.");
+                throw new KeyNotFoundException($"Vehicle with Id {dto.VehicleId} not found.");
+            }
 
             _logger.LogInformation("Creating new MissionsVehicle.");
             return await _repo.CreateMissionVehicleAsync(dto);

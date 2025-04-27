@@ -8,7 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using BusinessLogicLayer.Services;
 using DataAccessLayer;
 using BusinessLayer;
+<<<<<<< HEAD
 using Move_Smart.Hubs;
+=======
+using Move_Smart.Controllers;
+using DataAccessLayer.SharedFunctions;
+
+>>>>>>> 5e30ea634b07471a12a223cd1f0594367248b281
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -41,6 +47,9 @@ builder.Services.AddSingleton<ConnectionSettings>(sp =>
     return new ConnectionSettings(config, logger);
 });
 
+// Register Shared
+builder.Services.AddScoped<SharedFunctions>();
+
 // Register repositories
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<ApplicationRepo>();
@@ -60,12 +69,13 @@ builder.Services.AddScoped<DriverRepo>();
 builder.Services.AddScoped<EmployeeRepo>();
 builder.Services.AddScoped<PatrolRepo>();
 builder.Services.AddScoped<VacationRepo>();
+builder.Services.AddScoped<MaintenanceApplicationRepo>();
+builder.Services.AddScoped<MissionsNotesRepo>();
+builder.Services.AddScoped<PatrolsSubscriptionRepo>();
 builder.Services.AddScoped<SparePartPurchaseOrderService>();
 builder.Services.AddScoped<ConsumablespurchaseorderService>();
 builder.Services.AddScoped<CosumableWithdawApplicationService>();
 builder.Services.AddScoped<SparePartWithdrawApplicationService>();
-
-
 
 // Register services
 builder.Services.AddScoped<UserService>(); // For UserController
@@ -83,7 +93,13 @@ builder.Services.AddScoped<PatrolService>();
 builder.Services.AddScoped<ConsumablesReplacementRepo>();
 builder.Services.AddScoped<SparePartsReplacement>();
 builder.Services.AddScoped<VacationService>();
+<<<<<<< HEAD
 builder.Services.AddSignalR();
+=======
+builder.Services.AddScoped<MaintenanceApplicationService>();
+builder.Services.AddScoped<MissionsNotesService>();
+builder.Services.AddScoped<PatrolsSubscriptionService>();
+>>>>>>> 5e30ea634b07471a12a223cd1f0594367248b281
 
 
 // EF Core for Kamal's work
