@@ -50,11 +50,12 @@ namespace BusinessLogicLayer.Services
             }
             catch (Exception ex)
             {
-                _patrolsSubscriptionLogger.LogError(ex, "Validation Failed For PatrolsSubscriptionDTO");
+                _patrolsSubscriptionLogger.LogError(ex, ex.Message);
                 return null;
             }
 
-            return await _patrolsSubscriptionRepo.CreateNewSubscriptionRecordAsync(dto);
+            dto.SubscriptionID = await _patrolsSubscriptionRepo.CreateNewSubscriptionRecordAsync(dto);
+            return dto.SubscriptionID;
         }
 
         public async Task<bool> UpdatePatrolSubscriptionAsync(PatrolsSubscriptionDTO dto)
@@ -65,11 +66,11 @@ namespace BusinessLogicLayer.Services
             }
             catch (Exception ex)
             {
-                _patrolsSubscriptionLogger.LogError(ex, "Validation Failed For PatrolsSubscriptionDTO");
+                _patrolsSubscriptionLogger.LogError(ex, ex.Message);
                 return false;
             }
 
-            if (!await _patrolsSubscriptionRepo.IsPatrolSubscriptionExistsAsync(dto.SubscriptionID))
+            if (!await _patrolsSubscriptionRepo.IsPatrolSubscriptionExistsAsync(dto.SubscriptionID ?? 0))
             {
                 _patrolsSubscriptionLogger.LogError($"Patrol Subscription with ID {dto.SubscriptionID} doesn't exist.");
                 return false;
@@ -88,9 +89,15 @@ namespace BusinessLogicLayer.Services
             return await _patrolsSubscriptionRepo.GetAllSubscriptionsForPatrolAsync(patrolID);
         }
 
-        public async Task<PatrolsSubscriptionDTO> GetPatrolSubscriptionByIDAsync(int subscriptionID)
+        public async Task<PatrolsSubscriptionDTO?> GetPatrolSubscriptionByIDAsync(int subscriptionID)
         {
             return await _patrolsSubscriptionRepo.GetSubscriptionRecordByIDAsync(subscriptionID);
+        }
+
+
+        public async Task<bool> IsPatrolSubscriptionExists(int subscriptionID)
+        {
+            return await _patrolsSubscriptionRepo.IsPatrolSubscriptionExistsAsync(subscriptionID);
         }
 
         public async Task<bool> DeletePatrolSubscriptionAsync(int subscriptionID)

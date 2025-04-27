@@ -11,11 +11,11 @@ namespace DataAccessLayer
 {
     public class PatrolsSubscriptionDTO
     {
-        public int SubscriptionID { get; set; }
+        public int? SubscriptionID { get; set; }
         public short PatrolID { get; set; }
         public int EmployeeID { get; set; }
 
-        public PatrolsSubscriptionDTO(int subscriptionID, short patrolID, int employeeID)
+        public PatrolsSubscriptionDTO(int? subscriptionID, short patrolID, int employeeID)
         {
             SubscriptionID = subscriptionID;
             PatrolID = patrolID;
@@ -112,7 +112,7 @@ namespace DataAccessLayer
             return subscriptionsList;
         }
 
-        public async Task<PatrolsSubscriptionDTO> GetSubscriptionRecordByIDAsync(int subscriptionID)
+        public async Task<PatrolsSubscriptionDTO?> GetSubscriptionRecordByIDAsync(int subscriptionID)
         {
             string query = @"SELECT * FROM PatrolsSubscriptions
                             WHERE SubscriptionID = @SubscriptionID"
@@ -156,7 +156,7 @@ namespace DataAccessLayer
                             VALUES
                             (@PatrolID, @EmployeeID);
 
-                            SELECT SCOPE_IDENTITY();"
+                            SELECT LAST_INSERT_ID();"
             ;
 
             try
