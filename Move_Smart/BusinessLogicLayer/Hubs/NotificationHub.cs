@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace Move_Smart.Hubs
+namespace BusinessLogicLayer.Hubs
 {
     public class NotificationHub : Hub
     {

@@ -8,13 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using BusinessLogicLayer.Services;
 using DataAccessLayer;
 using BusinessLayer;
-<<<<<<< HEAD
-using Move_Smart.Hubs;
-=======
 using Move_Smart.Controllers;
 using DataAccessLayer.SharedFunctions;
+using BusinessLogicLayer.Hubs;
 
->>>>>>> 5e30ea634b07471a12a223cd1f0594367248b281
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -93,13 +90,13 @@ builder.Services.AddScoped<PatrolService>();
 builder.Services.AddScoped<ConsumablesReplacementRepo>();
 builder.Services.AddScoped<SparePartsReplacement>();
 builder.Services.AddScoped<VacationService>();
-<<<<<<< HEAD
+
 builder.Services.AddSignalR();
-=======
+
 builder.Services.AddScoped<MaintenanceApplicationService>();
 builder.Services.AddScoped<MissionsNotesService>();
 builder.Services.AddScoped<PatrolsSubscriptionService>();
->>>>>>> 5e30ea634b07471a12a223cd1f0594367248b281
+
 
 
 // EF Core for Kamal's work
