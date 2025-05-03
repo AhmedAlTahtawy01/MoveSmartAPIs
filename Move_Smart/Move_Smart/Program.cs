@@ -11,6 +11,12 @@ using BusinessLayer;
 using Move_Smart.Controllers;
 using DataAccessLayer.SharedFunctions;
 using BusinessLogicLayer.Hubs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using BusinessLogicLayer.Helpers;
+using Microsoft.Extensions.Options;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +30,33 @@ builder.Services.AddControllers()
     .AddJsonOptions(x =>
         x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
     );
+
+builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+builder.Services.AddSingleton<JWT>(sp => sp.GetRequiredService<IOptions<JWT>>().Value);
+
+
+// Register JWT authentication
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(o =>
+    {
+        o.RequireHttpsMetadata = false;
+        o.SaveToken = true;
+        o.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT:Key is not configured"))),
+        };
+    });
+
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -75,6 +108,7 @@ builder.Services.AddScoped<CosumableWithdawApplicationService>();
 builder.Services.AddScoped<SparePartWithdrawApplicationService>();
 
 // Register services
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<UserService>(); // For UserController
 builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
 builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
@@ -121,7 +155,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization(); // No auth enforced, but kept for future use
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 

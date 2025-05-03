@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
+using BusinessLogicLayer.Services;
 
 namespace Move_Smart.Controllers
 {
@@ -12,11 +13,13 @@ namespace Move_Smart.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _service;
+        private readonly ITokenService _tokenService;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(UserService service, ILogger<UserController> logger)
+        public UserController(UserService service, ITokenService tokenService, ILogger<UserController> logger)
         {
             _service = service;
+            _tokenService = tokenService;
             _logger = logger;
         }
 
@@ -160,18 +163,32 @@ namespace Move_Smart.Controllers
             try
             {
                 var user = await _service.LoginAsync(loginModel.NationalNo, loginModel.Password);
-                return Ok(user);
+
+                var jwt = _tokenService.GenerateToken(user);
+
+                var response = new LoginResponse
+                {
+                    Token = jwt,
+                    UserId = user.UserId,
+                    Name = user.Name,
+                    Role = user.Role.ToString()
+                };
+                
+                return Ok(response);
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error in Arguments.");
                 return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Invalid Operation.");
                 return NotFound(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(ex, "Unauthorized.");
                 return Unauthorized(ex.Message);
             }
             catch (Exception ex)
@@ -188,6 +205,14 @@ namespace Move_Smart.Controllers
 
             [Required, MinLength(6)]
             public required string Password { get; set; }
+        }
+
+        public class LoginResponse
+        {
+            public string Token { get; set; } = default!;
+            public int UserId { get; set; }
+            public string Name { get; set; } = default!;
+            public string Role { get; set; } = default!;
         }
 
     }
