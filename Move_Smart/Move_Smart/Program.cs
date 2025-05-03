@@ -57,6 +57,20 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    // A policy that allows only Hospital Managers or higher (e.g. SuperUser)
+    options.AddPolicy("RequireHospitalManager", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString()
+        ));
+
+    // A policy that allows only SuperUsers
+    options.AddPolicy("RequireSuperUser", policy =>
+        policy.RequireRole(EnUserRole.SuperUser.ToString()));
+});
+
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

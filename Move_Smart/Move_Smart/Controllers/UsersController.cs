@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
 using BusinessLogicLayer.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Move_Smart.Controllers
 {
@@ -23,6 +24,7 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -43,6 +45,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
@@ -97,11 +100,13 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO user)
+        public async Task<IActionResult> UpdateUserInfo(int id, [FromBody] UserDTO user)
         {
             if (id <= 0 || user == null || id != user.UserId)
             {
+                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user.UserId);
                 return BadRequest("User Id mismatch");
             }
 
@@ -112,14 +117,17 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentNullException ex)
             {
+                _logger.LogError(ex, "Error updating user");
                 return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Error updating user");
                 return Conflict(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogWarning(ex, "User not found with ID: {Id}", id);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -129,17 +137,60 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id, [FromHeader] int requestingUserId)
+        [Authorize(Roles = "SuperUser")]
+        [HttpPut("all/{id}")]
+        public async Task<IActionResult> UpdateAllUserInfo(int id, [FromBody] UserDTO user)
         {
-            if (id <= 0 || requestingUserId <= 0)
+            if (id <= 0 || user == null || id != user.UserId)
+            {
+                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user.UserId);
+                return BadRequest("User Id mismatch");
+            }
+            try
+            {
+
+                await _service.UpdateAllUserInfoAsync(user);
+                return NoContent();
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogError(ex, "Error updating user");
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Error updating user");
+                return Conflict(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "User not found with ID: {Id}", id);
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access while updating user");
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [Authorize(Policy = "RequireHospitalManager")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            if (id <= 0)
             {
                 return BadRequest("Invalid user ID");
             }
 
             try
             {
-                bool deleted = await _service.DeleteUserAsync(id, requestingUserId);
+                bool deleted = await _service.DeleteUserAsync(id);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -180,11 +231,6 @@ namespace Move_Smart.Controllers
             {
                 _logger.LogError(ex, "Error in Arguments.");
                 return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Invalid Operation.");
-                return NotFound(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {

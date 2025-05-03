@@ -201,7 +201,7 @@ namespace BusinessLayer.Services
             return await _repo.UpdateUserInfoAsync(dto);
         }
 
-        public async Task<bool> UpdateAllUserInfoAsync(UserDTO dto, int requestingUserId)
+        public async Task<bool> UpdateAllUserInfoAsync(UserDTO dto)
         {
             if (dto == null)
             {
@@ -230,13 +230,6 @@ namespace BusinessLayer.Services
             {
                 _logger.LogError($"User with ID {dto.UserId} not found.");
                 throw new KeyNotFoundException($"User with ID {dto.UserId} not found.");
-            }
-
-            var requestingUser = await _repo.GetUserByIdAsync(requestingUserId);
-            if (requestingUser == null || !_CheckPermission(requestingUser.AccessRight, EnPermissions.All))
-            {
-                _logger.LogError($"User with ID {requestingUserId} does not have permission to update all user info.");
-                throw new UnauthorizedAccessException($"User with ID {requestingUserId} does not have permission to update all user info.");
             }
 
             if (dto.NationalNo != existingUser.NationalNo && await _repo.NationalNoExistsAsync(dto.NationalNo, dto.UserId))
@@ -304,19 +297,12 @@ namespace BusinessLayer.Services
             return user;
         }
 
-        public async Task<bool> DeleteUserAsync(int userId, int requestingUserId)
+        public async Task<bool> DeleteUserAsync(int userId)
         {
             if (userId <= 0)
             {
                 _logger.LogError("User ID must be greater than 0.");
                 throw new ArgumentException("User ID must be greater than 0.", nameof(userId));
-            }
-
-            var requestingUser = await _repo.GetUserByIdAsync(requestingUserId);
-            if (requestingUser == null || !_CheckPermission(requestingUser.AccessRight, EnPermissions.All))
-            {
-                _logger.LogError($"User with ID {requestingUserId} does not have permission to delete users.");
-                throw new UnauthorizedAccessException($"User with ID {requestingUserId} does not have permission to delete users.");
             }
 
             _logger.LogInformation($"Deleting user with ID: {userId}");
@@ -336,15 +322,10 @@ namespace BusinessLayer.Services
                 throw new ArgumentException("Password cannot be null or empty.", nameof(password));
             }
             var user = await _repo.GetUserByNationalNoAsync(nationalNo.Trim());
-            if (user == null)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                _logger.LogError($"Login failed: User with National Number {nationalNo} not found.");
-                throw new InvalidOperationException($"User with National Number {nationalNo} not found.");
-            }
-            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
-            {
-                _logger.LogError("Login failed: Invalid password.");
-                throw new UnauthorizedAccessException("Invalid password.");
+                _logger.LogError($"Login failed: User with National Number {nationalNo} or password is wrong.");
+                throw new UnauthorizedAccessException($"Login failed: User with National Number {nationalNo} or password is wrong.");
             }
 
             _logger.LogInformation($"User with National Number {nationalNo} logged in successfully.");
