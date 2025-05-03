@@ -54,7 +54,7 @@ namespace DataAccessLayer.Repositories
                 reader.GetInt32("MissionVehiclesID"),
                 reader.GetDateTime("MissionStartDate"),
                 reader.GetDateTime("MissionEndDate"),
-                reader.GetString("DIstination"),
+                reader.GetString("Destination"),
                 reader.GetInt32("CreatedByUser")
             );
         }
@@ -65,7 +65,7 @@ namespace DataAccessLayer.Repositories
                 throw new ArgumentException("Page number and page size must be greater than 0.");
 
             const string query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
+                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
                     FROM missions
                     LIMIT @Offset, @PageSize";
             int offset = (pageNumber - 1) * pageSize;
@@ -84,7 +84,7 @@ namespace DataAccessLayer.Repositories
         public async Task<MissionDTO?> GetMissionByIdAsync(int missionId)
         {
             const string query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
+                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
                     FROM missions
                     WHERE MissionID = @missionId";
 
@@ -98,7 +98,7 @@ namespace DataAccessLayer.Repositories
         private async Task<List<MissionDTO>> GetMissionsAsync(string filter, params MySqlParameter[] parameters)
         {
             string query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser
+                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
                     FROM missions";
 
             if (!string.IsNullOrEmpty(filter))
@@ -133,7 +133,7 @@ namespace DataAccessLayer.Repositories
 
         public async Task<List<MissionDTO>> GetMissionsByDestinationAsync(string destination)
         {
-            return await GetMissionsAsync("DIstination = @destination",
+            return await GetMissionsAsync("Destination = @destination",
                 new MySqlParameter("@destination", destination));
         }
 
@@ -146,7 +146,7 @@ namespace DataAccessLayer.Repositories
         public async Task<int> CreateMissionAsync(MissionDTO mission)
         {
             const string query = @"
-                INSERT INTO missions (MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, DIstination, CreatedByUser)
+                INSERT INTO missions (MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser)
                 VALUES (@missionNoteId, @missionVehiclesId, @missionStartDate, @missionEndDate, @destination, @createdByUser)
                 SELECT LAST_INSERT_ID();";
 
@@ -170,7 +170,7 @@ namespace DataAccessLayer.Repositories
                     MissionVehiclesID = @missionVehiclesId,
                     MissionStartDate = @startDate,
                     MissionEndDate = @endDate,
-                    DIstination = @destination,
+                    Destination = @destination,
                     CreatedByUser = @createdByUser
                 WHERE
                     MissionID = @missionId";
