@@ -59,6 +59,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
+    // A policy that allows only SuperUsers
+    options.AddPolicy("RequireSuperUser", policy =>
+        policy.RequireRole(EnUserRole.SuperUser.ToString()));
+
     // A policy that allows only Hospital Managers or higher (e.g. SuperUser)
     options.AddPolicy("RequireHospitalManager", policy =>
         policy.RequireRole(
@@ -66,9 +70,34 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.HospitalManager.ToString()
         ));
 
-    // A policy that allows only SuperUsers
-    options.AddPolicy("RequireSuperUser", policy =>
-        policy.RequireRole(EnUserRole.SuperUser.ToString()));
+    // A policy that allows only General Manager or higher (e.g. SuperUser, HospitalManager)
+    options.AddPolicy("RequireGeneralManager", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString()
+        ));
+
+    // A policy that allows only General Supervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager)
+    options.AddPolicy("RequireGeneralSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString()
+        ));
+
+    // A policy that allows only Low Level Supervisors or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
+    options.AddPolicy("RequireLowLevelSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString(),
+            EnUserRole.PatrolsSupervisor.ToString(),
+            EnUserRole.WorkshopSupervisor.ToString()
+        ));
 });
 
 

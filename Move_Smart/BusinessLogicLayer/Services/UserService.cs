@@ -8,6 +8,7 @@ using BCrypt.Net;
 using ZstdSharp.Unsafe;
 using Org.BouncyCastle.Bcpg;
 using Org.BouncyCastle.Security;
+using DataAccessLayer.SharedFunctions;
 
 namespace BusinessLayer.Services
 {
@@ -36,11 +37,13 @@ namespace BusinessLayer.Services
     public class UserService
     {
         private readonly UserRepo _repo;
+        private readonly SharedFunctions _shared;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(UserRepo repo, ILogger<UserService> logger)
+        public UserService(UserRepo repo, SharedFunctions shared, ILogger<UserService> logger)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
+            _shared = shared ?? throw new ArgumentNullException(nameof(shared), "Shared functions cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
@@ -303,6 +306,12 @@ namespace BusinessLayer.Services
             {
                 _logger.LogError("User ID must be greater than 0.");
                 throw new ArgumentException("User ID must be greater than 0.", nameof(userId));
+            }
+
+            if (!await _shared.CheckUserExistsAsync(userId))
+            {
+                _logger.LogError($"User with ID {userId} not found.");
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
             }
 
             _logger.LogInformation($"Deleting user with ID: {userId}");

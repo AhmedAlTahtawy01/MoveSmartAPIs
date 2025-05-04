@@ -6,6 +6,7 @@ using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
 using BusinessLogicLayer.Services;
 using Microsoft.AspNetCore.Authorization;
+using Move_Smart.Models;
 
 namespace Move_Smart.Controllers
 {
@@ -77,6 +78,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserDTO user)
         {
@@ -197,6 +199,10 @@ namespace Move_Smart.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
             catch (UnauthorizedAccessException ex)
             {
                 return Forbid(ex.Message);
@@ -211,13 +217,19 @@ namespace Move_Smart.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid login model state: {ModelState}", ModelState);
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 var user = await _service.LoginAsync(loginModel.NationalNo, loginModel.Password);
 
                 var jwt = _tokenService.GenerateToken(user);
 
-                var response = new LoginResponse
+                var response = new LoginResponseModel
                 {
                     Token = jwt,
                     UserId = user.UserId,
@@ -243,24 +255,6 @@ namespace Move_Smart.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
-        public class LoginModel
-        {
-            [Required]
-            public required string NationalNo { get; set; }
-
-            [Required, MinLength(6)]
-            public required string Password { get; set; }
-        }
-
-        public class LoginResponse
-        {
-            public string Token { get; set; } = default!;
-            public int UserId { get; set; }
-            public string Name { get; set; } = default!;
-            public string Role { get; set; } = default!;
-        }
-
     }
 }
 
