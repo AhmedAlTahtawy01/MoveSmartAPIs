@@ -87,15 +87,33 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.GeneralSupervisor.ToString()
         ));
 
-    // A policy that allows only Low Level Supervisors or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
-    options.AddPolicy("RequireLowLevelSupervisor", policy =>
+    // A policy that allows only AdministrativeSupervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
+    options.AddPolicy("RequireAdministrativeSupervisor", policy =>
         policy.RequireRole(
             EnUserRole.SuperUser.ToString(),
             EnUserRole.HospitalManager.ToString(),
             EnUserRole.GeneralManager.ToString(),
             EnUserRole.GeneralSupervisor.ToString(),
-            EnUserRole.AdministrativeSupervisor.ToString(),
-            EnUserRole.PatrolsSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString()
+        ));
+
+    // A policy that allows only PatrolsSupervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
+    options.AddPolicy("RequirePatrolsSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.PatrolsSupervisor.ToString()
+        ));
+
+    // A policy that allows only WorkshopSupervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
+    options.AddPolicy("RequireWorkshopSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
             EnUserRole.WorkshopSupervisor.ToString()
         ));
 });
