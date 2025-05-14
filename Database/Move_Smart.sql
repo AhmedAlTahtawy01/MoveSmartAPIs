@@ -320,7 +320,7 @@ CREATE TABLE IF NOT EXISTS `move_smart`.`missions` (
   `MissionVehiclesID` INT NOT NULL,
   `MissionStartDate` DATE NOT NULL,
   `MissionEndDate` DATE NOT NULL,
-  `DIstination` VARCHAR(1000) NOT NULL,
+  `Destination` VARCHAR(1000) NOT NULL,
   `CreatedByUser` INT NOT NULL,
   PRIMARY KEY (`MissionID`),
   INDEX `FK_Missions_MissionsNotes` (`MissionNoteID` ASC) VISIBLE,

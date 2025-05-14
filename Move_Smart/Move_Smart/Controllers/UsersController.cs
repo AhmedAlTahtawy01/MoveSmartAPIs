@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
+using BusinessLogicLayer.Services;
+using Microsoft.AspNetCore.Authorization;
+using Move_Smart.Models;
 
 namespace Move_Smart.Controllers
 {
@@ -12,14 +15,17 @@ namespace Move_Smart.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _service;
+        private readonly ITokenService _tokenService;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(UserService service, ILogger<UserController> logger)
+        public UserController(UserService service, ITokenService tokenService, ILogger<UserController> logger)
         {
             _service = service;
+            _tokenService = tokenService;
             _logger = logger;
         }
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -40,6 +46,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
@@ -71,6 +78,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserDTO user)
         {
@@ -94,11 +102,13 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO user)
+        public async Task<IActionResult> UpdateUserInfo(int id, [FromBody] UserDTO user)
         {
             if (id <= 0 || user == null || id != user.UserId)
             {
+                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user.UserId);
                 return BadRequest("User Id mismatch");
             }
 
@@ -109,14 +119,17 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentNullException ex)
             {
+                _logger.LogError(ex, "Error updating user");
                 return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Error updating user");
                 return Conflict(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
+                _logger.LogWarning(ex, "User not found with ID: {Id}", id);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -126,22 +139,69 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id, [FromHeader] int requestingUserId)
+        [Authorize(Roles = "SuperUser")]
+        [HttpPut("all/{id}")]
+        public async Task<IActionResult> UpdateAllUserInfo(int id, [FromBody] UserDTO user)
         {
-            if (id <= 0 || requestingUserId <= 0)
+            if (id <= 0 || user == null || id != user.UserId)
+            {
+                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user.UserId);
+                return BadRequest("User Id mismatch");
+            }
+            try
+            {
+
+                await _service.UpdateAllUserInfoAsync(user);
+                return NoContent();
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogError(ex, "Error updating user");
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Error updating user");
+                return Conflict(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "User not found with ID: {Id}", id);
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access while updating user");
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [Authorize(Policy = "RequireHospitalManager")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            if (id <= 0)
             {
                 return BadRequest("Invalid user ID");
             }
 
             try
             {
-                bool deleted = await _service.DeleteUserAsync(id, requestingUserId);
+                bool deleted = await _service.DeleteUserAsync(id);
                 return NoContent();
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -157,21 +217,36 @@ namespace Move_Smart.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid login model state: {ModelState}", ModelState);
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 var user = await _service.LoginAsync(loginModel.NationalNo, loginModel.Password);
-                return Ok(user);
+
+                var jwt = _tokenService.GenerateToken(user);
+
+                var response = new LoginResponseModel
+                {
+                    Token = jwt,
+                    UserId = user.UserId,
+                    Name = user.Name,
+                    Role = user.Role.ToString()
+                };
+                
+                return Ok(response);
             }
             catch (ArgumentException ex)
             {
+                _logger.LogError(ex, "Error in Arguments.");
                 return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(ex, "Unauthorized.");
                 return Unauthorized(ex.Message);
             }
             catch (Exception ex)
@@ -180,16 +255,6 @@ namespace Move_Smart.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
-        public class LoginModel
-        {
-            [Required]
-            public required string NationalNo { get; set; }
-
-            [Required, MinLength(6)]
-            public required string Password { get; set; }
-        }
-
     }
 }
 

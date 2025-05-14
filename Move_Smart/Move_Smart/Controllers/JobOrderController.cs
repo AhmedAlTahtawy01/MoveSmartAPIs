@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Move_Smart.Controllers
@@ -21,6 +22,7 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetJobOrders([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -47,6 +49,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetJobOrderById([FromRoute] int id)
         {
@@ -78,6 +81,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("vehicle/{id}")]
         public async Task<IActionResult> GetJobOrdersByVehicleId([FromRoute] int vehicleId)
         {
@@ -110,6 +114,7 @@ namespace Move_Smart.Controllers
 
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("driver/{id}")]
         public async Task<IActionResult> GetJobOrdersByDriverId([FromRoute] int driverId)
         {
@@ -140,6 +145,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("startdate/{startDate}")]
         public async Task<IActionResult> GetJobOrdersByStartDate([FromRoute] DateTime startDate)
         {
@@ -170,6 +176,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("destination/{destination}")]
         public async Task<IActionResult> GetJobOrdersByDestination(string destination)
         {
@@ -200,6 +207,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetJobOrdersByStatus(enStatus status)
         {
@@ -231,6 +239,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("daterange")]
         public async Task<IActionResult> GetJobOrdersByDateRange([Required] DateTime startDate, [Required] DateTime endDate)
         {
@@ -260,6 +269,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Roles = "AdministrativeSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateJobOrder([FromBody] JobOrderDTO jobOrder)
         {
@@ -294,6 +304,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Roles = "AdministrativeSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateJobOrder([FromRoute] int id, [FromBody] JobOrderDTO jobOrder)
         {
@@ -325,6 +336,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Roles = "AdministrativeSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJobOrder([FromRoute] int id)
         {

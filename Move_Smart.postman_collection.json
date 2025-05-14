@@ -1,0 +1,304 @@
+{
+	"info": {
+		"_postman_id": "2ae2b4ca-2eda-42c3-927e-d1f02141682e",
+		"name": "Move_Smart",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34403808"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response as JSON since the content type is application/json\r",
+									"let responseData = pm.response.json();\r",
+									"\r",
+									"// Check if token exists in the response and save it to environment variable\r",
+									"if (responseData && responseData.token) {\r",
+									"  pm.environment.set(\"jwtToken\", responseData.token);\r",
+									"  console.log(\"Token saved to environment variable:\", responseData.token);\r",
+									"} else {\r",
+									"  console.warn(\"No token found in the response\");\r",
+									"}\r",
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.token).to.exist;",
+									"    pm.expect(responseData.userId).to.exist;",
+									"    pm.expect(responseData.name).to.exist;",
+									"    pm.expect(responseData.role).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token is a non-empty string\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"UserId is a non-negative integer\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.userId).to.be.a('number');",
+									"  pm.expect(responseData.userId).to.be.at.least(0);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nationalNo\": \"30310012614555\",\r\n    \"password\": \"Ahmed123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/User/login",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"User",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 409\", function () {",
+									"    pm.expect(pm.response.code).to.equal(409);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response content type is text/plain\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/plain\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response body is a non-empty string\", function () {",
+									"    pm.expect(pm.response.text()).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate the response body for specific error message\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"Specific error message\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Verify the response contains the expected headers\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.exist;",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.equal(\"text/plain\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": 0,\r\n    \"nationalNo\": \"20210012614556\",\r\n    \"password\": \"Ahmed\",\r\n    \"name\": \"Khaled\",\r\n    \"role\": 1,\r\n    \"accessright\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/User",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"User"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetUserById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/User/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"User",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetUsers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/User/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"User",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateInfoById",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": 4,\r\n    \"nationalNo\": \"20210012614556\",\r\n    \"password\": \"Abeer123\",\r\n    \"name\": \"Abeer\",\r\n    \"role\": 2,\r\n    \"accessright\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/User/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"User",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateAllUserInfo",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": 4,\r\n    \"nationalNo\": \"20210012614556\",\r\n    \"password\": \"Abeer123\",\r\n    \"name\": \"Abeer\",\r\n    \"role\": 2,\r\n    \"accessright\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/User/all/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"User",
+								"all",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteUser",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/User/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"User",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJBaG1lZCBIYW1keSJdLCJqdGkiOiIwNWEwZWRmNS0wNzdlLTQzZGYtODE0Ni1hMzEzNThjZDQ4OTMiLCJyb2xlIjoiU3VwZXJVc2VyIiwibmJmIjoxNzQ2Mzg0NDA5LCJleHAiOjE3NDYzODgwMDksImlhdCI6MTc0NjM4NDQwOSwiaXNzIjoiTW92ZVNtYXJ0QVBJIiwiYXVkIjoiTW92ZVNtYXJ0VXNlcnMifQ.CfuGd3XAweHeRWabR5d11Segb9lTet91qSCUbRfFYmI",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

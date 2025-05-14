@@ -11,6 +11,12 @@ using BusinessLayer;
 using Move_Smart.Controllers;
 using DataAccessLayer.SharedFunctions;
 using BusinessLogicLayer.Hubs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using BusinessLogicLayer.Helpers;
+using Microsoft.Extensions.Options;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +30,94 @@ builder.Services.AddControllers()
     .AddJsonOptions(x =>
         x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
     );
+
+builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+builder.Services.AddSingleton<JWT>(sp => sp.GetRequiredService<IOptions<JWT>>().Value);
+
+
+// Register JWT authentication
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(o =>
+    {
+        o.RequireHttpsMetadata = false;
+        o.SaveToken = true;
+        o.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT:Key is not configured"))),
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    // A policy that allows only SuperUsers
+    options.AddPolicy("RequireSuperUser", policy =>
+        policy.RequireRole(EnUserRole.SuperUser.ToString()));
+
+    // A policy that allows only Hospital Managers or higher (e.g. SuperUser)
+    options.AddPolicy("RequireHospitalManager", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString()
+        ));
+
+    // A policy that allows only General Manager or higher (e.g. SuperUser, HospitalManager)
+    options.AddPolicy("RequireGeneralManager", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString()
+        ));
+
+    // A policy that allows only General Supervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager)
+    options.AddPolicy("RequireGeneralSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString()
+        ));
+
+    // A policy that allows only AdministrativeSupervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
+    options.AddPolicy("RequireAdministrativeSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString()
+        ));
+
+    // A policy that allows only PatrolsSupervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
+    options.AddPolicy("RequirePatrolsSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.PatrolsSupervisor.ToString()
+        ));
+
+    // A policy that allows only WorkshopSupervisor or higher (e.g. SuperUser, HospitalManager, GeneralManager, General Supervisor)
+    options.AddPolicy("RequireWorkshopSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.WorkshopSupervisor.ToString()
+        ));
+});
+
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -75,6 +169,7 @@ builder.Services.AddScoped<CosumableWithdawApplicationService>();
 builder.Services.AddScoped<SparePartWithdrawApplicationService>();
 
 // Register services
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<UserService>(); // For UserController
 builder.Services.AddScoped<ApplicationService>(); // For JobOrderService
 builder.Services.AddScoped<JobOrderService>(); // For JobOrderController
@@ -121,7 +216,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization(); // No auth enforced, but kept for future use
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 

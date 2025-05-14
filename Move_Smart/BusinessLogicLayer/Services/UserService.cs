@@ -8,6 +8,7 @@ using BCrypt.Net;
 using ZstdSharp.Unsafe;
 using Org.BouncyCastle.Bcpg;
 using Org.BouncyCastle.Security;
+using DataAccessLayer.SharedFunctions;
 
 namespace BusinessLayer.Services
 {
@@ -36,11 +37,13 @@ namespace BusinessLayer.Services
     public class UserService
     {
         private readonly UserRepo _repo;
+        private readonly SharedFunctions _shared;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(UserRepo repo, ILogger<UserService> logger)
+        public UserService(UserRepo repo, SharedFunctions shared, ILogger<UserService> logger)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
+            _shared = shared ?? throw new ArgumentNullException(nameof(shared), "Shared functions cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
@@ -201,7 +204,7 @@ namespace BusinessLayer.Services
             return await _repo.UpdateUserInfoAsync(dto);
         }
 
-        public async Task<bool> UpdateAllUserInfoAsync(UserDTO dto, int requestingUserId)
+        public async Task<bool> UpdateAllUserInfoAsync(UserDTO dto)
         {
             if (dto == null)
             {
@@ -230,13 +233,6 @@ namespace BusinessLayer.Services
             {
                 _logger.LogError($"User with ID {dto.UserId} not found.");
                 throw new KeyNotFoundException($"User with ID {dto.UserId} not found.");
-            }
-
-            var requestingUser = await _repo.GetUserByIdAsync(requestingUserId);
-            if (requestingUser == null || !_CheckPermission(requestingUser.AccessRight, EnPermissions.All))
-            {
-                _logger.LogError($"User with ID {requestingUserId} does not have permission to update all user info.");
-                throw new UnauthorizedAccessException($"User with ID {requestingUserId} does not have permission to update all user info.");
             }
 
             if (dto.NationalNo != existingUser.NationalNo && await _repo.NationalNoExistsAsync(dto.NationalNo, dto.UserId))
@@ -304,7 +300,7 @@ namespace BusinessLayer.Services
             return user;
         }
 
-        public async Task<bool> DeleteUserAsync(int userId, int requestingUserId)
+        public async Task<bool> DeleteUserAsync(int userId)
         {
             if (userId <= 0)
             {
@@ -312,11 +308,10 @@ namespace BusinessLayer.Services
                 throw new ArgumentException("User ID must be greater than 0.", nameof(userId));
             }
 
-            var requestingUser = await _repo.GetUserByIdAsync(requestingUserId);
-            if (requestingUser == null || !_CheckPermission(requestingUser.AccessRight, EnPermissions.All))
+            if (!await _shared.CheckUserExistsAsync(userId))
             {
-                _logger.LogError($"User with ID {requestingUserId} does not have permission to delete users.");
-                throw new UnauthorizedAccessException($"User with ID {requestingUserId} does not have permission to delete users.");
+                _logger.LogError($"User with ID {userId} not found.");
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
             }
 
             _logger.LogInformation($"Deleting user with ID: {userId}");
@@ -336,15 +331,10 @@ namespace BusinessLayer.Services
                 throw new ArgumentException("Password cannot be null or empty.", nameof(password));
             }
             var user = await _repo.GetUserByNationalNoAsync(nationalNo.Trim());
-            if (user == null)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                _logger.LogError($"Login failed: User with National Number {nationalNo} not found.");
-                throw new InvalidOperationException($"User with National Number {nationalNo} not found.");
-            }
-            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
-            {
-                _logger.LogError("Login failed: Invalid password.");
-                throw new UnauthorizedAccessException("Invalid password.");
+                _logger.LogError($"Login failed: User with National Number {nationalNo} or password is wrong.");
+                throw new UnauthorizedAccessException($"Login failed: User with National Number {nationalNo} or password is wrong.");
             }
 
             _logger.LogInformation($"User with National Number {nationalNo} logged in successfully.");
