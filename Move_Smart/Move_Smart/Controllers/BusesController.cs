@@ -1,5 +1,6 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,8 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("All", Name = "GetAllBuses")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -34,6 +37,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("All/OfCapacity/{capacity}", Name = "GetAllBusesOfType")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -50,6 +54,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("All/WithAvailableSpace/{availableSpace}", Name = "GetAllBusesWithAvailableSpace")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -66,6 +71,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("ByID/{busID}", Name = "GetBusByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -82,6 +88,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("ByPlateNumbers/{plateNumbers}", Name = "GetBusByPlateNumbers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -98,6 +105,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpPost(Name = "AddNewBus")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -117,6 +125,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpPut(Name = "UpdateBus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -142,6 +151,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpDelete("ByID/{busID}", Name = "DeleteBusByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -175,6 +185,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpDelete("ByPlateNumbers/{plateNumbers}", Name = "DeleteBusByPlateNumbers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

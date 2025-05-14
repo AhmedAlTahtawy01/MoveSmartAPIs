@@ -1,6 +1,7 @@
 ﻿
 using BusinessLayer;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Move_Smart.Controllers
@@ -19,6 +20,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("All", Name = "GetAllVacations")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -35,6 +37,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("ForDriver/{driverID}", Name = "GetAllVacationsForDriver")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -51,6 +54,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("ValidForDriver/{driverID}", Name = "GetAllValidVacationsForDriver")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -67,6 +71,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("{vacationID}", Name = "GetVacationByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -83,6 +88,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpPost(Name = "AddNewVacation")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -102,6 +108,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpPut(Name = "UpdateVacation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -132,6 +139,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpDelete("{vacationID}", Name = "DeleteVacation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -157,6 +165,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("IsDriverInVacation/{driverID}", Name = "IsDriverInVacation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -1,5 +1,6 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("All", Name = "GetAllEmployees")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -36,6 +38,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("WhoAreUsingBus/{busID}", Name = "GetAllEmployeesWhoAreUsingBus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -52,6 +55,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("ByID/{employeeID}", Name = "GetEmployeeByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -74,6 +78,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("ByNationalNo/{nationalNo}", Name = "GetEmployeeByNationalNo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -96,6 +101,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("ByPhone/{phone}", Name = "GetEmployeeByPhone")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -118,6 +124,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("/IsTransportationSubscriptionValid/{employeeID}", Name = "IsTransportationSubscriptionValid")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -138,6 +145,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPost(Name = "AddNewEmployee")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -162,6 +170,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPut(Name = "UpdateEmployee")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -191,6 +200,8 @@ namespace Move_Smart.Controllers
             return Ok($"Employee with ID [{dto.EmployeeID}] updated successfully");
         }
 
+
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpDelete("ByID/{employeeID}", Name = "DeleteEmployeeByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -216,6 +227,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpDelete("ByNationalNo/{nationalNo}", Name = "DeleteEmployeeByNationalNo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
