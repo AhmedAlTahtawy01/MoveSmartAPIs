@@ -43,6 +43,13 @@ namespace Move_Smart.Controllers
             var data = await _vehicleconsumable.GetVehicleConsumableByID(id);
             return Ok(data);
         }
+        [Authorize(Policy = "RequireGeneralSupervisor")]
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetSparePartByID(string name )
+        {
+            var data = await _vehicleconsumable.GetVehicleConsumableByID(name);
+            return Ok(data);
+        }
         [Authorize(Roles = "WorkshopSupervisor")]
         [HttpPost]
         public async Task<IActionResult> AddVehicleConsumable([FromBody] Vehicleconsumable consume)
