@@ -11,7 +11,6 @@ namespace DataAccessLayer.Repositories
 
     public partial class Vehicleconsumable
     {
-//<<<<<<< HEAD
         public int ConsumableId { get; set; }
         public string ConsumableName { get; set; }
         public int ValidityLength { get; set; }
@@ -79,6 +78,19 @@ namespace DataAccessLayer.Repositories
             var consumable = await _appDBContext.Vehicleconsumables
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ConsumableId == id);
+
+            if (consumable == null)
+            {
+                throw new Exception("Vehicle consumable not found.");
+            }
+
+            return consumable;
+        }
+         public async Task<Vehicleconsumable> GetVehicleConsumableByName(string name )
+        {
+            var consumable = await _appDBContext.Vehicleconsumables
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.ConsumableName== name);
 
             if (consumable == null)
             {

@@ -45,9 +45,9 @@ namespace Move_Smart.Controllers
         }
         [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("{name}")]
-        public async Task<IActionResult> GetSparePartByID(string name )
+        public async Task<IActionResult> GetByName(string name )
         {
-            var data = await _vehicleconsumable.GetVehicleConsumableByID(name);
+            var data = await _vehicleconsumable.GetVehicleConsumableByName(name);
             return Ok(data);
         }
         [Authorize(Roles = "WorkshopSupervisor")]
