@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ namespace Move_Smart.Controllers
         {
             _vehicleconsumable = vehicleconsumable;
         }
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllVehicleConsumable()
         {
@@ -34,13 +36,14 @@ namespace Move_Smart.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSparePartByID(int id)
         {
             var data = await _vehicleconsumable.GetVehicleConsumableByID(id);
             return Ok(data);
         }
+        [Authorize(Roles = "WorkshopSupervisor")]
         [HttpPost]
         public async Task<IActionResult> AddVehicleConsumable([FromBody] Vehicleconsumable consume)
         {
@@ -54,13 +57,14 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> Count()
         {
             var count = await _vehicleconsumable.CountAllOrdersAsync();
             return Ok(count);
         }
-
+        [Authorize(Roles = "GeneralSupervisor")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteVehicleConsumable(int id)
@@ -81,6 +85,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Roles = "WorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Vehicleconsumable consume)
         {
