@@ -70,7 +70,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Roles = "WorkshopSupervisor")]
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Sparepart spare)
         {
@@ -85,7 +85,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Roles = "GeneralSupervisor")]
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteSparePart(int id)

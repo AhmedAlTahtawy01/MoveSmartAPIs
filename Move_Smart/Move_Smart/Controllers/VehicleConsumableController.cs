@@ -50,7 +50,7 @@ namespace Move_Smart.Controllers
             var data = await _vehicleconsumable.GetVehicleConsumableByName(name);
             return Ok(data);
         }
-        [Authorize(Roles = "WorkshopSupervisor")]
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpPost]
         public async Task<IActionResult> AddVehicleConsumable([FromBody] Vehicleconsumable consume)
         {
@@ -71,7 +71,7 @@ namespace Move_Smart.Controllers
             var count = await _vehicleconsumable.CountAllOrdersAsync();
             return Ok(count);
         }
-        [Authorize(Roles = "GeneralSupervisor")]
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteVehicleConsumable(int id)
@@ -92,7 +92,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Roles = "WorkshopSupervisor")]
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Vehicleconsumable consume)
         {
