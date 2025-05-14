@@ -16,48 +16,99 @@ namespace Move_Smart.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllVehicleConsumable()
         {
-            var data = await _vehicleconsumable.GetAllVehicleConsumable();
-            return Ok(data);
+            try
+            {
+                var data = await _vehicleconsumable.GetAllVehicleConsumable();
+
+                // Check if no data was found and return an appropriate response
+                if (data == null || !data.Any())
+                {
+                    return NotFound("No vehicle consumables found.");
+                }
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                // Return an error message in case of any exceptions
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
-        [HttpGet("{ConsumableName}")]
-        public async Task<IActionResult> GetSparePartByName(string ConsumableName)
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSparePartByID(int id)
         {
-            var data = await _vehicleconsumable.GetVehicleConsumableByName(ConsumableName);
+            var data = await _vehicleconsumable.GetVehicleConsumableByID(id);
             return Ok(data);
         }
         [HttpPost]
         public async Task<IActionResult> AddVehicleConsumable([FromBody] Vehicleconsumable consume)
         {
-            await _vehicleconsumable.AddVehicleConsumable(consume);
-            return Ok();
+            try
+            {
+                await _vehicleconsumable.AddVehicleConsumable(consume);
+                return Ok("Vehicle consumable added successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-        [HttpDelete]
-        [Route("{ConsumableName}")]
-        public async Task<IActionResult> DeleteVehicleConsumable(string ConsumableName)
+        [HttpGet("count")]
+        public async Task<IActionResult> Count()
         {
-            await _vehicleconsumable.DeleteVehicleConsumable(ConsumableName);
-            return Ok();
+            var count = await _vehicleconsumable.CountAllOrdersAsync();
+            return Ok(count);
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteVehicleConsumable(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    throw new Exception("Consumable ID must be greater than zero.");
+                }
+
+                await _vehicleconsumable.DeleteVehicleConsumable(id);
+                return Ok("Vehicle consumable deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Vehicleconsumable consume)
         {
-            await _vehicleconsumable.UpdateVehicleConsumable(consume);
-            return Ok();
-        }
+            try
+            {
+                // Ensure the consume object is not null
+                if (consume == null)
+                {
+                    throw new Exception("Consumable data cannot be null.");
+                }
 
-        [HttpPut("{part}")]
-        public async Task<IActionResult> UpdateVehicleConumable([FromRoute] string part, [FromBody] Vehicleconsumable consume)
-        {
-            await _vehicleconsumable.UpdateConsumableAsynchronously(part, consume);
-            return Ok();
-        }
-        //[HttpPut("{name}")]
-        //public async Task<IActionResult> UpdateConsume(string name, [FromBody] Vehicleconsumable consume)
-        //{
-        //    await _vehicleconsumable.UpdateConsumableAsynchronously(name, consume);
+                // Ensure the ConsumableId is valid
+                if (consume.ConsumableId <= 0)
+                {
+                    throw new Exception("Consumable ID must be provided and greater than zero.");
+                }
 
-        //    return Ok();
-        //}
+                // Call the update method
+                await _vehicleconsumable.UpdateVehicleConsumable(consume);
+
+                return Ok("Vehicle consumable updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        
 
     }
 }

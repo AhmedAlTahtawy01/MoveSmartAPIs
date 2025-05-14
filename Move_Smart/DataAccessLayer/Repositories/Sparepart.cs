@@ -35,51 +35,84 @@ namespace DataAccessLayer.Repositories
         }
         public async Task AddSparePart(Sparepart spare)
         {
-            var check = await _appDBContext.Spareparts.FirstOrDefaultAsync(x => x.PartName == spare.PartName);
-            if (check != null)
+            try
             {
-                throw new InvalidOperationException(" Spare Part Is alreay Found!!");
+                if (string.IsNullOrEmpty(spare.PartName) || spare.ValidityLength == 0 || spare.Quantity == 0)
+                {
+                    throw new InvalidOperationException("Part name, validity length, and quantity cannot be null or zero.");
+                }
+
+                var existingPart = await _appDBContext.Spareparts
+                    .FirstOrDefaultAsync(x => x.PartName == spare.PartName);
+
+                if (existingPart != null)
+                {
+                    Console.WriteLine("Spare part already exists. Skipping creation.");
+                }
+
+                _appDBContext.Spareparts.Add(spare);
+                await _appDBContext.SaveChangesAsync();
             }
-            if (string.IsNullOrEmpty(spare.PartName) && spare.ValidityLength == 0 && spare.Quantity == 0)
+            catch (Exception ex)
             {
-                throw new InvalidOperationException(" validitylength & quantity & name Cannot be null");
+                // You can log the exception or rethrow depending on your application's needs
+                Console.WriteLine($"Error adding spare part: {ex.Message}");
+                throw;
             }
-            _appDBContext.Spareparts.Add(spare);
-            await _appDBContext.SaveChangesAsync();
         }
 
         public async Task UpdateSparePart(Sparepart spare)
         {
-            _appDBContext.Spareparts.Update(spare);
+            var existingPart = await _appDBContext.Spareparts
+                .FirstOrDefaultAsync(x => x.SparePartId== spare.SparePartId);
+
+            if (existingPart == null)
+            {
+                throw new Exception("Spare part not found.");
+            }
+
+            existingPart.PartName = spare.PartName;
+            existingPart.ValidityLength = spare.ValidityLength;
+            existingPart.Quantity = spare.Quantity;
+
             await _appDBContext.SaveChangesAsync();
         }
-        public async Task DeleteSparePart(string PartName)
+
+
+        public async Task DeleteSparePart(int id)
         {
-            var sparepart = await _appDBContext.Spareparts.AsNoTracking().FirstOrDefaultAsync(id => id.PartName == PartName);
+            var sparepart = await _appDBContext.Spareparts
+                .FirstOrDefaultAsync(x => x.SparePartId == id);
+
             if (sparepart == null)
             {
-                throw new InvalidOperationException(" Cannot be null");
+                throw new Exception("Spare part not found.");
             }
+
             _appDBContext.Spareparts.Remove(sparepart);
             await _appDBContext.SaveChangesAsync();
         }
+
 
         public async Task<List<Sparepart>> GetAllSparePart()
         {
             return await _appDBContext.Spareparts.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Sparepart?> GetSparePartByName(string partName)
+        public async Task<Sparepart> GetSparePartByName(int id)
         {
-            var part =  await _appDBContext.Spareparts
+            var part = await _appDBContext.Spareparts
                 .AsNoTracking()
-                .FirstOrDefaultAsync(sp => sp.PartName == partName);
+                .FirstOrDefaultAsync(sp => sp.SparePartId == id);
+
             if (part == null)
             {
-                throw new InvalidOperationException("this is not found!!");
+                throw new Exception("Spare part not found.");
             }
+
             return part;
         }
+
 
 
         public async Task UpdateByNameSparePart(string PartName, Sparepart spare)
@@ -98,6 +131,10 @@ namespace DataAccessLayer.Repositories
             
 
             await _appDBContext.SaveChangesAsync();
+        }
+        public async Task<int> CountAllOrdersAsync()
+        {
+            return await _appDBContext.Consumableswithdrawapplications.CountAsync();
         }
 
     }

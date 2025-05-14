@@ -1,8 +1,8 @@
 ﻿using BusinessLayer.Services;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Move_Smart.Hubs;
 using Mysqlx.Crud;
 using System;
 using System.Collections.Generic;

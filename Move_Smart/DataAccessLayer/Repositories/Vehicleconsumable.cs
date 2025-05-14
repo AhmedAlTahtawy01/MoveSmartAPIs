@@ -13,20 +13,11 @@ namespace DataAccessLayer.Repositories
     {
 //<<<<<<< HEAD
         public int ConsumableId { get; set; }
-        //=======
-        //public short ConsumableId { get; set; }
-//>>>>>>> 2ec77d67c5319da35c5c074b4aa94fd5f5c4a0b6
-
         public string ConsumableName { get; set; }
-
         public int ValidityLength { get; set; }
-
         public int Quantity { get; set; }
-
         public virtual ICollection<Consumablespurchaseorder> Consumablespurchaseorders { get; set; } = new List<Consumablespurchaseorder>();
-
         public virtual ICollection<Consumablesreplacement> Consumablesreplacements { get; set; } = new List<Consumablesreplacement>();
-
         public virtual ICollection<Consumableswithdrawapplication> Consumableswithdrawapplications { get; set; } = new List<Consumableswithdrawapplication>();
         public Vehicleconsumable()
         {
@@ -42,23 +33,33 @@ namespace DataAccessLayer.Repositories
         }
         public async Task AddVehicleConsumable(Vehicleconsumable consumables)
         {
-            var check = await _appDBContext.Vehicleconsumables.FirstOrDefaultAsync(x => x.ConsumableName == consumables.ConsumableName);
+            if (consumables.ConsumableId != 0)
+            {
+                throw new Exception("Do not provide an ID when adding a new consumable.");
+            }
+
+            if (string.IsNullOrWhiteSpace(consumables.ConsumableName) ||
+                consumables.ValidityLength == 0 ||
+                consumables.Quantity == 0)
+            {
+                throw new Exception("Consumable name, validity length, and quantity cannot be null or zero.");
+            }
+
+            var check = await _appDBContext.Vehicleconsumables
+                .FirstOrDefaultAsync(x => x.ConsumableId == consumables.ConsumableId);
+
             if (check != null)
             {
-                throw new InvalidOperationException(" Cannot be null");
+                throw new Exception("Consumable with the same name already exists.");
             }
-            if (string.IsNullOrEmpty(consumables.ConsumableName) && consumables.ValidityLength == 0 && consumables.Quantity == 0)
-            {
-                throw new InvalidOperationException(" Cannot be null");
-            }
+
             _appDBContext.Vehicleconsumables.Add(consumables);
             await _appDBContext.SaveChangesAsync();
-
         }
 
-        public async Task DeleteVehicleConsumable(string ConsumableName)
+        public async Task DeleteVehicleConsumable(int id)
         {
-            var counsume = await _appDBContext.Vehicleconsumables.AsNoTracking().FirstOrDefaultAsync(st => st.ConsumableName == ConsumableName);
+            var counsume = await _appDBContext.Vehicleconsumables.AsNoTracking().FirstOrDefaultAsync(st => st.ConsumableId == id);
             if (counsume == null)
             {
                 throw new InvalidOperationException(" Cannot be null");
@@ -73,16 +74,31 @@ namespace DataAccessLayer.Repositories
         }
 
 
-        public async Task<Vehicleconsumable> GetVehicleConsumableByName(string ConsumableName)
+        public async Task<Vehicleconsumable> GetVehicleConsumableByID(int id)
         {
-            return await _appDBContext.Vehicleconsumables.AsNoTracking().FirstAsync(id => ConsumableName == id.ConsumableName);
+            var consumable = await _appDBContext.Vehicleconsumables
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.ConsumableId == id);
+
+            if (consumable == null)
+            {
+                throw new Exception("Vehicle consumable not found.");
+            }
+
+            return consumable;
         }
 
         public async Task UpdateVehicleConsumable(Vehicleconsumable consumables)
         {
+            if (consumables.ConsumableId == 0)
+            {
+                throw new Exception("Consumable ID cannot be null or zero for update.");
+            }
+
             _appDBContext.Vehicleconsumables.Update(consumables);
             await _appDBContext.SaveChangesAsync();
         }
+
         public async Task<Vehicleconsumable> UpdateConsumableAsynchronously(string name , Vehicleconsumable consumable)
         {
             var VehicleConsumable = await _appDBContext.Vehicleconsumables.FirstOrDefaultAsync(v=>v.ConsumableName == name);
@@ -98,6 +114,10 @@ namespace DataAccessLayer.Repositories
             // update it nowwww
             await _appDBContext.SaveChangesAsync();
             return VehicleConsumable;
+        }
+        public async Task<int> CountAllOrdersAsync()
+        {
+            return await _appDBContext.Vehicleconsumables.CountAsync();
         }
 
     }

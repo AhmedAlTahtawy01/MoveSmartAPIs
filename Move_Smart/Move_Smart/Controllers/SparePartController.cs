@@ -21,36 +21,66 @@ namespace Move_Smart.Controllers
             return Ok(data);
         }
         [HttpGet("{PartName}")]
-        public async Task<IActionResult> GetSparePartByName(string PartName)
+        public async Task<IActionResult> GetSparePartByName(int id)
         {
-            var data = await _isparepart.GetSparePartByName(PartName);
+            var data = await _isparepart.GetSparePartByName(id);
             return Ok(data);
         }
         [HttpPost]
         public async Task<IActionResult> AddSparePart([FromBody] Sparepart spare)
         {
-            await _isparepart.AddSparePart(spare);
-            return Ok();
+            try
+            {
+                await _isparepart.AddSparePart(spare);
+                return Ok("Spare part added successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Return only the error message
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Sparepart spare)
         {
-            await _isparepart.UpdateSparePart(spare);
-            return Ok();
+            try
+            {
+                await _isparepart.UpdateSparePart(spare);
+                return Ok("Spare part updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
         [HttpDelete]
-        [Route("{PartName}")]
-        public async Task<IActionResult> DeleteSparePart(string PartName)
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteSparePart(int id)
         {
-            await _isparepart.DeleteSparePart(PartName);
-            return Ok();
+            try
+            {
+                await _isparepart.DeleteSparePart(id);
+                return Ok("Spare part deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-        [HttpPut("{PartName}")]
-        public async Task<IActionResult> UpdateByNameSparePart(string PartName,[FromBody] Sparepart spare)
+        [HttpGet("count")]
+        public async Task<IActionResult> Count()
         {
-            await _isparepart.UpdateByNameSparePart(PartName, spare);
-            return Ok();
+            var count = await _isparepart.CountAllOrdersAsync();
+            return Ok(count);
         }
+        //[HttpPut("{PartName}")]
+        //public async Task<IActionResult> UpdateByNameSparePart(string PartName,[FromBody] Sparepart spare)
+        //{
+        //    await _isparepart.UpdateByNameSparePart(PartName, spare);
+        //    return Ok();
+        //}
 
     }
 }
