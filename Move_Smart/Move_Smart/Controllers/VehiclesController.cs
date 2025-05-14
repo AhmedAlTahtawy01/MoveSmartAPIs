@@ -1,5 +1,6 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static DataAccessLayer.VehicleDTO;
@@ -19,6 +20,7 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("All", Name = "GetAllVehicles")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -35,6 +37,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("OfType/{vehicleType}", Name = "GetAllVehiclesOfType")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -51,6 +54,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("WithStatus/{vehicleStatus}", Name = "GetAllVehiclesWithStatus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -67,6 +71,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("UsingFuelOfType/{fuelType}", Name = "GetAllVehiclesUsingFuelOfType")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -83,6 +88,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("{vehicleID}", Name = "GetVehicleByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -99,6 +105,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("Count", Name = "GetNumberOfVehicles")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -115,6 +122,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("Count/WithStatus/{vehicleStatus}", Name = "GetNumberOfVehiclesOfType")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -131,6 +139,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpPost(Name = "AddNewVehicle")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -145,6 +154,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpPut(Name = "UpdateVehicle")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -170,6 +180,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpDelete("ByID/{vehicleID}", Name = "DeleteVehicleByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -195,6 +206,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpDelete("ByPlateNumbers/{plateNumbers}", Name = "DeleteVehicleByPlateNumbers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

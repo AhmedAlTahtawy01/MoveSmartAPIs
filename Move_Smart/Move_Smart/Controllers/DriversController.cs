@@ -1,5 +1,6 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static DataAccessLayer.DriverDTO;
@@ -20,6 +21,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("All", Name = "GetAllDrivers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -36,6 +38,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("WorkingOnVehicle/WithID/{vehicleID}", Name = "GetAllDriversWorkingOnVehicleWithID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -58,6 +61,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("WorkingOnVehicle/WithPlateNumbers/{plateNumbers}", Name = "GetAllDriversWorkingOnVehicleWithPlateNumbers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -80,6 +84,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("WithStatus/{status}", Name = "GetAllDriversWithStatus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -96,6 +101,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("ByID/{driverID}", Name = "GetDriverByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -118,6 +124,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("ByNationalNo/{nationalNo}", Name = "GetDriverByNationalNo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -140,6 +147,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("ByPhone/{phone}", Name = "GetDriverByPhone")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -162,6 +170,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("Count", Name = "GetNumberOfDrivers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -178,6 +187,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("Count/WithStatus/{status}", Name = "GetNumberOfDriversByStatus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -193,6 +203,8 @@ namespace Move_Smart.Controllers
             return Ok(numberOfDrivers);
         }
 
+
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpPost(Name = "AddNewDriver")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -217,6 +229,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpPut(Name = "UpdateDriver")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -246,6 +259,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpDelete("ByID/{driverID}", Name = "DeleteDriverByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -271,6 +285,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralManager")]
         [HttpDelete("ByNationalNo/{nationalNo}", Name = "DeleteDriverByNationalNo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
