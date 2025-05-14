@@ -116,6 +116,42 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.GeneralSupervisor.ToString(),
             EnUserRole.WorkshopSupervisor.ToString()
         ));
+
+    options.AddPolicy("WorkshopSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.WorkshopSupervisor.ToString()
+        ));
+
+    options.AddPolicy("GeneralSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.GeneralSupervisor.ToString()
+        ));
+
+    options.AddPolicy("GeneralManager", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.GeneralManager.ToString()
+        ));
+
+    options.AddPolicy("HospitalManager", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString()
+        ));
+
+    options.AddPolicy("AdministrativeSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString()
+        ));
+
+    options.AddPolicy("PatrolsSupervisor", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.PatrolsSupervisor.ToString()
+        ));
 });
 
 

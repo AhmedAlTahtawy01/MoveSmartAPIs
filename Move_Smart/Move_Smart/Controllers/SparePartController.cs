@@ -53,8 +53,9 @@ namespace Move_Smart.Controllers
             }
             
         }
-        [Authorize(Roles = "WorkshopSupervisor")]
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpPost]
+
         public async Task<IActionResult> AddSparePart([FromBody] Sparepart spare)
         {
             try
@@ -68,6 +69,7 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [Authorize(Roles = "WorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Sparepart spare)
