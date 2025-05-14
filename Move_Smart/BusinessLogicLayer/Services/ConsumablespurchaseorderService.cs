@@ -3,10 +3,7 @@ using BusinessLogicLayer.Hubs;
 using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-<<<<<<< HEAD
-=======
-//using Move_Smart.Hubs;
->>>>>>> 669087167046440e1f3aee6aa5116fbc3f8d88ef
+
 using Mysqlx.Crud;
 using System;
 using System.Collections.Generic;

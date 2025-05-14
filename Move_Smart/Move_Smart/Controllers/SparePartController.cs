@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,18 +15,45 @@ namespace Move_Smart.Controllers
         {
             _isparepart = isparepart;
         }
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllSparePart()
         {
             var data = await _isparepart.GetAllSparePart();
             return Ok(data);
         }
-        [HttpGet("{PartName}")]
-        public async Task<IActionResult> GetSparePartByName(int id)
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetByID(int id)
         {
-            var data = await _isparepart.GetSparePartByName(id);
-            return Ok(data);
+            try
+            {
+                var data = await _isparepart.GetSparePartByID(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                // Return only the error message
+                return BadRequest(new { message = ex.Message });
+            }
         }
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetByName(string name )
+        {
+            try
+            {
+                var data = await _isparepart.GetSparePartByName(name);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                // Return only the error message
+                return BadRequest(new { message = ex.Message });
+            }
+            
+        }
+        [Authorize(Roles = "WorkshopSupervisor")]
         [HttpPost]
         public async Task<IActionResult> AddSparePart([FromBody] Sparepart spare)
         {
@@ -40,7 +68,7 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+        [Authorize(Roles = "WorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Sparepart spare)
         {
@@ -55,6 +83,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Roles = "GeneralSupervisor")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteSparePart(int id)
@@ -69,18 +98,12 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> Count()
         {
             var count = await _isparepart.CountAllOrdersAsync();
             return Ok(count);
         }
-        //[HttpPut("{PartName}")]
-        //public async Task<IActionResult> UpdateByNameSparePart(string PartName,[FromBody] Sparepart spare)
-        //{
-        //    await _isparepart.UpdateByNameSparePart(PartName, spare);
-        //    return Ok();
-        //}
-
     }
 }
