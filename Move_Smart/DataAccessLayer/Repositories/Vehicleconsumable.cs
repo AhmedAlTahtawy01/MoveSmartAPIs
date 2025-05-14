@@ -103,9 +103,13 @@ namespace DataAccessLayer.Repositories
         public async Task UpdateVehicleConsumable(Vehicleconsumable consumables)
         {
             if (consumables.ConsumableId == 0)
-            {
                 throw new Exception("Consumable ID cannot be null or zero for update.");
-            }
+
+            bool nameExists = await _appDBContext.Vehicleconsumables
+                .AnyAsync(c => c.Name == consumables.Name && c.ConsumableId != consumables.ConsumableId);
+
+            if (nameExists)
+                throw new Exception("A consumable with the same name already exists.");
 
             _appDBContext.Vehicleconsumables.Update(consumables);
             await _appDBContext.SaveChangesAsync();

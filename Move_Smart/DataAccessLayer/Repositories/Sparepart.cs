@@ -65,12 +65,13 @@ namespace DataAccessLayer.Repositories
         public async Task UpdateSparePart(Sparepart spare)
         {
             var existingPart = await _appDBContext.Spareparts
-                .FirstOrDefaultAsync(x => x.SparePartId== spare.SparePartId);
+                .FirstOrDefaultAsync(x => x.SparePartId == spare.SparePartId);
 
             if (existingPart == null)
-            {
                 throw new Exception("Spare part not found.");
-            }
+
+            if (await _appDBContext.Spareparts.AnyAsync(x => x.PartName == spare.PartName && x.SparePartId != spare.SparePartId))
+                throw new Exception("Part name already exists.");
 
             existingPart.PartName = spare.PartName;
             existingPart.ValidityLength = spare.ValidityLength;
@@ -78,6 +79,7 @@ namespace DataAccessLayer.Repositories
 
             await _appDBContext.SaveChangesAsync();
         }
+
 
 
         public async Task DeleteSparePart(int id)
