@@ -37,14 +37,14 @@ namespace Move_Smart.Controllers
             }
         }
         [Authorize(Policy = "RequireGeneralSupervisor")]
-        [HttpGet("{id}")]
+        [HttpGet("id/{id}")]
         public async Task<IActionResult> GetSparePartByID(int id)
         {
             var data = await _vehicleconsumable.GetVehicleConsumableByID(id);
             return Ok(data);
         }
         [Authorize(Policy = "RequireGeneralSupervisor")]
-        [HttpGet("{name}")]
+        [HttpGet("name/{name}")]
         public async Task<IActionResult> GetByName(string name )
         {
             var data = await _vehicleconsumable.GetVehicleConsumableByName(name);

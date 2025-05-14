@@ -23,7 +23,7 @@ namespace Move_Smart.Controllers
             return Ok(data);
         }
         [Authorize(Policy = "RequireWorkshopSupervisor")]
-        [HttpGet("{id}")]
+        [HttpGet("id/{id}")]
         public async Task<IActionResult> GetByID(int id)
         {
             try
@@ -38,7 +38,7 @@ namespace Move_Smart.Controllers
             }
         }
         [Authorize(Policy = "RequireWorkshopSupervisor")]
-        [HttpGet("{name}")]
+        [HttpGet("name/{name}")]
         public async Task<IActionResult> GetByName(string name )
         {
             try
@@ -53,8 +53,9 @@ namespace Move_Smart.Controllers
             }
             
         }
-        [Authorize(Roles = "WorkshopSupervisor")]
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpPost]
+
         public async Task<IActionResult> AddSparePart([FromBody] Sparepart spare)
         {
             try
@@ -68,6 +69,7 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [Authorize(Roles = "WorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Sparepart spare)
