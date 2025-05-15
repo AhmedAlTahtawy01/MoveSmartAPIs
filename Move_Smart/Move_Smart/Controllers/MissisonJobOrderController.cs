@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BusinessLayer.Services;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
 using BusinessLogicLayer.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Move_Smart.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     public class MissionJobOrderController : ControllerBase
     {
         private readonly MissionsJobOrderService _service;
@@ -21,6 +21,7 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateMissionJobOrder([FromBody] MissionsJobOrderDTO dto)
         {
@@ -52,6 +53,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllMissionsJobOrders([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -78,6 +80,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMissionJobOrderById([FromRoute] int id)
         {
@@ -109,6 +112,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("mission/{id}")]
         public async Task<IActionResult> GetMissionJobOrderByMissionId([FromRoute] int id)
         {
@@ -140,6 +144,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("joborder/{id}")]
         public async Task<IActionResult> GetMissionJobOrderByJobOrderId([FromRoute] int id)
         {
@@ -171,6 +176,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMissionJobOrderAsync([FromRoute] int id, [FromBody] MissionsJobOrderDTO dto)
         {
@@ -207,6 +213,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMissionJobOrder([FromRoute] int id)
         {

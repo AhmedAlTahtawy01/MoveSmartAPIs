@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Move_Smart.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
 
     partial class MissionVehicleController : ControllerBase
     {
@@ -21,11 +22,13 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateMissionsVehicle([FromBody] MissionsVehicleDTO dto)
         {
             if (dto == null)
             {
+                _logger.LogWarning("MissionsVehicleDTO cannot be null.");
                 return BadRequest("MissionsVehicleDTO cannot be null.");
             }
 
@@ -51,6 +54,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetMissionsVehicles([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -77,6 +81,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMissionsVehicleById([FromRoute] int id)
         {
@@ -109,6 +114,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("mission/{id}")]
         public async Task<IActionResult> GetMissionsVehiclesByMissionId([FromRoute] int id)
         {
@@ -140,6 +146,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("vehicle/{id}")]
         public async Task<IActionResult> GetMissionsVehiclesByVehicleId([FromRoute] int id)
         {
@@ -171,6 +178,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMissionsVehicle([FromRoute] int id, [FromBody] MissionsVehicleDTO dto)
         {
@@ -212,6 +220,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMissionVehicle([FromRoute] int id)
         {

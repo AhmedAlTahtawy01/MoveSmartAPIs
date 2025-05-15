@@ -5,11 +5,12 @@ using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
 using BusinessLogicLayer.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Move_Smart.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     public class MissionController : ControllerBase
     {
         private readonly MissionService _service;
@@ -21,6 +22,7 @@ namespace Move_Smart.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateMission([FromBody] MissionDTO dto)
         {
@@ -52,6 +54,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllMissions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -78,6 +81,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMissionById([FromRoute] int id)
         {
@@ -109,6 +113,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("missionNote/{id}")]
         public async Task<IActionResult> GetMissionsByMissionNoteId([FromRoute] int id)
         {
@@ -139,6 +144,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("vehicle/{id}")]
         public async Task<IActionResult> GetMissionsByVehicleId([FromRoute] int id)
         {
@@ -169,6 +175,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("startDate/{startDate}")]
         public async Task<IActionResult> GetMissionsByStartDate([FromRoute] DateTime startDate)
         {
@@ -200,6 +207,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("destination/{destination}")]
         public async Task<IActionResult> GetMissionsByDestination([FromRoute] string destination)
         {
@@ -231,6 +239,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMission([FromRoute] int id, [FromBody] MissionDTO dto)
         {
@@ -272,6 +281,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "GeneralSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMission([FromRoute] int id)
         {

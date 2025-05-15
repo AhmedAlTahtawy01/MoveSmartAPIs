@@ -269,7 +269,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Roles = "AdministrativeSupervisor")]
+        [Authorize(Policy = "AdministrativeSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateJobOrder([FromBody] JobOrderDTO jobOrder)
         {
@@ -304,7 +304,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Roles = "AdministrativeSupervisor")]
+        [Authorize(Policy = "AdministrativeSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateJobOrder([FromRoute] int id, [FromBody] JobOrderDTO jobOrder)
         {
@@ -336,7 +336,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Roles = "AdministrativeSupervisor")]
+        [Authorize(Policy = "AdministrativeSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJobOrder([FromRoute] int id)
         {

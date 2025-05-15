@@ -5,12 +5,13 @@ using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
 using BusinessLogicLayer.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Move_Smart.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     public class MaintenanceController : ControllerBase
     {
         private readonly MaintenanceService _service;
@@ -22,6 +23,7 @@ namespace Move_Smart.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateMaintenance([FromBody] MaintenanceDTO dto)
         {
@@ -51,6 +53,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllMaintenances([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -77,6 +80,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMaintenanceById([FromRoute] int id)
         {
@@ -108,6 +112,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("date/{date}")]
         public async Task<IActionResult> GetMaintenanceByDate(DateTime date)
         {
@@ -139,6 +144,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("maintenance-application-id/{maintenanceApplicationId}")]
         public async Task<IActionResult> GetMaintenanceByMaintenanceApplicationId(int maintenanceApplicationId)
         {
@@ -170,6 +176,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMaintenance(int id, [FromBody] MaintenanceDTO dto)
         {
@@ -213,6 +220,7 @@ namespace Move_Smart.Controllers
 
         }
 
+        [Authorize(Policy = "WorkshopSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMaintenance(int id)
         {

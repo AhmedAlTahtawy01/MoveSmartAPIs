@@ -59,10 +59,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    // A policy that allows only SuperUsers
-    options.AddPolicy("RequireSuperUser", policy =>
-        policy.RequireRole(EnUserRole.SuperUser.ToString()));
-
     // A policy that allows only Hospital Managers or higher (e.g. SuperUser)
     options.AddPolicy("RequireHospitalManager", policy =>
         policy.RequireRole(
@@ -117,10 +113,13 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.WorkshopSupervisor.ToString()
         ));
 
-    options.AddPolicy("WorkshopSupervisor", policy =>
+    // Policies for specific roles + SuperUser
+    // No need to make one for hospital manager because it's already included in the RequireGeneralManager policy
+
+    options.AddPolicy("GeneralManager", policy =>
         policy.RequireRole(
             EnUserRole.SuperUser.ToString(),
-            EnUserRole.WorkshopSupervisor.ToString()
+            EnUserRole.GeneralManager.ToString()
         ));
 
     options.AddPolicy("GeneralSupervisor", policy =>
@@ -129,16 +128,10 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.GeneralSupervisor.ToString()
         ));
 
-    options.AddPolicy("GeneralManager", policy =>
+    options.AddPolicy("PatrolsSupervisor", policy =>
         policy.RequireRole(
             EnUserRole.SuperUser.ToString(),
-            EnUserRole.GeneralManager.ToString()
-        ));
-
-    options.AddPolicy("HospitalManager", policy =>
-        policy.RequireRole(
-            EnUserRole.SuperUser.ToString(),
-            EnUserRole.HospitalManager.ToString()
+            EnUserRole.PatrolsSupervisor.ToString()
         ));
 
     options.AddPolicy("AdministrativeSupervisor", policy =>
@@ -147,10 +140,10 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.AdministrativeSupervisor.ToString()
         ));
 
-    options.AddPolicy("PatrolsSupervisor", policy =>
+    options.AddPolicy("WorkshopSupervisor", policy =>
         policy.RequireRole(
             EnUserRole.SuperUser.ToString(),
-            EnUserRole.PatrolsSupervisor.ToString()
+            EnUserRole.WorkshopSupervisor.ToString()
         ));
 });
 
