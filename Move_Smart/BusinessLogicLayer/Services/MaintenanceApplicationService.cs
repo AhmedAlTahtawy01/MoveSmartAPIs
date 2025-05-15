@@ -35,7 +35,7 @@ namespace BusinessLayer
 
             try
             {
-                _ValidateApplicationDTO(dto.Application);
+                await _ValidateApplicationDTO(dto.Application);
             }
             catch (Exception ex)
             {

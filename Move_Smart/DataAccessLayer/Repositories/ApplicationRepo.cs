@@ -42,22 +42,16 @@ namespace DataAccessLayer.Repositories
         public enApplicationType ApplicationType { get; set; }
         public string ApplicationDescription { get; set; }
         public int CreatedByUserID { get; set; }
-      // this two commands for me !! just for testing onlyyyyy 😊✨
-        //public virtual ICollection<Sparepartspurchaseorder> Sparepartspurchaseorders { get; set; } = new List<Sparepartspurchaseorder>();
-
-        //public virtual ICollection<Sparepartswithdrawapplication> Sparepartswithdrawapplications { get; set; } = new List<Sparepartswithdrawapplication>();
-
-        public ApplicationDTO(int applicationId, DateTime creationDate, enStatus status, enApplicationType applicationType, string applicationDescription, int createdByUser)
+     
+        public ApplicationDTO(int applicationId, DateTime creationDate, enStatus status, enApplicationType applicationType, string applicationDescription, int createdByUserID)
         {
             ApplicationId = applicationId;
             CreationDate = creationDate;
             Status = status;
             ApplicationType = applicationType;
             ApplicationDescription = applicationDescription;
-            CreatedByUserID = createdByUser;
+            CreatedByUserID = createdByUserID;
         }
-        public ApplicationDTO(){}
-
     }
 
     public class ApplicationRepo

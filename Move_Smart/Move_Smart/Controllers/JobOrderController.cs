@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using DataAccessLayer.Repositories;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using Move_Smart.Models;
 
 
 namespace Move_Smart.Controllers
@@ -82,7 +83,7 @@ namespace Move_Smart.Controllers
         }
 
         [Authorize(Policy = "RequireAdministrativeSupervisor")]
-        [HttpGet("vehicle/{id}")]
+        [HttpGet("vehicle/{vehicleId}")]
         public async Task<IActionResult> GetJobOrdersByVehicleId([FromRoute] int vehicleId)
         {
             if (vehicleId <= 0)
@@ -115,7 +116,7 @@ namespace Move_Smart.Controllers
         }
 
         [Authorize(Policy = "RequireAdministrativeSupervisor")]
-        [HttpGet("driver/{id}")]
+        [HttpGet("driver/{driverId}")]
         public async Task<IActionResult> GetJobOrdersByDriverId([FromRoute] int driverId)
         {
             if (driverId <= 0)
@@ -241,15 +242,15 @@ namespace Move_Smart.Controllers
 
         [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("daterange")]
-        public async Task<IActionResult> GetJobOrdersByDateRange([Required] DateTime startDate, [Required] DateTime endDate)
+        public async Task<IActionResult> GetJobOrdersByDateRange([FromBody] DataRangeModel dateRange)
         {
-            if (!ModelState.IsValid || startDate == default || endDate == default)
+            if (!ModelState.IsValid || dateRange.StartDate == default || dateRange.EndDate == default)
             {
                 return BadRequest("Invalid date range");
             }
             try
             {
-                var jobOrders = await _service.GetJobOrdersByDateRangeAsync(startDate, endDate);
+                var jobOrders = await _service.GetJobOrdersByDateRangeAsync(dateRange.StartDate, dateRange.EndDate);
                 return Ok(jobOrders);
             }
             catch (ArgumentException ex)
@@ -259,7 +260,7 @@ namespace Move_Smart.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, $"No job orders found in the date range {startDate} to {endDate}");
+                _logger.LogError(ex, $"No job orders found in the date range {dateRange.StartDate} to {dateRange.EndDate}");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
@@ -285,12 +286,18 @@ namespace Move_Smart.Controllers
             try
             {
                 var jobOrderId = await _service.CreateJobOrderAsync(jobOrder);
-                return CreatedAtAction(nameof(GetJobOrderById), new { jobOrderId }, jobOrder);
+                jobOrder.OrderId = jobOrderId; // Set the ID of the created job order
+                return CreatedAtAction(nameof(GetJobOrderById), new { id = jobOrderId }, jobOrder);
             }
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Invalid argument provided.");
                 return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Key not found during job order creation.");
+                return NotFound(ex.Message);
             }
             catch (InvalidOperationException ex)
             {

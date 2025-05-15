@@ -23,25 +23,7 @@ namespace BusinessLayer.Services
 
         public async Task<int> CreateJobOrderAsync(JobOrderDTO dto)
         {
-            if (dto.OrderId != 0)
-            {
-                _jobOrderLogger.LogWarning("Attempted to create a job order with a non-zero ID.");
-                throw new InvalidOperationException("Job order ID must be 0 for new job orders.");
-            }
-
-            _ValidateJobOrderDTO(dto);
-
-            if (!(await _shared.CheckVehicleExistsAsync(dto.VehicleId)))
-            {
-                _jobOrderLogger.LogWarning($"Vehicle with Id {dto.VehicleId} not exist.");
-                throw new KeyNotFoundException($"Vehicle with Id {dto.VehicleId} not exist.");
-            }
-
-            if (!(await _shared.CheckDriverExistsAsync(dto.DriverId)))
-            {
-                _jobOrderLogger.LogWarning($"Driver with Id {dto.DriverId} not exist.");
-                throw new KeyNotFoundException($"Driver with Id {dto.DriverId} not exist.");
-            }
+            await _ValidateJobOrderDTO(dto);
             
             try
             {
@@ -66,7 +48,7 @@ namespace BusinessLayer.Services
                 throw new InvalidOperationException("Job order ID must be greater than 0 for updates.");
             }
 
-            _ValidateJobOrderDTO(dto);
+            await _ValidateJobOrderDTO(dto);
             
             var existingJobOrder = await _jobOrderRepo.GetJobOrderByIdAsync(dto.OrderId);
             if (existingJobOrder == null)
@@ -138,6 +120,13 @@ namespace BusinessLayer.Services
                 _jobOrderLogger.LogWarning("Attempted to retrieve job orders with invalid driver ID.");
                 throw new ArgumentException("Driver ID must be greater than 0.");
             }
+
+            if (!await _shared.CheckDriverExistsAsync(driverId))
+            {
+                _jobOrderLogger.LogWarning($"Driver with ID {driverId} does not exist.");
+                throw new KeyNotFoundException($"Driver with ID {driverId} does not exist.");
+            }
+
             _jobOrderLogger.LogInformation($"Retrieving job orders for driver ID {driverId}.");
             return await _jobOrderRepo.GetJobOrdersByDriverIdAsync(driverId);
         }
@@ -230,7 +219,7 @@ namespace BusinessLayer.Services
             return jobOrderDeleted;
         }
 
-        private void _ValidateJobOrderDTO(JobOrderDTO dto)
+        private async Task _ValidateJobOrderDTO(JobOrderDTO dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto), "Job order DTO cannot be null.");
@@ -238,8 +227,14 @@ namespace BusinessLayer.Services
             if (dto.VehicleId <= 0)
                 throw new InvalidOperationException("Vehicle ID must be greater than 0.");
 
+            if (!await _shared.CheckVehicleExistsAsync(dto.VehicleId))
+                throw new KeyNotFoundException($"Vehicle with ID: {dto.VehicleId} does not exist.");
+
             if (dto.DriverId <= 0)
                 throw new InvalidOperationException("Driver ID must be greater than 0.");
+
+            if (!await _shared.CheckDriverExistsAsync(dto.DriverId))
+                throw new KeyNotFoundException($"Driver with ID: {dto.DriverId} does not exist.");
 
             if (dto.StartDate == default)
                 throw new InvalidOperationException("Start date is required.");

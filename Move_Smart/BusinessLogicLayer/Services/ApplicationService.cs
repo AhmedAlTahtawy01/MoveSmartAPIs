@@ -22,21 +22,8 @@ namespace BusinessLayer.Services
 
         public async Task<int> CreateApplicationAsync(ApplicationDTO dto)
         {
-            if (dto.ApplicationId != 0)
-            {
-                _logger.LogWarning("Attempted to create an application with a non-zero ID.");
-                throw new InvalidOperationException("Application ID must be 0 for new applications.");
-            }
+            await _ValidateApplicationDTO(dto);
 
-            
-            _ValidateApplicationDTO(dto);
-
-            if (!(await _shared.CheckUserExistsAsync(dto.CreatedByUserID)))
-            {
-                _logger.LogWarning($"User with ID {dto.CreatedByUserID} does not exist.");
-                throw new KeyNotFoundException($"User with ID {dto.CreatedByUserID} does not exist.");
-            }
-            
             _logger.LogInformation("Creating new application.");
             return await _repo.CreateApplicationAsync(dto);
         }
@@ -49,7 +36,7 @@ namespace BusinessLayer.Services
                 throw new InvalidOperationException("Application ID must be greater than 0 for updates.");
             }
 
-            _ValidateApplicationDTO(dto);
+            await _ValidateApplicationDTO(dto);
             
 
             var existingApplication = await _repo.GetApplicationByIdAsync(dto.ApplicationId);
@@ -112,6 +99,12 @@ namespace BusinessLayer.Services
                 throw new ArgumentException("User ID must be greater than 0.");
             }
 
+            if (!(await _shared.CheckUserExistsAsync(userId)))
+            {
+                _logger.LogWarning($"User with ID: {userId} does not exist.");
+                throw new KeyNotFoundException($"User with ID {userId} does not exist.");
+            }
+
             _logger.LogInformation($"Retrieving applications for user with ID {userId}.");
             return await _repo.GetApplicationsByUserIdAsync(userId);
         }
@@ -152,7 +145,7 @@ namespace BusinessLayer.Services
             return await _repo.ExistsAsync(id);
         }
 
-        protected async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)
+        private async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)
         {
             if (applicationId <= 0)
             {
@@ -164,17 +157,17 @@ namespace BusinessLayer.Services
             return await _repo.UpdateStatusAsync(applicationId, status);
         }
 
-        protected async Task<bool> ApproveApplicationAsync(int applicationId)
+        public async Task<bool> ApproveApplicationAsync(int applicationId)
         {
             return await UpdateStatusAsync(applicationId, enStatus.Confirmed);
         }
 
-        protected async Task<bool> CancelApplicationAsync(int applicationId)
+        public async Task<bool> CancelApplicationAsync(int applicationId)
         {
             return await UpdateStatusAsync(applicationId, enStatus.Canceled);
         }
 
-        protected async Task<bool> RejectApplicationAsync(int applicationId)
+        public async Task<bool> RejectApplicationAsync(int applicationId)
         {
             return await UpdateStatusAsync(applicationId, enStatus.Rejected);
         }
@@ -191,7 +184,7 @@ namespace BusinessLayer.Services
             return await _repo.DeleteApplicationAsync(applicationId);
         }
 
-        protected void _ValidateApplicationDTO(ApplicationDTO dto)
+        protected async Task _ValidateApplicationDTO(ApplicationDTO dto)
         {
             if (dto == null)
             {
@@ -215,6 +208,12 @@ namespace BusinessLayer.Services
             {
                 _logger.LogWarning("Validation Failed: User Id must be greater than 0.");
                 throw new InvalidOperationException("User Id must be greater than 0.");
+            }
+
+            if (!(await _shared.CheckUserExistsAsync(dto.CreatedByUserID)))
+            {
+                _logger.LogWarning($"User with ID {dto.CreatedByUserID} does not exist.");
+                throw new KeyNotFoundException($"User with ID {dto.CreatedByUserID} does not exist.");
             }
         }
     }

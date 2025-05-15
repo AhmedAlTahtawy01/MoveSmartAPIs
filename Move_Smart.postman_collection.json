@@ -16,16 +16,16 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Parse the response as JSON since the content type is application/json\r",
-									"let responseData = pm.response.json();\r",
-									"\r",
-									"// Check if token exists in the response and save it to environment variable\r",
-									"if (responseData && responseData.token) {\r",
-									"  pm.environment.set(\"jwtToken\", responseData.token);\r",
-									"  console.log(\"Token saved to environment variable:\", responseData.token);\r",
-									"} else {\r",
-									"  console.warn(\"No token found in the response\");\r",
-									"}\r",
+									"// Parse the response as JSON since the content type is application/json",
+									"let responseData = pm.response.json();",
+									"",
+									"// Check if token exists in the response and save it to environment variable",
+									"if (responseData && responseData.token) {",
+									"  pm.environment.set(\"jwtToken\", responseData.token);",
+									"  console.log(\"Token saved to environment variable:\", responseData.token);",
+									"} else {",
+									"  console.warn(\"No token found in the response\");",
+									"}",
 									"",
 									"pm.test(\"Response status code is 200\", function () {",
 									"  pm.response.to.have.status(200);",
@@ -61,13 +61,45 @@
 									"",
 									"pm.test(\"Content-Type header is application/json\", function () {",
 									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
-									"});"
+									"});",
+									"var template = `",
+									"<style type=\"text/css\">",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}",
+									"    .tftable tr {background-color:#ffffff;}",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}",
+									"    .tftable tr:hover {background-color:#e0ffff;}",
+									"</style>",
+									"",
+									"<table class=\"tftable\" border=\"1\">",
+									"    <tr>",
+									"        <th>User ID</th>",
+									"        <th>Name</th>",
+									"        <th>Role</th>",
+									"    </tr>",
+									"    <tr>",
+									"        <td>{{response.userId}}</td>",
+									"        <td>{{response.name}}</td>",
+									"        <td>{{response.role}}</td>",
+									"    </tr>",
+									"</table>",
+									"`;",
+									"",
+									"function constructVisualizerPayload() {",
+									"    return { response: pm.response.json() }",
+									"}",
+									"",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -134,11 +166,21 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiOTc4ZmFjNjUtOTMxYS00OTJkLTllNTMtNDkzN2RlMDI2ZThlIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1NDY5MCwiZXhwIjoxNzQ3MjU4MjkwLCJpYXQiOjE3NDcyNTQ2OTAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.h3OUzhrZiMe3ZIeM9oN_EADcvvlSIL4jQhPLDQf58KY",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"userId\": 0,\r\n    \"nationalNo\": \"20210012614556\",\r\n    \"password\": \"Ahmed\",\r\n    \"name\": \"Khaled\",\r\n    \"role\": 1,\r\n    \"accessright\": 0\r\n}",
+							"raw": "{\r\n    \"userId\": 0,\r\n    \"nationalNo\": \"30310012614556\",\r\n    \"password\": \"string\",\r\n    \"name\": \"Rashad\",\r\n    \"role\": 6,\r\n    \"accessright\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -146,11 +188,16 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/User",
+							"raw": "https://movesmartapi.runasp.net/api/v1/User",
+							"protocol": "https",
 							"host": [
-								"{{baseUrl}}"
+								"movesmartapi",
+								"runasp",
+								"net"
 							],
 							"path": [
+								"api",
+								"v1",
 								"User"
 							]
 						}
@@ -159,17 +206,29 @@
 				},
 				{
 					"name": "GetUserById",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{baseUrl}}/User/4",
+							"raw": "{{baseUrl}}/User/1",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"User",
-								"4"
+								"1"
 							]
 						}
 					},
@@ -267,6 +326,977 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "SparePart",
+			"item": [
+				{
+					"name": "GetALL",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiOTc4ZmFjNjUtOTMxYS00OTJkLTllNTMtNDkzN2RlMDI2ZThlIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1NDY5MCwiZXhwIjoxNzQ3MjU4MjkwLCJpYXQiOjE3NDcyNTQ2OTAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.h3OUzhrZiMe3ZIeM9oN_EADcvvlSIL4jQhPLDQf58KY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://movesmartapi.runasp.net/api/SparePart",
+							"protocol": "https",
+							"host": [
+								"movesmartapi",
+								"runasp",
+								"net"
+							],
+							"path": [
+								"api",
+								"SparePart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateSparePart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiMzc0MGY4NjUtN2ZmNS00NTA3LWIyMGQtMDBlOTNiNDU5YzFmIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI0OTE1OCwiZXhwIjoxNzQ3MjUyNzU4LCJpYXQiOjE3NDcyNDkxNTgsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.Bi11ljpDK61tiwLus0FZlLeufFQh-xbm68b44KbmlNU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"partName\": \"Hamdy test\",\r\n  \"validityLength\": 10,\r\n  \"quantity\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://movesmartapi.runasp.net/api/SparePart",
+							"protocol": "https",
+							"host": [
+								"movesmartapi",
+								"runasp",
+								"net"
+							],
+							"path": [
+								"api",
+								"SparePart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateSparePart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiOTc4ZmFjNjUtOTMxYS00OTJkLTllNTMtNDkzN2RlMDI2ZThlIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1NDY5MCwiZXhwIjoxNzQ3MjU4MjkwLCJpYXQiOjE3NDcyNTQ2OTAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.h3OUzhrZiMe3ZIeM9oN_EADcvvlSIL4jQhPLDQf58KY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"sparePartId\": 1,\r\n  \"partName\": \"Framal\",\r\n  \"validityLength\": 10,\r\n  \"quantity\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://movesmartapi.runasp.net/api/SparePart",
+							"protocol": "https",
+							"host": [
+								"movesmartapi",
+								"runasp",
+								"net"
+							],
+							"path": [
+								"api",
+								"SparePart"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vehicles",
+			"item": [
+				{
+					"name": "GetAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTYiLCJSYXNoYWQiXSwianRpIjoiNjU0YTNkOWQtM2I1Mi00NTY5LWI0OTAtZDk5YjIwMTU0MjBlIiwicm9sZSI6IkFkbWluaXN0cmF0aXZlU3VwZXJ2aXNvciIsIm5iZiI6MTc0NzI1NTc1OSwiZXhwIjoxNzQ3MjU5MzU5LCJpYXQiOjE3NDcyNTU3NTksImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.LIbCM3sUoYtIis4tF36KzDCV5-2Yqql6Kz_YaNd-dzU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nationalNo\": \"30310012614555\",\r\n    \"password\": \"string\"\r\n}"
+						},
+						"url": {
+							"raw": "https://movesmartapi.runasp.net/api/Vehicles/All",
+							"protocol": "https",
+							"host": [
+								"movesmartapi",
+								"runasp",
+								"net"
+							],
+							"path": [
+								"api",
+								"Vehicles",
+								"All"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Consumables",
+			"item": [
+				{
+					"name": "CreateConsumable",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiNDAxNDZmNDktMGE0Yy00ODgxLTg3ZWMtODQ2ZmJmZThiYjJhIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1OTUzNSwiZXhwIjoxNzQ3MjYzMTM1LCJpYXQiOjE3NDcyNTk1MzUsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.hGojBryAXX7a_gID6UEwdc_gz-zooqVlPoIexjv1zVo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"consumableName\": \"Hamdy test\",\r\n  \"validityLength\": 100,\r\n  \"quantity\": 1000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://movesmartapi.runasp.net/api/VehicleConsumable",
+							"protocol": "https",
+							"host": [
+								"movesmartapi",
+								"runasp",
+								"net"
+							],
+							"path": [
+								"api",
+								"VehicleConsumable"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiNDAxNDZmNDktMGE0Yy00ODgxLTg3ZWMtODQ2ZmJmZThiYjJhIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1OTUzNSwiZXhwIjoxNzQ3MjYzMTM1LCJpYXQiOjE3NDcyNTk1MzUsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.hGojBryAXX7a_gID6UEwdc_gz-zooqVlPoIexjv1zVo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://movesmartapi.runasp.net/api/VehicleConsumable",
+							"protocol": "https",
+							"host": [
+								"movesmartapi",
+								"runasp",
+								"net"
+							],
+							"path": [
+								"api",
+								"VehicleConsumable"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Job Order",
+			"item": [
+				{
+					"name": "GetAll",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Vehicle ID</th>\r",
+									"        <th>Driver ID</th>\r",
+									"        <th>Start Date</th>\r",
+									"        <th>End Date</th>\r",
+									"        <th>Start Time</th>\r",
+									"        <th>End Time</th>\r",
+									"        <th>Destination</th>\r",
+									"        <th>Odometer Before</th>\r",
+									"        <th>Odometer After</th>\r",
+									"    </tr>\r",
+									"    \r",
+									"    {{#each response.$values}}\r",
+									"        <tr>\r",
+									"            <td>{{orderId}}</td>\r",
+									"            <td>{{vehicleId}}</td>\r",
+									"            <td>{{driverId}}</td>\r",
+									"            <td>{{startDate}}</td>\r",
+									"            <td>{{endDate}}</td>\r",
+									"            <td>{{startTime}}</td>\r",
+									"            <td>{{endTime}}</td>\r",
+									"            <td>{{destination}}</td>\r",
+									"            <td>{{odometerBefore}}</td>\r",
+									"            <td>{{odometerAfter}}</td>\r",
+									"        </tr>\r",
+									"    {{/each}}\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return {response: pm.response.json()}\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder?pageNumber=1&pageSize=10",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateJobOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Vehicle ID</th>\r",
+									"        <th>Driver ID</th>\r",
+									"        <th>Start Date</th>\r",
+									"        <th>End Date</th>\r",
+									"        <th>Start Time</th>\r",
+									"        <th>End Time</th>\r",
+									"        <th>Destination</th>\r",
+									"        <th>Odometer Before</th>\r",
+									"        <th>Odometer After</th>\r",
+									"    </tr>\r",
+									"    <tr>\r",
+									"        <td>{{response.orderId}}</td>\r",
+									"        <td>{{response.vehicleId}}</td>\r",
+									"        <td>{{response.driverId}}</td>\r",
+									"        <td>{{response.startDate}}</td>\r",
+									"        <td>{{response.endDate}}</td>\r",
+									"        <td>{{response.startTime}}</td>\r",
+									"        <td>{{response.endTime}}</td>\r",
+									"        <td>{{response.destination}}</td>\r",
+									"        <td>{{response.odometerBefore}}</td>\r",
+									"        <td>{{response.odometerAfter}}</td>\r",
+									"    </tr>\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return { response: pm.response.json() }\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"status\": 1,\r\n    \"applicationType\": 1,\r\n    \"applicationDescription\": \"Test application from test job order\",\r\n    \"createdByUserID\": 1\r\n  },\r\n  \"vehicleId\": 1,\r\n  \"driverId\": 1,\r\n  \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n  \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n  \"startTime\": \"08:00:00\",\r\n  \"endTime\": \"10:00:00\",\r\n  \"destination\": \"Sohag\",\r\n  \"odometerBefore\": 1000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateJobOrder",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orderId\": 13,\r\n    \"application\": {\r\n        \"$id\": \"2\",\r\n        \"applicationId\": 14,\r\n        \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n        \"status\": 3,\r\n        \"applicationType\": 1,\r\n        \"applicationDescription\": \"Test update application from test update job order\",\r\n        \"createdByUserID\": 1\r\n    },\r\n    \"vehicleId\": 1,\r\n    \"driverId\": 1,\r\n    \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n    \"startTime\": \"08:00:00\",\r\n    \"endTime\": \"10:00:00\",\r\n    \"destination\": \"Sohag\",\r\n    \"odometerBefore\": 1000,\r\n    \"odometerAfter\": 1000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/13",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"13"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/12",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"12"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByVehicleId",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/vehicle/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"vehicle",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByDriverId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Vehicle ID</th>\r",
+									"        <th>Driver ID</th>\r",
+									"        <th>Start Date</th>\r",
+									"        <th>End Date</th>\r",
+									"        <th>Start Time</th>\r",
+									"        <th>End Time</th>\r",
+									"        <th>Destination</th>\r",
+									"        <th>Odometer Before</th>\r",
+									"        <th>Odometer After</th>\r",
+									"    </tr>\r",
+									"    \r",
+									"    {{#each response.$values}}\r",
+									"        <tr>\r",
+									"            <td>{{orderId}}</td>\r",
+									"            <td>{{vehicleId}}</td>\r",
+									"            <td>{{driverId}}</td>\r",
+									"            <td>{{startDate}}</td>\r",
+									"            <td>{{endDate}}</td>\r",
+									"            <td>{{startTime}}</td>\r",
+									"            <td>{{endTime}}</td>\r",
+									"            <td>{{destination}}</td>\r",
+									"            <td>{{odometerBefore}}</td>\r",
+									"            <td>{{odometerAfter}}</td>\r",
+									"        </tr>\r",
+									"    {{/each}}\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return { response: pm.response.json() }\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/driver/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"driver",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByDataRange",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Vehicle ID</th>\r",
+									"        <th>Driver ID</th>\r",
+									"        <th>Start Date</th>\r",
+									"        <th>End Date</th>\r",
+									"        <th>Start Time</th>\r",
+									"        <th>End Time</th>\r",
+									"        <th>Destination</th>\r",
+									"        <th>Odometer Before</th>\r",
+									"        <th>Odometer After</th>\r",
+									"    </tr>\r",
+									"    \r",
+									"    {{#each response.$values}}\r",
+									"        <tr>\r",
+									"            <td>{{orderId}}</td>\r",
+									"            <td>{{vehicleId}}</td>\r",
+									"            <td>{{driverId}}</td>\r",
+									"            <td>{{startDate}}</td>\r",
+									"            <td>{{endDate}}</td>\r",
+									"            <td>{{startTime}}</td>\r",
+									"            <td>{{endTime}}</td>\r",
+									"            <td>{{destination}}</td>\r",
+									"            <td>{{odometerBefore}}</td>\r",
+									"            <td>{{odometerAfter}}</td>\r",
+									"        </tr>\r",
+									"    {{/each}}\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return {response: pm.response.json()}\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/daterange",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"daterange"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByStartDate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Vehicle ID</th>\r",
+									"        <th>Driver ID</th>\r",
+									"        <th>Start Date</th>\r",
+									"        <th>End Date</th>\r",
+									"        <th>Start Time</th>\r",
+									"        <th>End Time</th>\r",
+									"        <th>Destination</th>\r",
+									"        <th>Odometer Before</th>\r",
+									"        <th>Odometer After</th>\r",
+									"    </tr>\r",
+									"    \r",
+									"    {{#each response.$values}}\r",
+									"        <tr>\r",
+									"            <td>{{orderId}}</td>\r",
+									"            <td>{{vehicleId}}</td>\r",
+									"            <td>{{driverId}}</td>\r",
+									"            <td>{{startDate}}</td>\r",
+									"            <td>{{endDate}}</td>\r",
+									"            <td>{{startTime}}</td>\r",
+									"            <td>{{endTime}}</td>\r",
+									"            <td>{{destination}}</td>\r",
+									"            <td>{{odometerBefore}}</td>\r",
+									"            <td>{{odometerAfter}}</td>\r",
+									"        </tr>\r",
+									"    {{/each}}\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return { response: pm.response.json() }\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/startdate/2025-05-15",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"startdate",
+								"2025-05-15"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByDestination",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Application ID</th>\r",
+									"        <th>Creation Date</th>\r",
+									"        <th>Status</th>\r",
+									"        <th>Application Type</th>\r",
+									"        <th>Application Description</th>\r",
+									"        <th>Created By UserID</th>\r",
+									"        <th>Vehicle ID</th>\r",
+									"        <th>Driver ID</th>\r",
+									"        <th>Start Date</th>\r",
+									"        <th>End Date</th>\r",
+									"        <th>Start Time</th>\r",
+									"        <th>End Time</th>\r",
+									"        <th>Destination</th>\r",
+									"        <th>Odometer Before</th>\r",
+									"        <th>Odometer After</th>\r",
+									"    </tr>\r",
+									"\r",
+									"    {{#each response.$values}}\r",
+									"        <tr>\r",
+									"            <td>{{orderId}}</td>\r",
+									"            <td>{{application.applicationId}}</td>\r",
+									"            <td>{{application.creationDate}}</td>\r",
+									"            <td>{{application.status}}</td>\r",
+									"            <td>{{application.applicationType}}</td>\r",
+									"            <td>{{application.applicationDescription}}</td>\r",
+									"            <td>{{application.createdByUserID}}</td>\r",
+									"            <td>{{vehicleId}}</td>\r",
+									"            <td>{{driverId}}</td>\r",
+									"            <td>{{startDate}}</td>\r",
+									"            <td>{{endDate}}</td>\r",
+									"            <td>{{startTime}}</td>\r",
+									"            <td>{{endTime}}</td>\r",
+									"            <td>{{destination}}</td>\r",
+									"            <td>{{odometerBefore}}</td>\r",
+									"            <td>{{odometerAfter}}</td>\r",
+									"        </tr>\r",
+									"    {{/each}}\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return {response: pm.response.json()}\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/destination/sohag",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"destination",
+								"sohag"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByStatus",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Vehicle ID</th>\r",
+									"        <th>Driver ID</th>\r",
+									"        <th>Start Date</th>\r",
+									"        <th>End Date</th>\r",
+									"        <th>Start Time</th>\r",
+									"        <th>End Time</th>\r",
+									"        <th>Destination</th>\r",
+									"        <th>Odometer Before</th>\r",
+									"        <th>Odometer After</th>\r",
+									"    </tr>\r",
+									"    \r",
+									"    {{#each response.$values}}\r",
+									"        <tr>\r",
+									"            <td>{{orderId}}</td>\r",
+									"            <td>{{vehicleId}}</td>\r",
+									"            <td>{{driverId}}</td>\r",
+									"            <td>{{startDate}}</td>\r",
+									"            <td>{{endDate}}</td>\r",
+									"            <td>{{startTime}}</td>\r",
+									"            <td>{{endTime}}</td>\r",
+									"            <td>{{destination}}</td>\r",
+									"            <td>{{odometerBefore}}</td>\r",
+									"            <td>{{odometerAfter}}</td>\r",
+									"        </tr>\r",
+									"    {{/each}}\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return {response: pm.response.json()}\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/status/4",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"status",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteJobOrder",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
+						},
+						"url": {
+							"raw": "https://localhost:7141/api/v1/JobOrder/12",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7141",
+							"path": [
+								"api",
+								"v1",
+								"JobOrder",
+								"12"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
@@ -274,7 +1304,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJBaG1lZCBIYW1keSJdLCJqdGkiOiIwNWEwZWRmNS0wNzdlLTQzZGYtODE0Ni1hMzEzNThjZDQ4OTMiLCJyb2xlIjoiU3VwZXJVc2VyIiwibmJmIjoxNzQ2Mzg0NDA5LCJleHAiOjE3NDYzODgwMDksImlhdCI6MTc0NjM4NDQwOSwiaXNzIjoiTW92ZVNtYXJ0QVBJIiwiYXVkIjoiTW92ZVNtYXJ0VXNlcnMifQ.CfuGd3XAweHeRWabR5d11Segb9lTet91qSCUbRfFYmI",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJBaG1lZCBIYW1keSJdLCJqdGkiOiIxNGVjYmU3Mi0xYzZkLTQ2MTAtYTJjNy05NWRiNmMwYjNkNmQiLCJyb2xlIjoiU3VwZXJVc2VyIiwibmJmIjoxNzQ3MzA0MDY0LCJleHAiOjE3NDczMDc2NjMsImlhdCI6MTc0NzMwNDA2NCwiaXNzIjoiTW92ZVNtYXJ0QVBJIiwiYXVkIjoiTW92ZVNtYXJ0VXNlcnMifQ.q-cU3bK22xm3CURGpWVZMaqmH69DRAw6_QFlP7v-Zvw",
 				"type": "string"
 			}
 		]
