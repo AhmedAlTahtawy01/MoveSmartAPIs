@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using BusinessLogicLayer.Helpers;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,9 +32,29 @@ builder.Services.AddControllers()
         x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
     );
 
-builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
-builder.Services.AddSingleton<JWT>(sp => sp.GetRequiredService<IOptions<JWT>>().Value);
+var jwtSection = builder.Configuration.GetSection("JWT");
+if (jwtSection == null)
+{
+    throw new InvalidOperationException("JWT section is not configured in appsettings");
+}
 
+// Register JWT settings
+builder.Services.Configure<JWT>(jwtSection);
+
+// Register JWT as a singleton
+var jwtSettings = jwtSection.Get<JWT>() ?? throw new InvalidOperationException("JWT settings are missing in configuration.");
+builder.Services.AddSingleton(jwtSettings);
+
+// Register Token Service
+builder.Services.AddScoped<TokenService>();
+
+//// Read JWT settings from configuration or environment variables
+//var jwtKey = builder.Configuration["JWT:Key"] ?? Environment.GetEnvironmentVariable("JWT__Key");
+
+//if (string.IsNullOrEmpty(jwtKey))
+//{
+//    throw new InvalidOperationException("JWT:Key is not configured in appsettings or enviornment variables");
+//}
 
 // Register JWT authentication
 builder.Services.AddAuthentication(options =>
@@ -51,9 +72,11 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"],
-            ValidAudience = builder.Configuration["JWT:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT:Key is not configured"))),
+
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.Key)),
         };
     });
 
@@ -150,7 +173,15 @@ builder.Services.AddAuthorization(options =>
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Move Smart API",
+        Version = "v1",
+        Description = "API documentation for Move Smart application"
+    });
+});
 
 // Logging
 builder.Services.AddLogging(logging =>
@@ -252,7 +283,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Move Smart API V1");
+        c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
+    });
 }
 
 app.UseHttpsRedirection();

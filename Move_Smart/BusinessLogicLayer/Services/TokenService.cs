@@ -8,15 +8,18 @@ using BusinessLogicLayer.Helpers;
 using DataAccessLayer.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
 
 namespace BusinessLogicLayer.Services
 {
     public class TokenService : ITokenService
     {
+        private readonly IConfiguration _configuration;
         private readonly JWT _jwt;
 
-        public TokenService(JWT jwt)
+        public TokenService(IConfiguration configuration ,JWT jwt)
         {
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _jwt = jwt ?? throw new ArgumentNullException(nameof(jwt));
         }
 
