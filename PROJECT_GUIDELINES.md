@@ -34,6 +34,20 @@
   - **Level 3**: ConsumablesPurchaseOrders, ConsumablesWithdrawApplications, SparePartsPurchaseOrders, SparePartsWithdrawApplications.
   - **Level 5**: ConsumablesReplacements, SparePartsReplacements.
 
+
+## Adding ConnectionString and Jwt key to your environment variable
+- **ConnectionString**: 
+- Write this code in your cmd: setx ConnectionStrings__DefaultConnection "Your_Connection_String_Here"
+
+- **Jwt Key**:
+- Write this code in your cmd: setx JWT__Key "The_Key_Here"
+- **If not worked:**
+- **Write this commands:**
+- 1- dotnet user-secrets init
+- 2- dotnet user-secrets set "JWT:Key" "YourSuperSecretKey"
+
+
+
 ## General Guidelines
 
 - Follow clean code practices.
