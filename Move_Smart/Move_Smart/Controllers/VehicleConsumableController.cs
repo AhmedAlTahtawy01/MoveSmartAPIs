@@ -14,7 +14,7 @@ namespace Move_Smart.Controllers
         {
             _vehicleconsumable = vehicleconsumable;
         }
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        //[Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllVehicleConsumable()
         {
@@ -36,21 +36,21 @@ namespace Move_Smart.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        //[Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("id/{id}")]
         public async Task<IActionResult> GetSparePartByID(int id)
         {
             var data = await _vehicleconsumable.GetVehicleConsumableByID(id);
             return Ok(data);
         }
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        //[Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("name/{name}")]
         public async Task<IActionResult> GetByName(string name )
         {
             var data = await _vehicleconsumable.GetVehicleConsumableByName(name);
             return Ok(data);
         }
-        [Authorize(Policy = "WorkshopSupervisor")]
+        //[Authorize(Policy = "WorkshopSupervisor")]
         [HttpPost]
         public async Task<IActionResult> AddVehicleConsumable([FromBody] Vehicleconsumable consume)
         {
@@ -64,7 +64,7 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        //[Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> Count()
         {
@@ -92,7 +92,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Policy = "WorkshopSupervisor")]
+        //[Authorize(Policy = "WorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSparePart([FromBody] Vehicleconsumable consume)
         {
