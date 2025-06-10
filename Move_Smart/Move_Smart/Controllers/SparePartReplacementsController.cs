@@ -90,15 +90,13 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
-        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> Count()
         {
             try
             {
                 var count = await _sparePartsReplacement.CountAllOrdersAsync();
-                return Ok(count);
+                return Ok(count);   
             }
             catch (Exception ex)
             {

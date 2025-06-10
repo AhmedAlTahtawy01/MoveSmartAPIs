@@ -262,16 +262,14 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.IncludeFields = true;
     });
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://127.0.0.1:5500")
               .AllowAnyHeader()
-              .WithOrigins("http://127.0.0.1:5500")
-              .AllowAnyMethod();
-
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
