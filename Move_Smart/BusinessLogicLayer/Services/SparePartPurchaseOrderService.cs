@@ -91,7 +91,7 @@ namespace BusinessLogicLayer.Services
             existingOrder.ApprovedByGeneralManager = updatedOrder.ApprovedByGeneralManager;
             existingOrder.RequiredItem = updatedOrder.RequiredItem;
             existingOrder.RequiredQuantity = updatedOrder.RequiredQuantity;
-
+            
             // Update Application fields via service
             if (existingOrder.Application != null && updatedOrder.Application != null)
             {
@@ -108,6 +108,7 @@ namespace BusinessLogicLayer.Services
                 .AsNoTracking()
                 .Include(o => o.Application)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
         }
         public async Task<int> CountAllSparePartPurchaseOrdersAsync()
         {

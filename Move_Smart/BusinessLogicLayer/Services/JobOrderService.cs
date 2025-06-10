@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace BusinessLayer.Services
@@ -14,8 +16,8 @@ namespace BusinessLayer.Services
         private readonly ILogger<JobOrderService> _jobOrderLogger;
         
 
-        public JobOrderService(JobOrderRepo repo, ApplicationRepo appRepo, ILogger<JobOrderService> logger, ILogger<ApplicationService> appLogger, SharedFunctions sharedFunctions)
-            : base(appRepo, appLogger, sharedFunctions)
+        public JobOrderService(JobOrderRepo repo, ApplicationRepo appRepo, ILogger<JobOrderService> logger, ILogger<ApplicationService> appLogger, SharedFunctions sharedFunctions, IHubContext<NotificationHub> hubContext)
+            : base(appRepo, appLogger, sharedFunctions,hubContext )
         {
             _jobOrderRepo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _jobOrderLogger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");

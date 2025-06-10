@@ -1,7 +1,9 @@
 ﻿using BusinessLayer.Services;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer;
 using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,8 +19,8 @@ namespace BusinessLayer
         protected readonly MaintenanceApplicationRepo _maintenanceApplicationRepo;
         protected readonly VehicleRepo _vehicleRepo;
 
-        public MaintenanceApplicationService(MaintenanceApplicationRepo maintenanceApplicationRepo, ApplicationRepo applicationRepo, VehicleRepo vehicleRepo, ILogger<MaintenanceApplicationService> maintenanceApplicationLogger, ILogger<ApplicationService> applicationLogger, SharedFunctions sharedFunctions)
-            : base(applicationRepo, applicationLogger, sharedFunctions)
+        public MaintenanceApplicationService(MaintenanceApplicationRepo maintenanceApplicationRepo, ApplicationRepo applicationRepo, VehicleRepo vehicleRepo, ILogger<MaintenanceApplicationService> maintenanceApplicationLogger, ILogger<ApplicationService> applicationLogger, SharedFunctions sharedFunctions, IHubContext<NotificationHub> hubContext)
+            : base(applicationRepo, applicationLogger, sharedFunctions,hubContext)
         {
             _maintenanceApplicationRepo = maintenanceApplicationRepo ?? throw new ArgumentNullException(nameof(maintenanceApplicationRepo), "Data access layer cannot be null.");
             _vehicleRepo = vehicleRepo ?? throw new ArgumentNullException(nameof(vehicleRepo), "Data access layer cannot be null.");

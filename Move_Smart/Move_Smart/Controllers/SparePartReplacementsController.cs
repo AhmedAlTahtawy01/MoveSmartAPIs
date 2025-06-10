@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,50 +10,100 @@ namespace Move_Smart.Controllers
     public class SparePartReplacementsController : ControllerBase
     {
         private readonly SparePartsReplacement _sparePartsReplacement;
+
         public SparePartReplacementsController(SparePartsReplacement sparePartsReplacement)
         {
             _sparePartsReplacement = sparePartsReplacement;
-
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet]
         public async Task<IActionResult> Getall()
         {
-            var data = await _sparePartsReplacement.GetAllSparePartsReplacement();
-            return Ok(data);
-
+            try
+            {
+                var data = await _sparePartsReplacement.GetAllSparePartsReplacement();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByID(int id)
         {
-            var data = await _sparePartsReplacement.GetSparePartsReplacementByID(id);
-            return Ok(data);
-
+            try
+            {
+                var data = await _sparePartsReplacement.GetSparePartsReplacementByID(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _sparePartsReplacement.DeleteSparePartsReplacement(id);
-            return Ok();
+            try
+            {
+                await _sparePartsReplacement.DeleteSparePartsReplacement(id);
+                return Ok(new { message = "Spare part replacement deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-        [HttpPut]
-        public async Task<IActionResult> Update(Sparepartsreplacement order)
-        {
-            await _sparePartsReplacement.UpdateSparePartsReplacement(order);
-            return Ok();
 
-        }
-        [HttpPost]
-        public async Task<IActionResult> Add(Sparepartsreplacement order)
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] Sparepartsreplacement order)
         {
-            await _sparePartsReplacement.AddSparePartsReplacement(order);
-            return Ok();
+            try
+            {
+                await _sparePartsReplacement.UpdateSparePartsReplacement(order);
+                return Ok(new { message = "Spare part replacement updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] Sparepartsreplacement order)
+        {
+            try
+            {
+                await _sparePartsReplacement.AddSparePartsReplacement(order);
+                return Ok(new { message = "Spare part replacement added successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> Count()
         {
-            var count = await _sparePartsReplacement.CountAllOrdersAsync();
-            return Ok(count);
+            try
+            {
+                var count = await _sparePartsReplacement.CountAllOrdersAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-
     }
 }

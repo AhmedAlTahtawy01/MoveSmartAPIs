@@ -15,7 +15,7 @@ namespace Move_Smart.Controllers
         {
             _isparepart = isparepart;
         }
-        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        //[Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllSparePart()
         {
@@ -53,7 +53,7 @@ namespace Move_Smart.Controllers
             }
             
         }
-        [Authorize(Policy = "WorkshopSupervisor")]
+        //[Authorize(Policy = "WorkshopSupervisor")]
         [HttpPost]
 
         public async Task<IActionResult> AddSparePart([FromBody] Sparepart spare)

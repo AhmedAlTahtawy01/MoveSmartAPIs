@@ -1,5 +1,6 @@
 ﻿using BusinessLogicLayer.Services;
 using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,48 +11,103 @@ namespace Move_Smart.Controllers
     public class ConsumableReplacementController : ControllerBase
     {
         private readonly ConsumablesReplacementRepo _consumablesreplacement;
+
         public ConsumableReplacementController(ConsumablesReplacementRepo consumablesreplacement)
         {
             _consumablesreplacement = consumablesreplacement;
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet]
         public async Task<IActionResult> Getall()
         {
-            var data = await _consumablesreplacement.GetAllConsumablesReplacement();
-            return Ok(data);
-
+            try
+            {
+                var data = await _consumablesreplacement.GetAllConsumablesReplacement();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByID(int id)
         {
-            var data = await _consumablesreplacement.GetConsumablesReplacementByID(id);
-            return Ok(data);
+            try
+            {
+                var data = await _consumablesreplacement.GetConsumablesReplacementByID(id);
+                if (data == null)
+                    return NotFound(new { message = "Consumable replacement not found." });
 
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _consumablesreplacement.DeleteAddConsumablesReplacement(id);
-            return Ok();
+            try
+            {
+                await _consumablesreplacement.DeleteAddConsumablesReplacement(id);
+                return Ok(new { message = "Consumable replacement deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-        [HttpPut]
-        public async Task<IActionResult> Update(Consumablesreplacement consumablesreplacement)
-        {
-            await _consumablesreplacement.UpdateConsumablesReplacement(consumablesreplacement);
-            return Ok();
 
-        }
-        [HttpPost]
-        public async Task<IActionResult> Add(Consumablesreplacement consumablesreplacement)
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] Consumablesreplacement consumablesreplacement)
         {
-            await _consumablesreplacement.AddConsumablesReplacement(consumablesreplacement);
-            return Ok();
+            try
+            {
+                await _consumablesreplacement.UpdateConsumablesReplacement(consumablesreplacement);
+                return Ok(new { message = "Consumable replacement updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] Consumablesreplacement consumablesreplacement)
+        {
+            try
+            {
+                await _consumablesreplacement.AddConsumablesReplacement(consumablesreplacement);
+                return Ok(new { message = "Consumable replacement added successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> Count()
         {
-            var count = await _consumablesreplacement.CountAllOrdersAsync();
-            return Ok(count);
+            try
+            {
+                var count = await _consumablesreplacement.CountAllOrdersAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
-    }
+}

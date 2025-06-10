@@ -270,7 +270,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Policy = "AdministrativeSupervisor")]
+        //[Authorize(Policy = "AdministrativeSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateJobOrder([FromBody] JobOrderDTO jobOrder)
         {

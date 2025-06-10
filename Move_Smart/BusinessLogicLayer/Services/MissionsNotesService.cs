@@ -1,7 +1,9 @@
 ﻿using BusinessLayer.Services;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer;
 using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,8 +18,8 @@ namespace BusinessLogicLayer.Services
         protected readonly MissionsNotesRepo _missionsNotesRepo;
         protected readonly ILogger<MissionsNotesService> _missionsNotesLogger;
 
-        public MissionsNotesService(MissionsNotesRepo missionsNotesRepo, ApplicationRepo applicationRepo, ILogger<ApplicationService> applicationLogger, ILogger<MissionsNotesService> missionsNotesLogger, SharedFunctions sharedFunctions)
-            : base(applicationRepo, applicationLogger, sharedFunctions)
+        public MissionsNotesService(MissionsNotesRepo missionsNotesRepo, ApplicationRepo applicationRepo, ILogger<ApplicationService> applicationLogger, ILogger<MissionsNotesService> missionsNotesLogger, SharedFunctions sharedFunctions, IHubContext<NotificationHub> notificationHub)
+            : base(applicationRepo, applicationLogger, sharedFunctions,notificationHub)
         {
             _missionsNotesRepo = missionsNotesRepo ?? throw new ArgumentNullException(nameof(missionsNotesRepo), "Data access layer cannot be null.");
             _missionsNotesLogger = missionsNotesLogger ?? throw new ArgumentNullException(nameof(missionsNotesLogger), "Logger cannot be null.");

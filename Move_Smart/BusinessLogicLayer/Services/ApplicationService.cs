@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace BusinessLayer.Services
@@ -12,12 +14,15 @@ namespace BusinessLayer.Services
         protected readonly ApplicationRepo _repo;
         protected readonly ILogger<ApplicationService> _logger;
         protected readonly SharedFunctions _shared;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger, SharedFunctions sharedFunctions)
+
+        public ApplicationService(ApplicationRepo repo, ILogger<ApplicationService> logger, SharedFunctions sharedFunctions, IHubContext<NotificationHub> hubContext)
         {
-            _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
-            _shared = sharedFunctions ?? throw new ArgumentNullException(nameof(sharedFunctions), "Shared functions cannot be null.");
+            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _shared = sharedFunctions ?? throw new ArgumentNullException(nameof(sharedFunctions));
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
         }
 
         public async Task<int> CreateApplicationAsync(ApplicationDTO dto)
@@ -25,7 +30,13 @@ namespace BusinessLayer.Services
             await _ValidateApplicationDTO(dto);
 
             _logger.LogInformation("Creating new application.");
-            return await _repo.CreateApplicationAsync(dto);
+            int newAppId = await _repo.CreateApplicationAsync(dto);
+
+            string message = $"New application created with ID {newAppId}, Type: {dto.ApplicationType}";
+
+            // Example: send to a specific role group (e.g., "Managers")
+            await _hubContext.Clients.Group("Managers").SendAsync("ReceiveNotification", message);
+            return newAppId;
         }
 
         public async Task<bool> UpdateApplicationAsync(ApplicationDTO dto)

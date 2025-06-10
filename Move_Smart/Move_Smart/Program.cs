@@ -211,8 +211,6 @@ builder.Services.AddScoped<MissionsJobOrderRepo>();
 builder.Services.AddScoped<MissionsVehicleRepo>();
 builder.Services.AddScoped<Sparepart>(); // Kept for Kamal
 builder.Services.AddScoped<Vehicleconsumable>(); // Kept for Kamal
-//builder.Services.AddScoped<SparePartsPurchaseOrderRepo>(); // Kept for Kamal
-//builder.Services.AddScoped<consumablespurchaseorderRepo>(); // Kept for Kamal
 builder.Services.AddScoped<ApplicationRepo>(); // Kept for Kamal
 builder.Services.AddScoped<VehicleRepo>();
 builder.Services.AddScoped<BusRepo>();
@@ -271,7 +269,9 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
+              .WithOrigins("http://127.0.0.1:5500")
               .AllowAnyMethod();
+
     });
 });
 
@@ -286,7 +286,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Move Smart API V1");
-        c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
+        //c.RoutePrefix = string.Empty; // <--- Swagger is now at root
     });
 }
 
