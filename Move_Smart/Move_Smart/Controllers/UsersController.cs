@@ -78,6 +78,22 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralManager")]
+        [HttpGet("count")]
+        public async Task<IActionResult> CountUsers()
+        {
+            try
+            {
+                int count = await _service.CountUsersAsync();
+                return Ok(new { count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error counting users.");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
         [Authorize(Policy = "RequireHospitalManager")]
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserDTO user)
@@ -103,12 +119,45 @@ namespace Move_Smart.Controllers
         }
 
         [Authorize]
+        [HttpPut("password/{id}")]
+        public async Task<IActionResult> ChangeUserPassword(int id, [FromBody] ChangePasswordModel model)
+        {
+            if (id <= 0 || model == null)
+            {
+                _logger.LogWarning("User Id must be greater than 0.");
+                return BadRequest("User Id mismatch");
+            }
+
+            try
+            {
+                await _service.UpdateUserPasswordAsync(id, model.OldPassword, model.NewPassword);
+                return Ok(new { message = "Password updated successfully" });
+            }
+
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Error updating user password");
+                return BadRequest( new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access while updating user password");
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user password");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUserInfo(int id, [FromBody] UserDTO user)
         {
             if (id <= 0 || user == null || id != user.UserId)
             {
-                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user.UserId);
+                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user?.UserId);
                 return BadRequest("User Id mismatch");
             }
 
@@ -145,7 +194,7 @@ namespace Move_Smart.Controllers
         {
             if (id <= 0 || user == null || id != user.UserId)
             {
-                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user.UserId);
+                _logger.LogWarning("User Id mismatch: {Id} vs {UserId}", id, user?.UserId);
                 return BadRequest("User Id mismatch");
             }
             try
