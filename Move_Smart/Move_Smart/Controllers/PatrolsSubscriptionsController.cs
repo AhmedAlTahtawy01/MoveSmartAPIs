@@ -1,5 +1,6 @@
 ﻿using BusinessLogicLayer.Services;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("AllForEmployee/{employeeID}", Name = "GetPatrolsSubscriptionForEmployee")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -35,6 +37,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("AllForPatrol/{patrolID}", Name = "GetPatrolsSubscriptionForPatrol")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -51,6 +54,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("{subscriptionID}", Name = "GetPatrolSubscriptionByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -73,6 +77,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPost(Name = "AddNewPatrolSubscription")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,6 +97,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPut(Name = "UpdatePatrolSubscription")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -117,6 +123,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpDelete("{subscriptionID}", Name = "DeletePatrolSubscription")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

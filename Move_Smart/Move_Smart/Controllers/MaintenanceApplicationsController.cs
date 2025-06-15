@@ -1,5 +1,6 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("All", Name = "GetAllMaintenanceApplications")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -35,6 +37,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("ForVehicle/{vehicleID}", Name = "GetAllMaintenanceApplicationsForVehicle")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -57,6 +60,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("{maintenanceApplicationID}", Name = "GetMaintenanceApplicationByMaintenanceApplicationID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -79,6 +83,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpPost(Name = "AddNewMaintenanceApplication")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -98,6 +103,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpPut(Name = "UpdateMaintenanceApplication")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -128,6 +134,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpDelete("{maintenanceApplicationID}", Name = "DeleteMaintenanceApplication")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
