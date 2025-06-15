@@ -172,6 +172,24 @@ namespace BusinessLayer.Services
             return await _jobOrderRepo.GetJobOrdersByDateRangeAsync(startDate, endDate);
         }
 
+        public async Task<List<JobOrderDTO>> GetJobOrdersByApplicationIdAsync(int applicationId)
+        {
+            if (applicationId <= 0)
+            {
+                _jobOrderLogger.LogWarning("Attempted to retrieve job orders with invalid application ID.");
+                throw new ArgumentException("Application ID must be greater than 0.");
+            }
+
+            if (!await ExistsAsync(applicationId))
+            {
+                _jobOrderLogger.LogWarning($"Application with ID {applicationId} does not exist.");
+                throw new KeyNotFoundException($"Application with ID {applicationId} does not exist.");
+            }
+
+            _jobOrderLogger.LogInformation($"Retrieving job orders for application ID {applicationId}.");
+            return await _jobOrderRepo.GetJobOrdersByApplicationIdAsync(applicationId);
+        }
+
         public async Task<bool> ExsitsAsync(int orderId)
         {
             if (orderId <= 0)

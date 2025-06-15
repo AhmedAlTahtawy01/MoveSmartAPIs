@@ -270,6 +270,32 @@ namespace Move_Smart.Controllers
             }
         }
 
+        // [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [HttpGet("application/{applicationId}")]
+        public async Task<IActionResult> GetJobOrdersByApplicationId([FromRoute] int applicationId)
+        {
+            try
+            {
+                var jobOrders = await _service.GetJobOrdersByApplicationIdAsync(applicationId);
+                return Ok(jobOrders);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching job orders by application ID");
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogError(ex, $"No job orders found for application ID {applicationId}");
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving job orders by application ID");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [Authorize(Policy = "AdministrativeSupervisor")]
         [HttpPost]
         public async Task<IActionResult> CreateJobOrder([FromBody] JobOrderDTO jobOrder)
