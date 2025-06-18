@@ -76,7 +76,7 @@ namespace BusinessLayer.Services
             return await _repo.GetAllApplicationsAsync(pageNumber, pageSize);
         }
 
-        protected async Task<ApplicationDTO> GetApplicationByIdAsync(int applicationId)
+        public async Task<ApplicationDTO> GetApplicationByIdAsync(int applicationId)
         {
             if (applicationId <= 0)
             {
@@ -110,7 +110,7 @@ namespace BusinessLayer.Services
                 throw new ArgumentException("User ID must be greater than 0.");
             }
 
-            if (!(await _shared.CheckUserExistsAsync(userId)))
+            if (!await _shared.CheckUserExistsAsync(userId))
             {
                 _logger.LogWarning($"User with ID: {userId} does not exist.");
                 throw new KeyNotFoundException($"User with ID {userId} does not exist.");
@@ -221,7 +221,7 @@ namespace BusinessLayer.Services
                 throw new InvalidOperationException("User Id must be greater than 0.");
             }
 
-            if (!(await _shared.CheckUserExistsAsync(dto.CreatedByUserID)))
+            if (!await _shared.CheckUserExistsAsync(dto.CreatedByUserID))
             {
                 _logger.LogWarning($"User with ID {dto.CreatedByUserID} does not exist.");
                 throw new KeyNotFoundException($"User with ID {dto.CreatedByUserID} does not exist.");

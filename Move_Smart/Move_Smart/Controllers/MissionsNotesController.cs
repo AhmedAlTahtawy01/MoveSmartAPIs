@@ -1,5 +1,6 @@
 ﻿using BusinessLogicLayer.Services;
 using DataAccessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("All", Name = "GetAllMissionsNotes")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -35,6 +37,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("{noteID}", Name = "GetMissionNoteByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -57,6 +60,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpPost(Name = "AddNewMissionNote")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -76,6 +80,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpPut(Name = "UpdateMissionNote")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -101,6 +106,7 @@ namespace Move_Smart.Controllers
         }
 
 
+        [Authorize(Policy = "RequireHospitalManager")]
         [HttpDelete("{noteID}", Name = "DeleteMissionNote")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

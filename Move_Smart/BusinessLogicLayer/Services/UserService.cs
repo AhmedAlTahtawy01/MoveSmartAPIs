@@ -300,6 +300,47 @@ namespace BusinessLayer.Services
             return user;
         }
 
+        public async Task<int> CountUsersAsync()
+        {
+            _logger.LogInformation("Counting all users.");
+            return await _repo.CountUsersAsync();
+        }
+
+        public async Task<bool> UpdateUserPasswordAsync(int userId, string oldPassword, string newPassword)
+        {
+            if (userId <= 0)
+            {
+                _logger.LogError("User ID must be greater than 0.");
+                throw new ArgumentException("User ID must be greater than 0.", nameof(userId));
+            }
+            if (string.IsNullOrWhiteSpace(oldPassword))
+            {
+                _logger.LogError("Old password cannot be null or empty.");
+                throw new ArgumentException("Old password cannot be null or empty.", nameof(oldPassword));
+            }
+            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+            {
+                _logger.LogError("Password must be at least 6 characters.");
+                throw new ArgumentException("Password must be at least 6 characters.", nameof(newPassword));
+            }
+
+            var user = await _repo.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogError($"User with ID {userId} not found.");
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(oldPassword, user.Password))
+            {
+                _logger.LogError("Old password is wrong.");
+                throw new UnauthorizedAccessException("Old password is wrong.");
+            }
+
+            _logger.LogInformation($"Updating password for user with ID: {userId}");
+            return await _repo.UpdateUserPasswordAsync(userId, BCrypt.Net.BCrypt.HashPassword(newPassword));
+        }
+
         public async Task<bool> DeleteUserAsync(int userId)
         {
             if (userId <= 0)

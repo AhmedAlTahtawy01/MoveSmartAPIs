@@ -113,6 +113,15 @@ namespace DataAccessLayer.Repositories
             }, new MySqlParameter("@nationalNo", nationalNo));
         }
 
+        public async Task<int> CountUsersAsync()
+        {
+            const string query = "SELECT COUNT(*) FROM users";
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            });
+        }
+
         public async Task<bool> NationalNoExistsAsync(string nationalNo, int excludeUserId = 0)
         {
             string query = "SELECT COUNT(*) FROM users WHERE NationalNo = @nationalNo";
@@ -153,15 +162,23 @@ namespace DataAccessLayer.Repositories
         {
             const string query = @"
                 UPDATE users
-                SET NationalNo = @NationalNo, Password = @Password, Name = @Name
+                SET NationalNo = @NationalNo, Name = @Name
                 WHERE UserID = @UserID";
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
                 await cmd.ExecuteNonQueryAsync() > 0,
                 new MySqlParameter("@UserID", user.UserId),
                 new MySqlParameter("@NationalNo", user.NationalNo),
-                new MySqlParameter("@Password", user.Password),
                 new MySqlParameter("@Name", user.Name));
+        }
+
+        public async Task<bool> UpdateUserPasswordAsync(int userId, string newPassword)
+        {
+            const string query = "UPDATE users SET Password = @Password WHERE UserID = @UserID";
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+                await cmd.ExecuteNonQueryAsync() > 0,
+                new MySqlParameter("@UserID", userId),
+                new MySqlParameter("@Password", newPassword));
         }
 
         public async Task<bool> UpdateAllUserInfoAsync(UserDTO user)
