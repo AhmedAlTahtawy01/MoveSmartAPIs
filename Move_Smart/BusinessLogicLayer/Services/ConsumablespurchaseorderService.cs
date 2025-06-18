@@ -20,12 +20,12 @@ namespace BusinessLogicLayer.Services
         private readonly ApplicationService _applicationService;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly UserRepo _userRepo;
-        public ConsumablespurchaseorderService(ApplicationService applicationService,appDBContext appDBContext, IHubContext<NotificationHub> hubContext, UserRepo userRepo)
+        public ConsumablespurchaseorderService(ApplicationService applicationService,appDBContext appDBContext, IHubContext<NotificationHub> hubContext, UserRepo userRepo,IHubContext<NotificationHub> notification )
         {
             _appDBContext = appDBContext;
             _applicationService = applicationService;
-            _hubContext = hubContext;
             _userRepo = userRepo;
+            _hubContext = notification ?? throw new ArgumentNullException(nameof(notification));
         }
         public async Task<List<Consumablespurchaseorder>> GetAllConsumablesPurchaseoOrder()
         {
@@ -71,41 +71,42 @@ namespace BusinessLogicLayer.Services
             await _appDBContext.SaveChangesAsync();
             await _hubContext.Clients.All.SendAsync("NewOrderCreated", $"A new Consumable Purchase Order has been created with ID: {order.OrderId}");
         }
-            public async Task AddConsumablePurchaseOrderAsync(Consumablespurchaseorder order)
+        public async Task AddConsumablePurchaseOrderAsync(Consumablespurchaseorder order)
+        {
+            if (order == null || order.Application == null)
             {
-                if (order == null || order.Application == null)
-                {
-                    throw new ArgumentNullException("Order or Application data is missing.");
-                }
-                // First, add and save the Application
-                var application = order.Application;
-                application.Status = enStatus.Pending;
-
-                int appId = await _applicationService.CreateApplicationAsync(application);
-                order.ApplicationId = appId;
-
-                // Now link the ApplicationId to the order
-                //order.ApplicationId = application.ApplicationId;
-
-                // Ensure the order doesn’t already exist
-                var existingOrder = await _appDBContext.Consumablespurchaseorders
-                    .FirstOrDefaultAsync(x => x.OrderId == order.OrderId);
-
-                if (existingOrder != null)
-                {
-                    throw new InvalidOperationException("Order already exists.");
-                }
-
-                // the problem of navi ....
-                order.Application = null;
-
-                _appDBContext.Consumablespurchaseorders.Add(order);
-                await _appDBContext.SaveChangesAsync();
-
-                await SendNotificationBasedOnRole(order.Application.CreatedByUserID, order.OrderId);
-
+                throw new ArgumentNullException("Order or Application data is missing.");
             }
-            public async Task DeleteConsumablePurchaseOrder(int ID)
+
+            // Set initial application status
+            var application = order.Application;
+            application.Status = enStatus.Pending;
+
+            int appId = await _applicationService.CreateApplicationAsync(application);
+            order.ApplicationId = appId;
+
+            // Check for existing order
+            var existingOrder = await _appDBContext.Consumablespurchaseorders
+                .FirstOrDefaultAsync(x => x.OrderId == order.OrderId);
+
+            if (existingOrder != null)
+            {
+                throw new InvalidOperationException("Order already exists.");
+            }
+
+            // Break circular reference for EF
+            order.Application = null;
+
+            _appDBContext.Consumablespurchaseorders.Add(order);
+            await _appDBContext.SaveChangesAsync();
+
+            // 🔔 Send notification to specific role
+            string roleToNotify = "WarehouseManager"; // You can determine this dynamically
+            string message = $"New consumable order (ID: {order.OrderId}) created by User ID: {application.CreatedByUserID}";
+
+            await _hubContext.Clients.Group(roleToNotify).SendAsync("ReceiveNotification", message);
+        }
+        public async Task DeleteConsumablePurchaseOrder(int ID)
             {
                 var order = await _appDBContext.Consumablespurchaseorders
                     .Include(o => o.Application)

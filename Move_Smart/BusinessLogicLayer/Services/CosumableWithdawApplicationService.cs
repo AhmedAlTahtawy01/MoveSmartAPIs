@@ -1,5 +1,7 @@
 ﻿using BusinessLayer.Services;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,10 +15,12 @@ namespace BusinessLogicLayer.Services
     {
         private readonly appDBContext _appDBContext;
         private readonly ApplicationService _applicationService;
-        public CosumableWithdawApplicationService(appDBContext appDBContext,ApplicationService applicationService)
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public CosumableWithdawApplicationService(appDBContext appDBContext,ApplicationService applicationService, IHubContext<NotificationHub> notification)
         {
             _appDBContext = appDBContext;
             _applicationService = applicationService;  
+            _hubContext = notification;
         }
         public async Task<List<Consumableswithdrawapplication>> GetAllConsumableWithdrawApplications()
         {

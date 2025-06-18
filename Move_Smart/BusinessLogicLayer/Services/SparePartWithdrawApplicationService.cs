@@ -1,5 +1,7 @@
 ﻿using BusinessLayer.Services;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,10 +15,12 @@ namespace BusinessLogicLayer.Services
     {
         private readonly appDBContext _appDBContext;
         private readonly ApplicationService _applicationService;
-        public SparePartWithdrawApplicationService(appDBContext appDBContext , ApplicationService application)
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public SparePartWithdrawApplicationService(appDBContext appDBContext , ApplicationService application, IHubContext<NotificationHub> notification)
         {
             _appDBContext = appDBContext;
             _applicationService = application;
+            _hubContext = notification;
         }
         public async Task<Sparepartswithdrawapplication> GetSparepartswithdrawapplicationByID(int id)
         {

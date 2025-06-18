@@ -1,5 +1,7 @@
 ﻿using BusinessLayer.Services;
+using BusinessLogicLayer.Hubs;
 using DataAccessLayer.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,10 +15,12 @@ namespace BusinessLogicLayer.Services
     {
         private readonly appDBContext _appDbContext;
         private readonly ApplicationService _applicationService;
-        public SparePartPurchaseOrderService(appDBContext appDBContext, ApplicationService application )
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public SparePartPurchaseOrderService(appDBContext appDBContext, ApplicationService application , IHubContext<NotificationHub> notification)
         {
             _appDbContext = appDBContext;
             _applicationService = application;
+            _hubContext = notification ?? throw new ArgumentNullException(nameof(notification));    
         }
         public async Task AddSparePartsPurchaseOrder(Sparepartspurchaseorder order)
         {

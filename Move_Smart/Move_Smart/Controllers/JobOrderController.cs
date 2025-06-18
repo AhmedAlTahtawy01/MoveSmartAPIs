@@ -279,7 +279,6 @@ namespace Move_Smart.Controllers
                 _logger.LogWarning("Received null job order data.");
                 return BadRequest("Job order cannot be null");
             }
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -289,6 +288,7 @@ namespace Move_Smart.Controllers
                 jobOrder.OrderId = jobOrderId; // Set the ID of the created job order
                 return CreatedAtAction(nameof(GetJobOrderById), new { id = jobOrderId }, jobOrder);
             }
+            // this is the catch statement in the ..'s class ..
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Invalid argument provided.");
