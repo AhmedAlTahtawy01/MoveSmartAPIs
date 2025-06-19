@@ -179,6 +179,16 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.AdministrativeSupervisor.ToString(),
             EnUserRole.WorkshopSupervisor.ToString()
         ));
+
+    options.AddPolicy("Drivers", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString(),
+            EnUserRole.PatrolsSupervisor.ToString()
+        ));
 });
 
 
