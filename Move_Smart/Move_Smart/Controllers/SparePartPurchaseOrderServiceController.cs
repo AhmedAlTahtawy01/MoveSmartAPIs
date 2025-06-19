@@ -19,7 +19,7 @@ namespace Move_Smart.Controllers
 
         [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpPost]
-        public async Task<IActionResult> Add(Sparepartspurchaseorder partpurchaseorder)
+        public async Task<IActionResult> Add([FromBody]Sparepartspurchaseorder partpurchaseorder)
         {
             try
             {
