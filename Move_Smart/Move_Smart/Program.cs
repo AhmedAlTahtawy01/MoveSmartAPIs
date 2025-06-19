@@ -168,6 +168,17 @@ builder.Services.AddAuthorization(options =>
             EnUserRole.SuperUser.ToString(),
             EnUserRole.WorkshopSupervisor.ToString()
         ));
+
+    // Policies for specific roles
+    options.AddPolicy("AllVehicles", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString(),
+            EnUserRole.WorkshopSupervisor.ToString()
+        ));
 });
 
 

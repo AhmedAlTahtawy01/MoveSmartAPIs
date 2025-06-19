@@ -221,6 +221,12 @@ namespace BusinessLayer.Services
                 throw new InvalidOperationException("User Id must be greater than 0.");
             }
 
+            if (!Enum.IsDefined(typeof(enStatus), dto.Status))
+            {
+                _logger.LogWarning("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
+            }
+
             if (!await _shared.CheckUserExistsAsync(dto.CreatedByUserID))
             {
                 _logger.LogWarning($"User with ID {dto.CreatedByUserID} does not exist.");

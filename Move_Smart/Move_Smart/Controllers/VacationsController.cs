@@ -1,5 +1,4 @@
-﻿
-using BusinessLayer;
+﻿using BusinessLayer;
 using DataAccessLayer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -177,6 +176,31 @@ namespace Move_Smart.Controllers
             }
             
             return await _service.IsDriverInVacationAsync(driverID) ? Ok(true) : Ok(false);
+        }
+
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [HttpPost("SynchronizeVacationStatuses", Name = "SynchronizeVacationStatuses")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<object>> SynchronizeVacationStatuses()
+        {
+            try
+            {
+                int updatedCount = await _service.SynchronizeDriverVacationStatusesAsync();
+                
+                return Ok(new
+                {
+                    Message = "Vacation status synchronization completed successfully.",
+                    UpdatedDriversCount = updatedCount,
+                    Timestamp = DateTime.Now
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during manual vacation status synchronization.");
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    "An error occurred while synchronizing vacation statuses.");
+            }
         }
     }
 }

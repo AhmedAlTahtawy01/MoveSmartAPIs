@@ -6,6 +6,8 @@ using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using static DataAccessLayer.DriverDTO;
+using static DataAccessLayer.VehicleDTO;
 
 namespace BusinessLayer.Services
 {
@@ -23,6 +25,22 @@ namespace BusinessLayer.Services
             _jobOrderLogger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
         }
 
+        private enDriverStatus _GetDriverStatus(enStatus status)
+        {
+            if (status == enStatus.Pending)
+                return enDriverStatus.Working;
+            else
+                return enDriverStatus.Working;
+        }
+        
+        private enVehicleStatus _GetVehicleStatus(enStatus status)
+        {
+            if (status == enStatus.Pending)
+                return enVehicleStatus.Working;
+            else
+                return enVehicleStatus.Available;
+        }
+
         public async Task<int> CreateJobOrderAsync(JobOrderDTO dto)
         {
             await _ValidateJobOrderDTO(dto);
@@ -33,7 +51,19 @@ namespace BusinessLayer.Services
                 _jobOrderLogger.LogInformation($"Created application with ID {dto.Application.ApplicationId} for job order.");
 
                 _jobOrderLogger.LogInformation("Creating new job order.");
-                return await _jobOrderRepo.CreateJobOrderAsync(dto);
+                int jobOrderId = await _jobOrderRepo.CreateJobOrderAsync(dto);
+                if (jobOrderId > 0)
+                {
+                    _jobOrderLogger.LogInformation($"Created job order with ID {jobOrderId}.");
+                    await _shared.UpdateDriverStatusAsync(dto.DriverId, enDriverStatus.Working);
+                    await _shared.UpdateVehicleStatusAsync(dto.VehicleId, enVehicleStatus.Working);
+                    return jobOrderId;
+                }
+                else
+                {
+                    _jobOrderLogger.LogError("Failed to create job order.");
+                    throw new InvalidOperationException("Failed to create job order.");
+                }
             }
             catch (Exception ex)
             {
@@ -70,7 +100,13 @@ namespace BusinessLayer.Services
             }
 
             _jobOrderLogger.LogInformation("Updating job order.");
-            return await _jobOrderRepo.UpdateJobOrderAsync(dto);
+            bool updated = await _jobOrderRepo.UpdateJobOrderAsync(dto);
+            if (updated && dto.Application != null)
+            {
+                await _shared.UpdateDriverStatusAsync(dto.DriverId, _GetDriverStatus(dto.Application.Status));
+                await _shared.UpdateVehicleStatusAsync(dto.VehicleId, _GetVehicleStatus(dto.Application.Status));
+            }
+            return updated;
         }
 
         public async Task<List<JobOrderDTO>> GetAllJobOrdersAsync(int pageNumber, int pageSize)

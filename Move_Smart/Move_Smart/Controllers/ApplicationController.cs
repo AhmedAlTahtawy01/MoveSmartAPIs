@@ -23,6 +23,7 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize (Policy = "RequireGeneralSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllApplications([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -43,6 +44,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationById([FromRoute] int id)
         {
@@ -68,6 +70,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("type/{type}")]
         public async Task<IActionResult> GetApplicationsByType([FromRoute] enApplicationType type)
         {
@@ -88,6 +91,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetApplicationsByUserId([FromRoute] int userId)
         {
@@ -113,6 +117,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetApplicationsByStatus([FromRoute] enStatus status)
         {
@@ -132,7 +137,8 @@ namespace Move_Smart.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        
+
+        [Authorize]
         [HttpGet("count/type/{type}")]
         public async Task<IActionResult> CountApplicationsByType([FromRoute] enApplicationType type)
         {
@@ -153,6 +159,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("count/status/{status}")]
         public async Task<IActionResult> CountApplicationsByStatus([FromRoute] enStatus status) 
         {
@@ -173,6 +180,7 @@ namespace Move_Smart.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> CountAllApplications()
         {
