@@ -30,7 +30,7 @@ namespace BusinessLayer.Services
             if (status == enStatus.Pending)
                 return enDriverStatus.Working;
             else
-                return enDriverStatus.Working;
+                return enDriverStatus.Available;
         }
         
         private enVehicleStatus _GetVehicleStatus(enStatus status)
@@ -95,18 +95,17 @@ namespace BusinessLayer.Services
                 dto.Application.CreationDate = existingJobOrder.Application.CreationDate;
                 dto.Application.CreatedByUserID= existingJobOrder.Application.CreatedByUserID;
 
-                await UpdateApplicationAsync(dto.Application);
+                bool updated = await UpdateApplicationAsync(dto.Application);
+                if (updated)
+                {
+                    await _shared.UpdateDriverStatusAsync(dto.DriverId, _GetDriverStatus(dto.Application.Status));
+                    await _shared.UpdateVehicleStatusAsync(dto.VehicleId, _GetVehicleStatus(dto.Application.Status));
+                }
                 _jobOrderLogger.LogInformation($"Updated application with ID {dto.Application.ApplicationId} for job order.");
             }
 
             _jobOrderLogger.LogInformation("Updating job order.");
-            bool updated = await _jobOrderRepo.UpdateJobOrderAsync(dto);
-            if (updated && dto.Application != null)
-            {
-                await _shared.UpdateDriverStatusAsync(dto.DriverId, _GetDriverStatus(dto.Application.Status));
-                await _shared.UpdateVehicleStatusAsync(dto.VehicleId, _GetVehicleStatus(dto.Application.Status));
-            }
-            return updated;
+            return await _jobOrderRepo.UpdateJobOrderAsync(dto);
         }
 
         public async Task<List<JobOrderDTO>> GetAllJobOrdersAsync(int pageNumber, int pageSize)
