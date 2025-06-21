@@ -15,13 +15,15 @@ namespace Move_Smart.Controllers
         {
             _isparepart = isparepart;
         }
-        //[Authorize(Policy = "RequireWorkshopSupervisor")]
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllSparePart()
         {
             var data = await _isparepart.GetAllSparePart();
             return Ok(data);
         }
+
         [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("id/{id}")]
         public async Task<IActionResult> GetByID(int id)
