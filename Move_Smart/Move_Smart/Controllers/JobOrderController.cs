@@ -270,7 +270,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        // [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "RequireAdministrativeSupervisor")]
         [HttpGet("application/{applicationId}")]
         public async Task<IActionResult> GetJobOrdersByApplicationId([FromRoute] int applicationId)
         {

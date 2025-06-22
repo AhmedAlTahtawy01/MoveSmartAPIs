@@ -20,7 +20,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [Authorize(Policy = "All")]
         [HttpGet("All", Name = "GetAllBuses")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -37,7 +37,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [Authorize(Policy = "All")]
         [HttpGet("All/OfCapacity/{capacity}", Name = "GetAllBusesOfType")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -54,7 +54,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [Authorize(Policy = "All")]
         [HttpGet("All/WithAvailableSpace/{availableSpace}", Name = "GetAllBusesWithAvailableSpace")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -71,7 +71,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [Authorize(Policy = "All")]
         [HttpGet("ByID/{busID}", Name = "GetBusByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -88,7 +88,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [Authorize(Policy = "All")]
         [HttpGet("ByPlateNumbers/{plateNumbers}", Name = "GetBusByPlateNumbers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

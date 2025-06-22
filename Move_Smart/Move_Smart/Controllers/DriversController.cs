@@ -21,7 +21,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("All", Name = "GetAllDrivers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -38,7 +38,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("WorkingOnVehicle/WithID/{vehicleID}", Name = "GetAllDriversWorkingOnVehicleWithID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -61,7 +61,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("WorkingOnVehicle/WithPlateNumbers/{plateNumbers}", Name = "GetAllDriversWorkingOnVehicleWithPlateNumbers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -84,7 +84,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("WithStatus/{status}", Name = "GetAllDriversWithStatus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -101,7 +101,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("ByID/{driverID}", Name = "GetDriverByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -124,7 +124,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("ByNationalNo/{nationalNo}", Name = "GetDriverByNationalNo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -147,7 +147,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("ByPhone/{phone}", Name = "GetDriverByPhone")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -170,7 +170,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("Count", Name = "GetNumberOfDrivers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -187,7 +187,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireAdministrativeSupervisor")]
+        [Authorize(Policy = "Drivers")]
         [HttpGet("Count/WithStatus/{status}", Name = "GetNumberOfDriversByStatus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

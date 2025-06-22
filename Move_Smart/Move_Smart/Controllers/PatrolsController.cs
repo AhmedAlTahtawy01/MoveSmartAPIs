@@ -60,7 +60,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPost(Name = "AddNewPatrol")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -85,7 +85,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPut(Name = "UpdatePatrol")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -111,7 +111,7 @@ namespace Move_Smart.Controllers
         }
 
 
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpDelete("{patrolID}", Name = "DeletePatrol")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
