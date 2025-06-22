@@ -15,6 +15,7 @@ namespace DataAccessLayer.Repositories
         public short SparePartId { get; set; }
 
         public short VehicleId { get; set; }
+
         public virtual ApplicationDTO Application { get; set; }
         public ulong ApprovedByGeneralSupervisor { get; set; }
 

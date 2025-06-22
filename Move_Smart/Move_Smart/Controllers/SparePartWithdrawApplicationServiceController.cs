@@ -17,7 +17,7 @@ namespace Move_Smart.Controllers
             _sparePartWithdrawApplicationService = sparePartWithdrawApplicationService;
         }
 
-        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        //[Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -32,7 +32,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        //[Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -47,7 +47,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        //[Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpPut]
         public async Task<IActionResult> UpdateSpareParetWithdrawApp([FromBody] Sparepartswithdrawapplication order)
         {
@@ -62,7 +62,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        //[Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -77,7 +77,7 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize(Policy = "RequireWorkshopSupervisor")]
+        //[Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Sparepartswithdrawapplication order)
         {

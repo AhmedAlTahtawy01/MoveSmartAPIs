@@ -24,7 +24,7 @@ namespace Move_Smart.Controllers
             try
             {
                 await _sparePartPurchaseOrderService.AddSparePartsPurchaseOrder(partpurchaseorder);
-                return Ok(new { message = "Spare part purchase order added successfully." });
+                return Ok(new { message = "Spare part purchase order added successfully!" });
             }
             catch (Exception ex)
             {
@@ -46,7 +46,7 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+      
         [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpDelete("{orderId}")]
         public async Task<IActionResult> DeleteSparePartsPurchaseOrder(int orderId)
@@ -64,7 +64,7 @@ namespace Move_Smart.Controllers
 
         [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Upadate(int id, [FromBody] Sparepartspurchaseorder order)
+        public async Task<IActionResult> Update(int id, [FromBody] Sparepartspurchaseorder order)
         {
             try
             {
