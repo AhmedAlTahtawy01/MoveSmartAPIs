@@ -58,14 +58,13 @@ namespace BusinessLayer.Services
 
                     try
                     {
-                        _jobOrderLogger.LogInformation("Updating vehicle status...");
-                        bool vehicleResult = await _shared.UpdateVehicleStatusAsync(dto.VehicleId, enVehicleStatus.Working);
-                        _jobOrderLogger.LogInformation($"Vehicle status updated: {vehicleResult}");
-
                         _jobOrderLogger.LogInformation("Updating driver status...");
                         bool driverResult = await _shared.UpdateDriverStatusAsync(dto.DriverId, enDriverStatus.Working);
                         _jobOrderLogger.LogInformation($"Driver status updated: {driverResult}");
 
+                        _jobOrderLogger.LogInformation("Updating vehicle status...");
+                        bool vehicleResult = await _shared.UpdateVehicleStatusAsync(dto.VehicleId, enVehicleStatus.Working);
+                        _jobOrderLogger.LogInformation($"Vehicle status updated: {vehicleResult}");
                     }
                     catch (Exception updateEx)
                     {
