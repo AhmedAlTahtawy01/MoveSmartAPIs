@@ -15,9 +15,9 @@ namespace DataAccessLayer
     {
         public enum enVehicleStatus : byte
         {
-            Available = 0,
-            Working = 1,
-            BrokenDown = 2
+            Available = 1,
+            Working = 2,
+            BrokenDown = 3
         }
         public enum enVehicleType : byte
         {

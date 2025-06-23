@@ -55,8 +55,23 @@ namespace BusinessLayer.Services
                 if (jobOrderId > 0)
                 {
                     _jobOrderLogger.LogInformation($"Created job order with ID {jobOrderId}.");
-                    await _shared.UpdateDriverStatusAsync(dto.DriverId, enDriverStatus.Working);
-                    await _shared.UpdateVehicleStatusAsync(dto.VehicleId, enVehicleStatus.Working);
+
+                    try
+                    {
+                        _jobOrderLogger.LogInformation("Updating vehicle status...");
+                        bool vehicleResult = await _shared.UpdateVehicleStatusAsync(dto.VehicleId, enVehicleStatus.Working);
+                        _jobOrderLogger.LogInformation($"Vehicle status updated: {vehicleResult}");
+
+                        _jobOrderLogger.LogInformation("Updating driver status...");
+                        bool driverResult = await _shared.UpdateDriverStatusAsync(dto.DriverId, enDriverStatus.Working);
+                        _jobOrderLogger.LogInformation($"Driver status updated: {driverResult}");
+
+                    }
+                    catch (Exception updateEx)
+                    {
+                        _jobOrderLogger.LogError(updateEx, "Error while updating driver or vehicle status.");
+                    }
+
                     return jobOrderId;
                 }
                 else

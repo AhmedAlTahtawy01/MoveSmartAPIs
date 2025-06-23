@@ -175,7 +175,7 @@ namespace BusinessLayer.Services
 
         public async Task<bool> CancelApplicationAsync(int applicationId)
         {
-            return await UpdateStatusAsync(applicationId, enStatus.Canceled);
+            return await UpdateStatusAsync(applicationId, enStatus.Cancelled);
         }
 
         public async Task<bool> RejectApplicationAsync(int applicationId)

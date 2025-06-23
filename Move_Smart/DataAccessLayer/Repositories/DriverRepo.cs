@@ -14,7 +14,7 @@ namespace DataAccessLayer
 {
     public class DriverDTO
     {
-        public enum enDriverStatus { Available, Absent, Working };
+        public enum enDriverStatus { Available = 1, Absent = 2, Working = 3 };
         public int? DriverID { get; set; }
         public string NationalNo { get; set; }
         public string Name { get; set; }
