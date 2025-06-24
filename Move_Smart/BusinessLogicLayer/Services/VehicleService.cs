@@ -47,13 +47,13 @@ namespace BusinessLayer
                 throw new InvalidOperationException("Invalid status.");
             }
 
-            if (!Enum.IsDefined(typeof(enVehicleType), dto.Status))
+            if (!Enum.IsDefined(typeof(enVehicleType), dto.VehicleType))
             {
                 _vehicleLogger.LogError("Validation Failed: Invalid status.");
                 throw new InvalidOperationException("Invalid status.");
             }
 
-            if (!Enum.IsDefined(typeof(enFuelType), dto.Status))
+            if (!Enum.IsDefined(typeof(enFuelType), dto.FuelType))
             {
                 _vehicleLogger.LogError("Validation Failed: Invalid status.");
                 throw new InvalidOperationException("Invalid status.");
