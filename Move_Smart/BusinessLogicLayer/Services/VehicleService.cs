@@ -103,6 +103,38 @@ namespace BusinessLayer
             return false;
         }
 
+        public async Task<bool> UpdateVehicleTotalKilometersAsync(int totalKilometers, short vehicleID)
+        {
+            if (totalKilometers < 0)
+            {
+                _vehicleLogger.LogError("Total kilometers cannot be negative.");
+                return false;
+            }
+
+            if (vehicleID <= 0)
+            {
+                _vehicleLogger.LogError("Vehicle ID must be a positive integer.");
+                return false;
+            }
+
+            try
+            {
+                if (!await _vehicleRepo.IsVehicleExistsAsync(vehicleID))
+                {
+                    _vehicleLogger.LogError($"Vehicle with ID {vehicleID} does not exist.");
+                    return false;
+                }
+
+                _vehicleLogger.LogInformation($"Updating total kilometers for vehicle ID {vehicleID} by {totalKilometers}.");
+                return await _vehicleRepo.UpdateVehicleTotalKilometersAsync(totalKilometers, vehicleID);
+            }
+            catch (Exception ex)
+            {
+                _vehicleLogger.LogError(ex, "Failed to update total kilometers for vehicle.");
+                return false;
+            }
+        }
+
         public async Task<List<VehicleDTO>> GetAllVehiclesAsync()
         {
             return await _vehicleRepo.GetAllVehiclesAsync();

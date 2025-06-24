@@ -575,6 +575,31 @@ namespace DataAccessLayer
             return false;
         }
 
+        public async Task<bool> UpdateVehicleTotalKilometersAsync(int kilometersToAdd, short vehicleId)
+        {
+            string query = @"UPDATE Vehicles SET
+                            TotalKilometersMoved = TotalKilometersMoved + @KilometersToAdd
+                            WHERE VehicleID = @VehicleID;";
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("VehicleID", vehicleId);
+                        cmd.Parameters.AddWithValue("KilometersToAdd", kilometersToAdd);
+                        await conn.OpenAsync();
+                        return Convert.ToByte(await cmd.ExecuteNonQueryAsync()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+            return false;
+        }
+
         public async Task<bool> DeleteVehicleAsync(string plateNumbers)
         {
             string query = @"DELETE FROM Vehicles

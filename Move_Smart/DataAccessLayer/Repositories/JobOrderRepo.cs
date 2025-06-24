@@ -22,7 +22,7 @@ namespace DataAccessLayer.Repositories
         public ApplicationDTO Application { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "VehicleId must be greater than 0.")]
-        public int VehicleId { get; set; }
+        public short VehicleId { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "DriverId must be greater than 0.")]
         public int DriverId { get; set; }
@@ -45,7 +45,7 @@ namespace DataAccessLayer.Repositories
         [Range(0, int.MaxValue, ErrorMessage = "OdometerAfter must be non-negative if provided.")]
         public int? OdometerAfter { get; set; }
 
-        public JobOrderDTO(int orderId, ApplicationDTO application, int vehicleId, int driverId, DateTime startDate, DateTime endDate, TimeSpan startTime, TimeSpan endTime, string destination,
+        public JobOrderDTO(int orderId, ApplicationDTO application, short vehicleId, int driverId, DateTime startDate, DateTime endDate, TimeSpan startTime, TimeSpan endTime, string destination,
             int odometerBefore, int? odometerAfter)
         {
             OrderId = orderId;
@@ -95,7 +95,7 @@ namespace DataAccessLayer.Repositories
             (
                 reader.GetInt32(reader.GetOrdinal("OrderID")),
                 application,
-                reader.GetInt32(reader.GetOrdinal("VehicleID")),
+                reader.GetInt16(reader.GetOrdinal("VehicleID")),
                 reader.GetInt32(reader.GetOrdinal("DriverID")),
                 reader.GetDateTime(reader.GetOrdinal("OrderStartDate")),
                 reader.GetDateTime(reader.GetOrdinal("OrderEndDate")),
