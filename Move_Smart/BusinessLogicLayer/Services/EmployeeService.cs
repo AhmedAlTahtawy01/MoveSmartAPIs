@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static DataAccessLayer.EmployeeDTO;
+using static DataAccessLayer.VehicleDTO;
 
 namespace BusinessLayer
 {
@@ -56,6 +57,12 @@ namespace BusinessLayer
             {
                 _employeeLogger.LogError("Phone Must Be 11 Numbers.");
                 throw new ArgumentException("Phone Must Be 11 Numbers.");
+            }
+
+            if (!Enum.IsDefined(typeof(enTransportationSubscriptionStatus), dto.TransportationSubscriptionStatus))
+            {
+                _employeeLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
             }
         }
 

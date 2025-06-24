@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer;
+using DataAccessLayer.Repositories;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,24 @@ namespace BusinessLayer
             {
                 _vehicleLogger.LogError("Plate numbers must be between 6-7 characters long.");
                 throw new ArgumentException("Plate numbers must be between 6-7 characters long.");
+            }
+
+            if (!Enum.IsDefined(typeof(enVehicleStatus), dto.Status))
+            {
+                _vehicleLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
+            }
+
+            if (!Enum.IsDefined(typeof(enVehicleType), dto.Status))
+            {
+                _vehicleLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
+            }
+
+            if (!Enum.IsDefined(typeof(enFuelType), dto.Status))
+            {
+                _vehicleLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
             }
         }
 
