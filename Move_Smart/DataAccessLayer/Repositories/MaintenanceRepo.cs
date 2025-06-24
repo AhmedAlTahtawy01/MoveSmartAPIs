@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 
 namespace DataAccessLayer.Repositories
@@ -19,10 +20,12 @@ namespace DataAccessLayer.Repositories
         public string Description { get; set; }
         public int MaintenanceApplicationId { get; set; }
 
-        public MaintenanceDTO(int maintenanceId, DateTime date, string description, int maintenanceApplicationId)
+
+        [JsonConstructor]
+        public MaintenanceDTO(int maintenanceId, DateTime maintenanceDate, string description, int maintenanceApplicationId)
         {
             MaintenanceId = maintenanceId;
-            MaintenanceDate = date;
+            MaintenanceDate = maintenanceDate;
             Description = description;
             MaintenanceApplicationId = maintenanceApplicationId;
         }
