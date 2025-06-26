@@ -28,7 +28,7 @@ namespace Move_Smart.Controllers
             if (dto == null)
             {
                 _logger.LogWarning("Received null DTO for CreateMissionJobOrder.");
-                return BadRequest("DTO cannot be null.");
+                return BadRequest(new { message = "DTO cannot be null." });
             }
 
             try
@@ -38,18 +38,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Argument exception while creating MissionJobOrder.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Argument exception while creating MissionJobOrder.");
+                return BadRequest(new { message = "Argument exception while creating MissionJobOrder." });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Invalid operation while creating MissionJobOrder.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid operation while creating MissionJobOrder.");
+                return BadRequest(new { message = "Invalid operation while creating MissionJobOrder." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating MissionJobOrder.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -60,7 +60,7 @@ namespace Move_Smart.Controllers
             if (pageNumber < 1 || pageSize < 1)
             {
                 _logger.LogWarning("Invalid pagination parameters.");
-                return BadRequest("Page number and page size must be greater than 0.");
+                return BadRequest(new { message = "Page number and page size must be greater than 0." });
             }
 
             try
@@ -70,13 +70,13 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Argument exception while fetching MissionJobOrders.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Argument exception while fetching MissionJobOrders.");
+                return BadRequest(new { message = "Argument exception while fetching MissionJobOrders." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching MissionJobOrders.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -87,7 +87,7 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid ID parameter.");
-                return BadRequest("ID must be greater than 0.");
+                return BadRequest(new { message = "ID must be greater than 0." });
             }
 
             try
@@ -97,18 +97,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Argument exception while fetching MissionJobOrder by ID.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Argument exception while fetching MissionJobOrder by ID.");
+                return BadRequest(new { message = "Argument exception while fetching MissionJobOrder by ID." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No MissionJobOrder found with ID {id}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No MissionJobOrder found with ID {id}.");
+                return NotFound(new { message = $"No MissionJobOrder found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching MissionJobOrder by ID.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -119,7 +119,7 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid ID parameter.");
-                return BadRequest("ID must be greater than 0.");
+                return BadRequest(new { message = "ID must be greater than 0." });
             }
 
             try
@@ -129,18 +129,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Argument exception while fetching MissionJobOrder by Mission ID.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Argument exception while fetching MissionJobOrder by Mission ID.");
+                return BadRequest(new { message = "Argument exception while fetching MissionJobOrder by Mission ID." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No MissionJobOrder found with Mission ID {id}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No MissionJobOrder found with Mission ID {id}.");
+                return NotFound(new { message = $"No MissionJobOrder found with Mission ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching MissionJobOrder by Mission ID.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -151,7 +151,7 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid ID parameter.");
-                return BadRequest("ID must be greater than 0.");
+                return BadRequest(new { message = "ID must be greater than 0." });
             }
 
             try
@@ -161,18 +161,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Argument exception while fetching MissionJobOrder by Job Order ID.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Argument exception while fetching MissionJobOrder by Job Order ID.");
+                return BadRequest(new { message = "Argument exception while fetching MissionJobOrder by Job Order ID." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No MissionJobOrder found with Job Order ID {id}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No MissionJobOrder found with Job Order ID {id}.");
+                return NotFound(new { message = $"No MissionJobOrder found with Job Order ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching MissionJobOrder by Job Order ID.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -183,12 +183,12 @@ namespace Move_Smart.Controllers
             if (id <= 0 || dto == null)
             {
                 _logger.LogWarning("Invalid parameters for UpdateMissionJobOrder.");
-                return BadRequest("ID must be greater than 0 and DTO cannot be null.");
+                return BadRequest(new { message = "ID must be greater than 0 and DTO cannot be null." });
             }
             if (dto.OrderId != id)
             {
                 _logger.LogWarning("Mismatch between URL ID and DTO ID.");
-                return BadRequest("ID in URL must match ID in DTO.");
+                return BadRequest(new { message = "ID in URL must match ID in DTO." });
             }
 
             try
@@ -198,18 +198,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Argument exception while updating MissionJobOrder.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Argument exception while updating MissionJobOrder.");
+                return BadRequest(new { message = "Argument exception while updating MissionJobOrder." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No MissionJobOrder found with ID {id}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No MissionJobOrder found with ID {id}.");
+                return NotFound(new { message = $"No MissionJobOrder found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating MissionJobOrder.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -220,7 +220,7 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid ID parameter.");
-                return BadRequest("ID must be greater than 0.");
+                return BadRequest(new { message = "ID must be greater than 0." });
             }
 
             try
@@ -230,18 +230,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Argument exception while deleting MissionJobOrder.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Argument exception while deleting MissionJobOrder.");
+                return BadRequest(new { message = "Argument exception while deleting MissionJobOrder." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No MissionJobOrder found with ID {id}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No MissionJobOrder found with ID {id}.");
+                return NotFound(new { message = $"No MissionJobOrder found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting MissionJobOrder.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
     }

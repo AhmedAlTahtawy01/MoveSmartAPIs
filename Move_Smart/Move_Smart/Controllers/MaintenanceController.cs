@@ -30,26 +30,29 @@ namespace Move_Smart.Controllers
             if (dto == null)
             {
                 _logger.LogWarning("Received null maintenance DTO.");
-                return BadRequest("Maintenance data cannot be null.");
+                return BadRequest(new { message = "Maintenance data cannot be null." });
             }
 
             try
             {
+                _logger.LogInformation("Creating maintenance.");
                 var id = await _service.CreateMaintenanceAsync(dto);
                 return CreatedAtAction(nameof(GetMaintenanceById), new { id }, dto);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Error creating maintenance.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                _logger.LogError(ex, "Invalid operation while creating maintenance.");
+                return Conflict(new { message = $"Invalid Data" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating maintenance.");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
 
@@ -60,7 +63,7 @@ namespace Move_Smart.Controllers
             if (pageNumber < 1 || pageSize < 1)
             {
                 _logger.LogWarning("Invalid pagination parameters.");
-                return BadRequest("Page number and page size must be greater than 0.");
+                return BadRequest(new { message = "Page number and page size must be greater than 0." });
             }
 
             try
@@ -71,12 +74,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Invalid arguments for retrieving maintenances.");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving all maintenances.");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
 
@@ -87,7 +90,7 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid maintenance ID.");
-                return BadRequest("Maintenance ID must be greater than 0.");
+                return BadRequest(new { message = "Maintenance ID must be greater than 0." });
             }
 
             try
@@ -97,18 +100,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid arguments for retrieving maintenance by ID.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid arguments for retrieving maintenance by ID.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No maintenance found with ID {id}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, "No maintenance found with ID {MaintenanceId}.", id);
+                return NotFound(new { message = $"No maintenance found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving maintenance by ID.");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
 
@@ -118,8 +121,8 @@ namespace Move_Smart.Controllers
         {
             if (date == default)
             {
-                _logger.LogWarning("Invalid date parameter.");
-                return BadRequest("Date cannot be default value.");
+                _logger.LogError("Invalid date parameter.");
+                return BadRequest(new { message = "Date cannot be default value." });
             }
 
             try
@@ -129,18 +132,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid arguments for retrieving maintenance by date.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid arguments for retrieving maintenance by date.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No maintenance found for date {date}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, "No maintenance found for date {Date}.", date);
+                return NotFound(new { message = $"No maintenance found for date {date}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving maintenance by date.");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
 
@@ -150,8 +153,8 @@ namespace Move_Smart.Controllers
         {
             if (maintenanceApplicationId <= 0)
             {
-                _logger.LogWarning("Invalid maintenance application ID.");
-                return BadRequest("Maintenance application ID must be greater than 0.");
+                _logger.LogError("Invalid maintenance application ID.");
+                return BadRequest(new { message = "Maintenance application ID must be greater than 0." });
             }
 
             try
@@ -161,18 +164,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid arguments for retrieving maintenance by application ID.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid arguments for retrieving maintenance by application ID.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No maintenance found for application ID {maintenanceApplicationId}.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, "No maintenance found for application ID {MaintenanceApplicationId}.", maintenanceApplicationId);
+                return NotFound(new { message = $"No maintenance found for application ID {maintenanceApplicationId}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving maintenance by application ID.");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
 
@@ -182,18 +185,18 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                _logger.LogWarning("Received null maintenance DTO.");
-                return BadRequest("Maintenance data cannot be null.");
+                _logger.LogError("Received null maintenance DTO.");
+                return BadRequest(new { message = "Maintenance data cannot be null." });
             }
             if (id <= 0)
             {
-                _logger.LogWarning("Invalid maintenance ID.");
-                return BadRequest("Maintenance ID must be greater than 0.");
+                _logger.LogError("Invalid maintenance ID.");
+                return BadRequest(new { message = "Maintenance ID must be greater than 0." });
             }
             if (dto.MaintenanceId != id)
             {
-                _logger.LogWarning("Mismatch between ID in URL and ID in DTO.");
-                return BadRequest("ID in URL and ID in DTO must match.");
+                _logger.LogError("Mismatch between ID in URL and ID in DTO.");
+                return BadRequest(new { message = "ID in URL and ID in DTO must match." });
             }
 
             try
@@ -204,18 +207,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid arguments for updating maintenance.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid arguments for updating maintenance.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No maintenance found with ID {id} for update.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, "No maintenance found with ID {MaintenanceId} for update.", id);
+                return NotFound(new { message = $"No maintenance found with ID {id} for update." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating maintenance.");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(500, new { message = "Internal server error." });
             }
 
         }
@@ -226,29 +229,29 @@ namespace Move_Smart.Controllers
         {
             if (id <= 0)
             {
-                _logger.LogWarning("Invalid maintenance ID.");
-                return BadRequest("Maintenance ID must be greater than 0.");
+                _logger.LogError("Invalid maintenance ID.");
+                return BadRequest(new { message = "Maintenance ID must be greater than 0." });
             }
 
             try 
             {
                 await _service.DeleteMaintenanceAsync(id);
-                return NoContent();
+                return Ok(new { message = $"Maintenance with ID {id} deleted successfully." });
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid arguments for deleting maintenance.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid arguments for deleting maintenance.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, $"No maintenance found with ID {id} for deletion.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, "No maintenance found with ID {MaintenanceId} for deletion.", id);
+                return NotFound(new { message = $"No maintenance found with ID {id} for deletion." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting maintenance.");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
     }

@@ -30,7 +30,7 @@ namespace Move_Smart.Controllers
 
             if (patrolsSubscriptions == null || !patrolsSubscriptions.Any())
             {
-                return NotFound($"No patrols subscriptions found for employee with ID [{employeeID}].");
+                return NotFound(new { message = $"No patrols subscriptions found for employee with ID [{employeeID}]." });
             }
 
             return Ok(patrolsSubscriptions);
@@ -47,7 +47,7 @@ namespace Move_Smart.Controllers
          
             if (patrolsSubscriptions == null || !patrolsSubscriptions.Any())
             {
-                return NotFound($"No patrols subscriptions found for patrol with ID [{patrolID}].");
+                return NotFound(new { message = $"No patrols subscriptions found for patrol with ID [{patrolID}]." });
             }
             
             return Ok(patrolsSubscriptions);
@@ -63,14 +63,14 @@ namespace Move_Smart.Controllers
         {
             if(subscriptionID <= 0)
             {
-                return BadRequest($"Invalid ID [{subscriptionID}]");
+                return BadRequest(new { message = $"Invalid ID [{subscriptionID}]" });
             }
 
             PatrolsSubscriptionDTO? patrolsSubscription = await _service.GetPatrolSubscriptionByIDAsync(subscriptionID);
          
             if (patrolsSubscription == null)
             {
-                return NotFound($"No patrol subscription found with ID [{subscriptionID}].");
+                return NotFound(new { message = $"No patrol subscription found with ID [{subscriptionID}]." });
             }
             
             return Ok(patrolsSubscription);
@@ -85,12 +85,12 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("PatrolsSubscriptionDTO cannot be null.");
+                return BadRequest(new { message = "PatrolsSubscriptionDTO cannot be null." });
             }
 
             if (await _service.AddNewPatrolSubscriptionAsync(dto) == null)
             {
-                return BadRequest("Failed to create new patrol subscription.");
+                return BadRequest(new { message = "Failed to create new patrol subscription." });
             }
 
             return CreatedAtRoute("GetPatrolSubscriptionByID", new { subscriptionID = dto.SubscriptionID }, dto);
@@ -106,20 +106,20 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("PatrolsSubscriptionDTO cannot be null.");
+                return BadRequest(new { message = "PatrolsSubscriptionDTO cannot be null." });
             }
 
             if (!await _service.IsPatrolSubscriptionExists(dto.SubscriptionID ?? 0))
             {
-                return NotFound($"No patrol subscription found with ID [{dto.SubscriptionID}].");
+                return NotFound(new { message = $"No patrol subscription found with ID [{dto.SubscriptionID}]." });
             }
 
             if (!await _service.UpdatePatrolSubscriptionAsync(dto))
             {
-                return BadRequest($"Failed to update patrol subscription with ID [{dto.SubscriptionID}]!");
+                return BadRequest(new { message = $"Failed to update patrol subscription with ID [{dto.SubscriptionID}]!" });
             }
          
-            return Ok($"Patrol subscription with ID [{dto.SubscriptionID}] updated successfully.");
+            return Ok(new { message = $"Patrol subscription with ID [{dto.SubscriptionID}] updated successfully." });
         }
 
 
@@ -132,20 +132,20 @@ namespace Move_Smart.Controllers
         {
             if (subscriptionID <= 0)
             {
-                return BadRequest($"Invalid ID [{subscriptionID}]");
+                return BadRequest(new { message = $"Invalid ID [{subscriptionID}]" });
             }
             
             if (!await _service.IsPatrolSubscriptionExists(subscriptionID))
             {
-                return NotFound($"No patrol subscription found with ID [{subscriptionID}].");
+                return NotFound(new { message = $"No patrol subscription found with ID [{subscriptionID}]." });
             }
             
             if (!await _service.DeletePatrolSubscriptionAsync(subscriptionID))
             {
-                return BadRequest($"Failed to delete patrol subscription with ID [{subscriptionID}]!");
+                return BadRequest(new { message = $"Failed to delete patrol subscription with ID [{subscriptionID}]!" });
             }
 
-            return Ok($"Patrol subscription with ID [{subscriptionID}] deleted successfully.");
+            return Ok(new { message = $"Patrol subscription with ID [{subscriptionID}] deleted successfully." });
         }
     }
 }

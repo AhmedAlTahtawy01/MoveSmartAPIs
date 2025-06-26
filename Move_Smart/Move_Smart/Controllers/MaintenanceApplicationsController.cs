@@ -30,7 +30,7 @@ namespace Move_Smart.Controllers
 
             if (maintenanceApplications == null || !maintenanceApplications.Any())
             {
-                return NotFound("No maintenance applications found.");
+                return NotFound(new { message = "No maintenance applications found." });
             }
 
             return Ok(maintenanceApplications);
@@ -46,14 +46,14 @@ namespace Move_Smart.Controllers
         {
             if (vehicleID <= 0)
             {
-                return BadRequest($"Invalid ID [{vehicleID}]!");
+                return BadRequest(new { message = $"Invalid ID [{vehicleID}]!" });
             }
 
             List<MaintenanceApplicationDTO> maintenanceApplications = await _service.GetAllMaintenanceApplicationsForVehicleAsync(vehicleID);
 
             if (maintenanceApplications == null || !maintenanceApplications.Any())
             {
-                return NotFound($"No maintenance applications found for vehicle with ID [{vehicleID}].");
+                return NotFound(new { message = $"No maintenance applications found for vehicle with ID [{vehicleID}]." });
             }
 
             return Ok(maintenanceApplications);
@@ -69,14 +69,14 @@ namespace Move_Smart.Controllers
         {
             if (maintenanceApplicationID <= 0)
             {
-                return BadRequest($"Invalid ID [{maintenanceApplicationID}]!");
+                return BadRequest(new { message = $"Invalid ID [{maintenanceApplicationID}]!" });
             }
 
             MaintenanceApplicationDTO? maintenanceApplication = await _service.GetMaintenanceApplicationByMaintenanceApplicationIDAsync(maintenanceApplicationID);
 
             if (maintenanceApplication == null)
             {
-                return NotFound($"No maintenance application found with ID [{maintenanceApplicationID}].");
+                return NotFound(new { message = $"No maintenance application found with ID [{maintenanceApplicationID}]." });
             }
 
             return Ok(maintenanceApplication);
@@ -91,12 +91,12 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("MaintenanceApplicationDTO cannot be null.");
+                return BadRequest(new { message = "MaintenanceApplicationDTO cannot be null." });
             }
 
             if (await _service.AddNewMaintenanceApplicationAsync(dto) == null)
             {
-                return BadRequest("Failed to add new maintenance application!");
+                return BadRequest(new { message = "Failed to add new maintenance application!" });
             }
 
             return CreatedAtRoute("GetMaintenanceApplicationByMaintenanceApplicationID", new { maintenanceApplicationID = dto.MaintenanceApplicationID }, dto);
@@ -112,25 +112,25 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("MaintenanceApplicationDTO cannot be null.");
+                return BadRequest(new { message = "MaintenanceApplicationDTO cannot be null." });
             }
 
             if (dto.MaintenanceApplicationID <= 0)
             {
-                return BadRequest($"Invalid ID [{dto.MaintenanceApplicationID}]");
+                return BadRequest(new { message = $"Invalid ID [{dto.MaintenanceApplicationID}]" });
             }
 
             if (!await _service.IsMaintenanceApplicationExistsAsync(dto.MaintenanceApplicationID ?? 0))
             {
-                return NotFound($"No maintenance application found with ID [{dto.MaintenanceApplicationID}].");
+                return NotFound(new { message = $"No maintenance application found with ID [{dto.MaintenanceApplicationID}]." });
             }
             
             if (!await _service.UpdateMaintenanceApplicationAsync(dto))
             {
-                return BadRequest($"Failed to update maintenance application with ID [{dto.MaintenanceApplicationID}]!");
+                return BadRequest(new { message = $"Failed to update maintenance application with ID [{dto.MaintenanceApplicationID}]!" });
             }
             
-            return Ok($"Maintenance application with ID [{dto.MaintenanceApplicationID}] updated successfully.");
+            return Ok(new { message = $"Maintenance application with ID [{dto.MaintenanceApplicationID}] updated successfully." });
         }
 
 
@@ -143,20 +143,20 @@ namespace Move_Smart.Controllers
         {
             if (maintenanceApplicationID <= 0)
             {
-                return BadRequest($"Invalid ID [{maintenanceApplicationID}]!");
+                return BadRequest(new { message = $"Invalid ID [{maintenanceApplicationID}]!" });
             }
             
             if (!await _service.IsMaintenanceApplicationExistsAsync(maintenanceApplicationID))
             {
-                return NotFound($"No maintenance application found with ID [{maintenanceApplicationID}].");
+                return NotFound(new { message = $"No maintenance application found with ID [{maintenanceApplicationID}]." });
             }
             
             if (!await _service.DeleteMaintenanceApplicationAsync(maintenanceApplicationID))
             {
-                return BadRequest($"Failed to delete maintenance application with ID [{maintenanceApplicationID}]!");
+                return BadRequest(new { message = $"Failed to delete maintenance application with ID [{maintenanceApplicationID}]!" });
             }
             
-            return Ok($"Maintenance application with ID [{maintenanceApplicationID}] deleted successfully.");
+            return Ok(new { message = $"Maintenance application with ID [{maintenanceApplicationID}] deleted successfully." });
         }
     }
 }

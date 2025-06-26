@@ -1,7 +1,6 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Move_Smart.Controllers
@@ -19,7 +18,6 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
-
         [Authorize(Policy = "All")]
         [HttpGet("All", Name = "GetAllBuses")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -30,7 +28,7 @@ namespace Move_Smart.Controllers
 
             if (buses == null || !buses.Any())
             {
-                return NotFound("No buses found.");
+                return NotFound(new { message = "No buses found." });
             }
 
             return Ok(buses);
@@ -47,7 +45,7 @@ namespace Move_Smart.Controllers
 
             if (buses == null || !buses.Any())
             {
-                return NotFound($"No buses found with capacity [{capacity}] seats.");
+                return NotFound(new { message = $"No buses found with capacity [{capacity}] seats." });
             }
 
             return Ok(buses);
@@ -64,7 +62,7 @@ namespace Move_Smart.Controllers
             
             if (buses == null || !buses.Any())
             {
-                return NotFound($"No buses found with available space [{availableSpace}] seats.");
+                return NotFound(new { message = $"No buses found with available space [{availableSpace}] seats." });
             }
          
             return Ok(buses);
@@ -81,7 +79,7 @@ namespace Move_Smart.Controllers
 
             if (bus == null)
             {
-                return NotFound($"No bus found with ID [{busID}].");
+                return NotFound(new { message = $"No bus found with ID [{busID}]." });
             }
             
             return Ok(bus);
@@ -98,7 +96,7 @@ namespace Move_Smart.Controllers
             
             if (bus == null)
             {
-                return NotFound($"No bus found with Plate Numbers [{plateNumbers}].");
+                return NotFound(new { message = $"No bus found with Plate Numbers [{plateNumbers}]." });
             }
 
             return Ok(bus);
@@ -113,12 +111,12 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("BusDTO can't be null.");
+                return BadRequest(new { message = "BusDTO can't be null." });
             }
 
             if (await _service.AddNewBusAsync(dto) == null)
             {
-                return BadRequest($"Failed to add new bus with plate numbers [{dto.Vehicle.PlateNumbers}]");
+                return BadRequest(new { message = $"Failed to add new bus with plate numbers [{dto.Vehicle.PlateNumbers}]" });
             }
 
             return CreatedAtRoute("GetBusByPlateNumbers", new { plateNumbers = dto.Vehicle.PlateNumbers }, dto);
@@ -134,20 +132,20 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("BusDTO can't be null.");
+                return BadRequest(new { message = "BusDTO can't be null." });
             }
 
             if (!await _service.IsBusExists(dto.BusID ?? 0))
             {
-                return NotFound($"Bus with ID [{dto.BusID}] not found!");
+                return NotFound(new { message = $"Bus with ID [{dto.BusID}] not found!" });
             }
 
             if (!await _service.UpdateBusAsync(dto))
             {
-                return BadRequest($"Failed to update bus with plate numbers [{dto.Vehicle.PlateNumbers}]");
+                return BadRequest(new { message = $"Failed to update bus with plate numbers [{dto.Vehicle.PlateNumbers}]" });
             }
 
-            return Ok($"Bus with ID [{dto.BusID}] updated successfully");
+            return Ok(new { message = $"Bus with ID [{dto.BusID}] updated successfully" });
         }
 
 
@@ -160,28 +158,28 @@ namespace Move_Smart.Controllers
         {
             if (busID <= 0)
             {
-                return BadRequest($"Invalid bus ID [{busID}]");
+                return BadRequest(new { message = $"Invalid bus ID [{busID}]" });
             }
 
             if (!await _service.IsBusExists(busID))
             {
-                return NotFound($"Bus with ID [{busID}] not found!");
+                return NotFound(new { message = $"Bus with ID [{busID}] not found!" });
             }
 
             if (!await _service.DeleteBusAsync(busID))
             {
                 if(await _service.IsBusExists(busID))
                 {
-                    return BadRequest($"Can't delete bus with ID [{busID}]");
+                    return BadRequest(new { message = $"Can't delete bus with ID [{busID}]" });
                 }
 
                 if (await _service.IsVehicleExistsAsync(busID))
                 {
-                    return BadRequest($"Can't delete vehicle for Bus with ID [{busID}]");
+                    return BadRequest(new { message = $"Can't delete vehicle for Bus with ID [{busID}]" });
                 }
             }
             
-            return Ok($"Bus with ID [{busID}] deleted successfully");
+            return Ok(new { message = $"Bus with ID [{busID}] deleted successfully" });
         }
 
 
@@ -194,28 +192,28 @@ namespace Move_Smart.Controllers
         {
             if (plateNumbers.Length != 6 && plateNumbers.Length != 7)
             {
-                return BadRequest($"Invalid plate numbers [{plateNumbers}]");
+                return BadRequest(new { message = $"Invalid plate numbers [{plateNumbers}]" });
             }
 
             if (!await _service.IsBusExists(plateNumbers))
             {
-                return NotFound($"Bus with plate numbers [{plateNumbers}] not found!");
+                return NotFound(new { message = $"Bus with plate numbers [{plateNumbers}] not found!" });
             }
             
             if (!await _service.DeleteBusAsync(plateNumbers))
             {
                 if(await _service.IsBusExists(plateNumbers))
                 {
-                    return BadRequest($"Can't delete bus with plate numbers [{plateNumbers}]");
+                    return BadRequest(new { message = $"Can't delete bus with plate numbers [{plateNumbers}]" });
                 }
 
                 if(await _service.IsVehicleExistsAsync(plateNumbers))
                 {
-                    return BadRequest($"Can't delete vehicle for Bus with plate numbers [{plateNumbers}]");
+                    return BadRequest(new { message = $"Can't delete vehicle for Bus with plate numbers [{plateNumbers}]" });
                 }
             }
     
-            return Ok($"Bus with plate numbers [{plateNumbers}] deleted successfully");
+            return Ok(new { message = $"Bus with plate numbers [{plateNumbers}] deleted successfully" });
         }
     }
 }

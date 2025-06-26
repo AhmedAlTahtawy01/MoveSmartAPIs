@@ -25,15 +25,14 @@ namespace Move_Smart.Controllers
                 // Check if no data was found and return an appropriate response
                 if (data == null || !data.Any())
                 {
-                    return NotFound("No vehicle consumables found.");
+                    return NotFound(new { message = "No vehicle consumables found." });
                 }
 
                 return Ok(data);
             }
             catch (Exception ex)
             {
-                // Return an error message in case of any exceptions
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
         //[Authorize(Policy = "RequireGeneralSupervisor")]
@@ -57,7 +56,7 @@ namespace Move_Smart.Controllers
             try
             {
                 await _vehicleconsumable.AddVehicleConsumable(consume);
-                return Ok("Vehicle consumable added successfully.");
+                return Ok(new { message = "Vehicle consumable added successfully." });
             }
             catch (Exception ex)
             {
@@ -69,7 +68,7 @@ namespace Move_Smart.Controllers
         public async Task<IActionResult> Count()
         {
             var count = await _vehicleconsumable.CountAllOrdersAsync();
-            return Ok(count);
+            return Ok(new { message = count });
         }
         [Authorize(Policy = "GeneralSupervisor")]
         [HttpDelete]
@@ -84,7 +83,7 @@ namespace Move_Smart.Controllers
                 }
 
                 await _vehicleconsumable.DeleteVehicleConsumable(id);
-                return Ok("Vehicle consumable deleted successfully.");
+                return Ok(new { message = "Vehicle consumable deleted successfully." });
             }
             catch (Exception ex)
             {
@@ -113,7 +112,7 @@ namespace Move_Smart.Controllers
                 // Call the update method
                 await _vehicleconsumable.UpdateVehicleConsumable(consume);
 
-                return Ok("Vehicle consumable updated successfully.");
+                return Ok(new { message = "Vehicle consumable updated successfully." });
             }
             catch (Exception ex)
             {

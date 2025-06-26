@@ -30,7 +30,7 @@ namespace Move_Smart.Controllers
 
             if (vehicles == null || !vehicles.Any())
             {
-                return NotFound("No vehicles found.");
+                return NotFound(new { message = "No vehicles found." });
             }
 
             return Ok(vehicles);
@@ -47,7 +47,7 @@ namespace Move_Smart.Controllers
 
             if (vehicles == null || !vehicles.Any())
             {
-                return NotFound($"No vehicles found of type [{vehicleType}].");
+                return NotFound(new { message = $"No vehicles found of type [{vehicleType}]." });
             }
 
             return Ok(vehicles);
@@ -64,7 +64,7 @@ namespace Move_Smart.Controllers
 
             if (vehicles == null || !vehicles.Any())
             {
-                return NotFound($"No vehicles found with status [{vehicleStatus}].");
+                return NotFound(new { message = $"No vehicles found with status [{vehicleStatus}]." });
             }
 
             return Ok(vehicles);
@@ -81,7 +81,7 @@ namespace Move_Smart.Controllers
 
             if (vehicles == null || !vehicles.Any())
             {
-                return NotFound($"No vehicles found using fuel of type [{fuelType}].");
+                return NotFound(new { message = $"No vehicles found using fuel of type [{fuelType}]." });
             }
 
             return Ok(vehicles);
@@ -98,7 +98,8 @@ namespace Move_Smart.Controllers
 
             if (vehicle == null)
             {
-                return NotFound($"Vehicle with ID [{vehicleID}] not found.");
+                _logger.LogWarning("Vehicle not found: {VehicleID}", vehicleID);
+                return NotFound(new { message = $"Vehicle with ID [{vehicleID}] not found." });
             }
 
             return Ok(vehicle);
@@ -115,7 +116,8 @@ namespace Move_Smart.Controllers
 
             if (numberOfVehicles == 0)
             {
-                return NotFound("No vehicles found.");
+                _logger.LogWarning("No vehicles found.");
+                return NotFound(new { message = "No vehicles found." });
             }
 
             return Ok(numberOfVehicles);
@@ -132,8 +134,10 @@ namespace Move_Smart.Controllers
 
             if (numberOfVehicles == 0)
             {
-                return NotFound($"No vehicles found with status [{vehicleStatus}].");
+                _logger.LogWarning("No vehicles found with status: {VehicleStatus}", vehicleStatus);
+                return NotFound(new { message = $"No vehicles found with status [{vehicleStatus}]." });
             }
+
 
             return Ok(numberOfVehicles);
         }
@@ -147,7 +151,8 @@ namespace Move_Smart.Controllers
         {
             if (await _service.AddNewVehicleAsync(dto) == null)
             {
-                return BadRequest("Failed to add new vehicle.");
+                _logger.LogWarning("Failed to add new vehicle.");
+                return BadRequest(new { message = "Failed to add new vehicle." });
             }
 
             return CreatedAtRoute("GetVehicleByID", new { vehicleID = dto.VehicleID }, dto);
@@ -161,22 +166,26 @@ namespace Move_Smart.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateVehicle(VehicleDTO dto)
         {
+            _logger.LogInformation("Updating vehicle: {VehicleID}", dto.VehicleID);
             if (dto.VehicleID <= 0)
             {
-                return BadRequest($"Invalid vehicle ID [{dto.VehicleID}].");
+                _logger.LogWarning("Invalid vehicle ID: {VehicleID}", dto.VehicleID);
+                return BadRequest(new { message = $"Invalid vehicle ID [{dto.VehicleID}]." });
             }
 
             if(!await _service.IsVehicleExistsAsync(dto.VehicleID ?? 0))
             {
-                return NotFound($"Vehicle with ID [{dto.VehicleID}] not found!");
+                _logger.LogWarning("Vehicle not found: {VehicleID}", dto.VehicleID);
+                return NotFound(new { message = $"Vehicle with ID [{dto.VehicleID}] not found!" });
             }
 
             if (!await _service.UpdateVehicleAsync(dto))
             {
-                return BadRequest($"Update for vehicle with ID [{dto.VehicleID}] failed");
+                _logger.LogWarning("Update failed: {VehicleID}", dto.VehicleID);
+                return BadRequest(new { message = $"Update for vehicle with ID [{dto.VehicleID}] failed" });
             }
 
-            return Ok($"Vehicle with ID [{dto.VehicleID}] updated successfully");
+            return Ok(new { message = $"Vehicle with ID [{dto.VehicleID}] updated successfully" });
         }
 
 
@@ -187,22 +196,26 @@ namespace Move_Smart.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeleteVehicle(short vehicleID)
         {
+            _logger.LogInformation("Deleting vehicle: {VehicleID}", vehicleID);
             if (vehicleID <= 0)
             {
-                return BadRequest($"Invalid vehicle ID [{vehicleID}].");
+                _logger.LogWarning("Invalid vehicle ID: {VehicleID}", vehicleID);
+                return BadRequest(new { message = $"Invalid vehicle ID [{vehicleID}]." });
             }
 
             if (!await _service.IsVehicleExistsAsync(vehicleID))
             {
-                return NotFound($"Vehicle with ID [{vehicleID}] not found!");
+                _logger.LogWarning("Vehicle not found: {VehicleID}", vehicleID);
+                return NotFound(new { message = $"Vehicle with ID [{vehicleID}] not found!" });
             }
             
             if (!await _service.DeleteVehicleAsync(vehicleID))
             {
-                return BadRequest($"Can't delete vehicle with ID [{vehicleID}]");
+                _logger.LogWarning("Delete failed: {VehicleID}", vehicleID);
+                return BadRequest(new { message = $"Can't delete vehicle with ID [{vehicleID}]" });
             }
 
-            return Ok($"Vehicle with ID [{vehicleID}] deleted successfully");
+            return Ok(new { message = $"Vehicle with ID [{vehicleID}] deleted successfully" });
         }
 
 
@@ -213,22 +226,26 @@ namespace Move_Smart.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeleteVehicle(string plateNumbers)
         {
+            _logger.LogInformation("Deleting vehicle by plate numbers: {PlateNumbers}", plateNumbers);
             if (plateNumbers.Length != 6 && plateNumbers.Length != 7)
             {
-                return BadRequest($"Invalid vehicle plate numbers [{plateNumbers}].");
+                _logger.LogWarning("Invalid vehicle plate numbers: {PlateNumbers}", plateNumbers);
+                return BadRequest(new { message = $"Invalid vehicle plate numbers [{plateNumbers}]." });
             }
 
             if (!await _service.IsVehicleExistsAsync(plateNumbers))
             {
-                return NotFound($"Vehicle with plate numbers [{plateNumbers}] not found!");
+                _logger.LogWarning("Vehicle not found: {PlateNumbers}", plateNumbers);
+                return NotFound(new { message = $"Vehicle with plate numbers [{plateNumbers}] not found!" });
             }
             
             if (!await _service.DeleteVehicleAsync(plateNumbers))
             {
-                return BadRequest($"Can't delete vehicle with plate numbers [{plateNumbers}]!");
+                _logger.LogWarning("Delete failed: {PlateNumbers}", plateNumbers);
+                return BadRequest(new { message = $"Can't delete vehicle with plate numbers [{plateNumbers}]!" });
             }
 
-            return Ok($"Vehicle with plate numbers [{plateNumbers}] deleted successfully");
+            return Ok(new { message = $"Vehicle with plate numbers [{plateNumbers}] deleted successfully" });
         }
     }
 }
