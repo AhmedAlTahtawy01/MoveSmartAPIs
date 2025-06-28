@@ -159,18 +159,6 @@ namespace BusinessLogicLayer.Services
             return await _repo.GetMissionsByNoteIdAsync(missionNoteId);
         }
 
-        public async Task<List<MissionDTO>> GetMissionsByVehicleIdAsync(int missionVehicleId)
-        {
-            if (missionVehicleId <= 0)
-            {
-                _logger.LogWarning("Attempted to retrieve missions with invalid Vehicle ID.");
-                throw new ArgumentException("Mission Vehicle ID must be greater than 0.");
-            }
-
-            _logger.LogInformation($"Retrieving missions for Vehicle ID {missionVehicleId}");
-            return await _repo.GetMissionsByVehicleIdAsync(missionVehicleId);
-        }
-
         public async Task<List<MissionDTO>> GetMissionsByStartDateAsync(DateTime startDate)
         {
             if (startDate == default)
@@ -219,12 +207,6 @@ namespace BusinessLogicLayer.Services
             {
                 _logger.LogWarning("Mission Note ID is invalid.");
                 throw new ArgumentException("Mission Note ID must be greater than 0.", nameof(mission.MissionNoteId));
-            }
-
-            if (mission.MissionVehiclesId <= 0)
-            {
-                _logger.LogWarning("Mission Vehicle ID is invalid.");
-                throw new ArgumentException("Mission Vehicle ID must be greater than 0.", nameof(mission.MissionVehiclesId));
             }
 
             if (mission.UserId <= 0)

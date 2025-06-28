@@ -317,7 +317,6 @@ COLLATE = utf8mb4_0900_ai_ci;
 CREATE TABLE IF NOT EXISTS `move_smart`.`missions` (
   `MissionID` INT NOT NULL AUTO_INCREMENT,
   `MissionNoteID` INT NOT NULL,
-  `MissionVehiclesID` INT NOT NULL,
   `MissionStartDate` DATE NOT NULL,
   `MissionEndDate` DATE NOT NULL,
   `Destination` VARCHAR(1000) NOT NULL,

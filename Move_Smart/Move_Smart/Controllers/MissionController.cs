@@ -145,37 +145,6 @@ namespace Move_Smart.Controllers
         }
 
         [Authorize(Policy = "RequireGeneralSupervisor")]
-        [HttpGet("vehicle/{id}")]
-        public async Task<IActionResult> GetMissionsByVehicleId([FromRoute] int id)
-        {
-            if (id <= 0)
-            {
-                _logger.LogWarning("Invalid vehicle ID.");
-                return BadRequest(new { message = "Vehicle ID must be greater than 0." });
-            }
-            try
-            {
-                var missions = await _service.GetMissionsByVehicleIdAsync(id);
-                return Ok(missions);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "Invalid argument provided.");
-                return BadRequest(new { message = "Invalid argument provided." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogError(ex, $"No mission found with ID {id}.");
-                return NotFound(new { message = $"No mission found with ID {id}." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving missions.");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("startDate/{startDate}")]
         public async Task<IActionResult> GetMissionsByStartDate([FromRoute] DateTime startDate)
         {
