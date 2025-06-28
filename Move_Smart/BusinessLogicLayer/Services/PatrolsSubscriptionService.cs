@@ -104,5 +104,10 @@ namespace BusinessLogicLayer.Services
         {
             return await _patrolsSubscriptionRepo.DeleteSubscriptionRecordAsync(subscriptionID);
         }
+
+        public async Task<int> GetNumberOfPartolsSubscriptionsAsync()
+        {
+            return await _patrolsSubscriptionRepo.GetNumberOfPatrolsSubscriptionsAsync();
+        }
     }
 }

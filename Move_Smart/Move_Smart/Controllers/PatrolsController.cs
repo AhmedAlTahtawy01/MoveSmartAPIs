@@ -44,7 +44,7 @@ namespace Move_Smart.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<PatrolDTO>> GetPatrolByID(short patrolID)
         {
-            if(patrolID <= 0)
+            if (patrolID <= 0)
             {
                 return BadRequest($"Invalid ID [{patrolID}]");
             }
@@ -71,12 +71,12 @@ namespace Move_Smart.Controllers
                 return BadRequest("PatrolDTO cannot be null!");
             }
 
-            if(await _service.IsPatrolExistsAsync(dto.PatrolID ?? 0))
+            if (await _service.IsPatrolExistsAsync(dto.PatrolID ?? 0))
             {
                 return BadRequest($"Patrol with ID [{dto.PatrolID}] already exists!");
             }
 
-            if(await _service.AddNewPatrolAsync(dto) == null)
+            if (await _service.AddNewPatrolAsync(dto) == null)
             {
                 return BadRequest("Failed to add new patrol!");
             }
@@ -97,12 +97,12 @@ namespace Move_Smart.Controllers
                 return BadRequest("PatrolDTO cannot be null!");
             }
 
-            if(!await _service.IsPatrolExistsAsync(dto.PatrolID ?? 0))
+            if (!await _service.IsPatrolExistsAsync(dto.PatrolID ?? 0))
             {
                 return NotFound($"No patrols found with ID [{dto.PatrolID}]!");
             }
 
-            if(!await _service.UpdatePatrolAsync(dto))
+            if (!await _service.UpdatePatrolAsync(dto))
             {
                 return BadRequest($"Failed to update patrol with ID [{dto.PatrolID}]!");
             }
@@ -118,22 +118,31 @@ namespace Move_Smart.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeletePatrol(short patrolID)
         {
-            if(patrolID <= 0)
+            if (patrolID <= 0)
             {
                 return BadRequest($"Invalid ID [{patrolID}]!");
             }
 
-            if(!await _service.IsPatrolExistsAsync(patrolID))
+            if (!await _service.IsPatrolExistsAsync(patrolID))
             {
                 return NotFound($"No patrol found with ID [{patrolID}]!");
             }
 
-            if(!await _service.DeletePatrolAsync(patrolID))
+            if (!await _service.DeletePatrolAsync(patrolID))
             {
                 return BadRequest($"Failed to delete patrol with ID [{patrolID}]!");
             }
 
             return Ok($"Patrol with ID [{patrolID}] deleted successfully");
+        }
+
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [HttpGet("NumberOfPatrols", Name = "GetNumberOfPatrols")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<int>> GetNumberOfPatrols()
+        {
+            int count = await _service.GetNumberOfPatrols();
+            return Ok(count);
         }
     }
 }

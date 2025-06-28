@@ -38,7 +38,7 @@ namespace BusinessLayer
                 _patrolLogger.LogError("ApproximatedTime must be greater than 0.");
                 throw new ArgumentException("ApproximatedTime must be greater than 0.");
             }
-            if(!await _busRepo.IsBusExistsAsync(dto.BusID))
+            if (!await _busRepo.IsBusExistsAsync(dto.BusID))
             {
                 _patrolLogger.LogError($"Bus with ID [{dto.BusID}] does not exist.");
                 throw new ArgumentException($"Bus with ID [{dto.BusID}] does not exist.");
@@ -57,7 +57,7 @@ namespace BusinessLayer
                 return null;
             }
 
-            if(await _patrolRepo.IsPatrolExistsAsync(dto.PatrolID ?? 0))
+            if (await _patrolRepo.IsPatrolExistsAsync(dto.PatrolID ?? 0))
             {
                 _patrolLogger.LogError($"Patrol with ID [{dto.PatrolID}] already exists.");
                 return null;
@@ -79,7 +79,7 @@ namespace BusinessLayer
                 return false;
             }
 
-            if(!await _patrolRepo.IsPatrolExistsAsync(dto.PatrolID ?? 0))
+            if (!await _patrolRepo.IsPatrolExistsAsync(dto.PatrolID ?? 0))
             {
                 _patrolLogger.LogError($"Patrol with ID [{dto.PatrolID}] does not exist.");
                 return false;
@@ -106,6 +106,11 @@ namespace BusinessLayer
         public async Task<bool> DeletePatrolAsync(short patrolID)
         {
             return await _patrolRepo.DeletePatrolAsync(patrolID);
+        }
+
+        public async Task<int> GetNumberOfPatrols()
+        {
+            return await _patrolRepo.GetNumberOfPatrolsAsync();
         }
     }
 }
