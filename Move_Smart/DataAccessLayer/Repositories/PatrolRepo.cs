@@ -243,5 +243,33 @@ namespace DataAccessLayer
 
             return false;
         }
+
+        public async Task<int> GetNumberOfPatrolsAsync()
+        {
+            string query = @"SELECT COUNT(*) FROM Patrols";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
+
+                        object? result = await cmd.ExecuteScalarAsync();
+                        if (result != null && int.TryParse(result.ToString(), out int count))
+                        {
+                            return count;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+           
+            return 0;
+        }
     }
 }

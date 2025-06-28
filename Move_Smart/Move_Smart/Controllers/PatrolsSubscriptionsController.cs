@@ -147,5 +147,14 @@ namespace Move_Smart.Controllers
 
             return Ok(new { message = $"Patrol subscription with ID [{subscriptionID}] deleted successfully." });
         }
+
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [HttpGet("NumberOfPatrolsSubscriptions", Name = "GetNumberOfPatrolsSubscriptions")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<int>> GetNumberOfPatrolsSubscriptions()
+        {
+            int count = await _service.GetNumberOfPartolsSubscriptionsAsync();
+            return Ok(count);
+        }
     }
 }
