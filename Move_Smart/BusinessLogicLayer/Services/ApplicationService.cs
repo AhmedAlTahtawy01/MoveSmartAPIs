@@ -6,6 +6,7 @@ using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using static DataAccessLayer.VehicleDTO;
 
 namespace BusinessLayer.Services
 { 
@@ -158,6 +159,12 @@ namespace BusinessLayer.Services
 
         private async Task<bool> UpdateStatusAsync(int applicationId, enStatus status)
         {
+            if(!Enum.IsDefined(typeof(enStatus), status))
+{
+                _logger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
+            }
+
             if (applicationId <= 0)
             {
                 _logger.LogWarning("Attempted to update status of an application with invalid ID.");
@@ -175,7 +182,7 @@ namespace BusinessLayer.Services
 
         public async Task<bool> CancelApplicationAsync(int applicationId)
         {
-            return await UpdateStatusAsync(applicationId, enStatus.Canceled);
+            return await UpdateStatusAsync(applicationId, enStatus.Cancelled);
         }
 
         public async Task<bool> RejectApplicationAsync(int applicationId)
@@ -223,7 +230,7 @@ namespace BusinessLayer.Services
 
             if (!Enum.IsDefined(typeof(enStatus), dto.Status))
             {
-                _logger.LogWarning("Validation Failed: Invalid status.");
+                _logger.LogError("Validation Failed: Invalid status.");
                 throw new InvalidOperationException("Invalid status.");
             }
 

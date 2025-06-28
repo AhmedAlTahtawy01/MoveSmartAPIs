@@ -31,7 +31,7 @@ namespace Move_Smart.Controllers
 
             if (drivers == null || !drivers.Any())
             {
-                return NotFound("No drivers found.");
+                return NotFound(new { message = "No drivers found." });
             }
 
             return Ok(drivers);
@@ -47,14 +47,14 @@ namespace Move_Smart.Controllers
         {
             if (vehicleID <= 0)
             {
-                return BadRequest("Invalid vehicle ID!");
+                return BadRequest(new { message = "Invalid vehicle ID!" });
             }
 
             List<DriverDTO> drivers = await _service.GetAllDriversWorkingOnVehicleAsync(vehicleID);
 
             if (drivers == null || !drivers.Any())
             {
-                return NotFound($"No drivers found working on vehicle with ID [{vehicleID}].");
+                return NotFound(new { message = $"No drivers found working on vehicle with ID [{vehicleID}]." });
             }
 
             return Ok(drivers);
@@ -70,14 +70,14 @@ namespace Move_Smart.Controllers
         {
             if(plateNumbers.Length != 6 && plateNumbers.Length != 7)
             {
-                return BadRequest("Invalid plate numbers!");
+                return BadRequest(new { message = "Invalid plate numbers!" });
             }
 
             List<DriverDTO> drivers = await _service.GetAllDriversWorkingOnVehicleAsync(plateNumbers);
 
             if (drivers == null || !drivers.Any())
             {
-                return NotFound($"No drivers found working on vehicle with plate numbers [{plateNumbers}].");
+                return NotFound(new { message = $"No drivers found working on vehicle with plate numbers [{plateNumbers}]." });
             }
 
             return Ok(drivers);
@@ -94,7 +94,7 @@ namespace Move_Smart.Controllers
 
             if (drivers == null || !drivers.Any())
             {
-                return NotFound($"No drivers found with status [{status}].");
+                return NotFound(new { message = $"No drivers found with status [{status}]." });
             }
 
             return Ok(drivers);
@@ -110,14 +110,14 @@ namespace Move_Smart.Controllers
         {
             if (driverID <= 0)
             {
-                return BadRequest("Invalid driver ID!");
+                return BadRequest(new { message = "Invalid driver ID!" });
             }
 
             DriverDTO? driver = await _service.GetDriverByIDAsync(driverID);
 
             if (driver == null)
             {
-                return NotFound($"Driver with ID [{driverID}] not found.");
+                return NotFound(new { message = $"Driver with ID [{driverID}] not found." });
             }
 
             return Ok(driver);
@@ -133,14 +133,14 @@ namespace Move_Smart.Controllers
         {
             if (nationalNo.Length != 14 || nationalNo.Any(ch => char.IsLetter(ch)))
             {
-                return BadRequest("Invalid national number!");
+                return BadRequest(new { message = "Invalid national number!" });
             }
 
             DriverDTO? driver = await _service.GetDriverByNationalNoAsync(nationalNo);
 
             if (driver == null)
             {
-                return NotFound($"Driver with national numbers [{nationalNo}] not found.");
+                return NotFound(new { message = $"Driver with national numbers [{nationalNo}] not found." });
             }
 
             return Ok(driver);
@@ -156,14 +156,14 @@ namespace Move_Smart.Controllers
         {
             if (phone.Length != 11 || phone.Any(ch => char.IsLetter(ch)))
             {
-                return BadRequest("Invalid phone number!");
+                return BadRequest(new { message = "Invalid phone number!" });
             }
 
             DriverDTO? driver = await _service.GetDriverByPhoneAsync(phone);
 
             if (driver == null)
             {
-                return NotFound($"Driver with phone number [{phone}] not found.");
+                return NotFound(new { message = $"Driver with phone number [{phone}] not found." });
             }
 
             return Ok(driver);
@@ -180,7 +180,7 @@ namespace Move_Smart.Controllers
 
             if (numberOfDrivers == 0)
             {
-                return NotFound("No Drivers Found!");
+                return NotFound(new { message = "No Drivers Found!" });
             }
 
             return Ok(numberOfDrivers);
@@ -197,7 +197,7 @@ namespace Move_Smart.Controllers
 
             if (numberOfDrivers == 0)
             {
-                return NotFound($"No Drivers Found With Status [{status}]!");
+                return NotFound(new { message = $"No Drivers Found With Status [{status}]!" });
             }
 
             return Ok(numberOfDrivers);
@@ -212,17 +212,17 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("DriverDTO cannot be null.");
+                return BadRequest(new { message = "DriverDTO cannot be null." });
             }
 
             if (await _service.IsDriverExistsAsync(dto.NationalNo))
             {
-                return BadRequest($"Driver with NationalNo [{dto.NationalNo}] already exists.");
+                return BadRequest(new { message = $"Driver with NationalNo [{dto.NationalNo}] already exists." });
             }
 
             if (await _service.AddNewDriverAsync(dto) == null)
             {
-                return BadRequest("Failed to add new driver.");
+                return BadRequest(new { message = "Failed to add new driver." });
             }
 
             return CreatedAtRoute("GetDriverByID", new { driverID = dto.DriverID }, dto);
@@ -237,25 +237,25 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Driver DTO can't be null!");
+                return BadRequest(new { message = "Driver DTO can't be null!" });
             }
 
             if (dto.DriverID <= 0)
             {
-                return BadRequest("Invalid driver ID!");
+                return BadRequest(new { message = "Invalid driver ID!" });
             }
 
             if (!await _service.IsDriverExistsAsync(dto.DriverID ?? 0))
             {
-                return BadRequest($"Driver with ID [{dto.DriverID}] does not exist.");
+                return BadRequest(new { message = $"Driver with ID [{dto.DriverID}] does not exist." });
             }
 
             if (!await _service.UpdateDriverAsync(dto))
             {
-                return BadRequest($"Failed to update driver with ID [{dto.DriverID}].");
+                return BadRequest(new { message = $"Failed to update driver with ID [{dto.DriverID}]." });
             }
 
-            return Ok($"Driver with ID [{dto.DriverID}] updated successfully.");
+            return Ok(new { message = $"Driver with ID [{dto.DriverID}] updated successfully." });
         }
 
 
@@ -268,20 +268,20 @@ namespace Move_Smart.Controllers
         {
             if (driverID <= 0)
             {
-                return BadRequest("Invalid driver ID!");
+                return BadRequest(new { message = "Invalid driver ID!" });
             }
 
             if (!await _service.IsDriverExistsAsync(driverID))
             {
-                return NotFound($"Driver with ID [{driverID}] not found.");
+                return NotFound(new { message = $"Driver with ID [{driverID}] not found." });
             }
             
             if (!await _service.DeleteDriverAsync(driverID))
             {
-                return BadRequest($"Failed to delete driver with ID [{driverID}].");
+                return BadRequest(new { message = $"Failed to delete driver with ID [{driverID}]." });
             }
 
-            return Ok($"Driver with ID [{driverID}] deleted successfully.");
+            return Ok(new { message = $"Driver with ID [{driverID}] deleted successfully." });
         }
 
 
@@ -294,20 +294,20 @@ namespace Move_Smart.Controllers
         {
             if (nationalNo.Length != 14 || nationalNo.Any(ch => char.IsLetter(ch)))
             {
-                return BadRequest("Invalid national number!");
+                return BadRequest(new { message = "Invalid national number!" });
             }
 
             if (!await _service.IsDriverExistsAsync(nationalNo))
             {
-                return NotFound($"Driver with NationalNo [{nationalNo}] not found.");
+                return NotFound(new { message = $"Driver with NationalNo [{nationalNo}] not found." });
             }
             
             if (!await _service.DeleteDriverAsync(nationalNo))
             {
-                return BadRequest($"Failed to delete driver with NationalNo [{nationalNo}].");
+                return BadRequest(new { message = $"Failed to delete driver with NationalNo [{nationalNo}]." });
             }
             
-            return Ok($"Driver with NationalNo [{nationalNo}] deleted successfully.");
+            return Ok(new { message = $"Driver with NationalNo [{nationalNo}] deleted successfully." });
         }
     }
 }

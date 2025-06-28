@@ -98,7 +98,7 @@ namespace Move_Smart.Controllers
             try
             {
                 var count = await _sparePartPurchaseOrderService.CountAllSparePartPurchaseOrdersAsync();
-                return Ok(count);
+                return Ok(new { message = count });
             }
             catch (Exception ex)
             {

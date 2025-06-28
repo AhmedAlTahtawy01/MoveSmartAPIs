@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BusinessLayer;
 using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
 using Microsoft.Extensions.Logging;
+using static DataAccessLayer.VehicleDTO;
 
 namespace BusinessLogicLayer.Services
 {
@@ -11,12 +13,14 @@ namespace BusinessLogicLayer.Services
     {
         private readonly MaintenanceRepo _repo;
         private readonly ILogger<MaintenanceService> _logger;
+        private readonly MaintenanceApplicationService _maintenanceApplicationService;
         private readonly SharedFunctions _shared;
 
-        public MaintenanceService(MaintenanceRepo repo, ILogger<MaintenanceService> logger, SharedFunctions sharedFunctions)
+        public MaintenanceService(MaintenanceRepo repo, ILogger<MaintenanceService> logger, MaintenanceApplicationService maintenanceApplicationService, SharedFunctions sharedFunctions)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _maintenanceApplicationService = maintenanceApplicationService ?? throw new ArgumentNullException(nameof(maintenanceApplicationService), "Maintenance Application Service cannot be null.");
             _shared = sharedFunctions ?? throw new ArgumentNullException(nameof(sharedFunctions), "Shared Functions cannot be null.");
         }
 
@@ -36,7 +40,30 @@ namespace BusinessLogicLayer.Services
                 _logger.LogWarning($"Maintenance Application with Id {dto.MaintenanceApplicationId} not found.");
                 throw new KeyNotFoundException($"Maintenance Application with Id {dto.MaintenanceApplicationId} not found.");
             }
+
+            try
+            {
+                _logger.LogInformation($"Validating maintenance application with ID {dto.MaintenanceApplicationId}.");
+                var maintenanceApplication = await _maintenanceApplicationService.GetMaintenanceApplicationByMaintenanceApplicationIDAsync(dto.MaintenanceApplicationId);
+
+                if (maintenanceApplication == null)
+                {
+                    _logger.LogWarning($"Maintenance Application with ID {dto.MaintenanceApplicationId} not found.");
+                    throw new KeyNotFoundException($"Maintenance Application with ID {dto.MaintenanceApplicationId} not found.");
+                }
+
+                _logger.LogInformation($"Validating maintenance application with ID {maintenanceApplication.MaintenanceApplicationID}.");
+                await _shared.UpdateVehicleStatusAsync(maintenanceApplication.VehicleID, enVehicleStatus.Available);
+                _logger.LogInformation($"Vehicle with Id {maintenanceApplication.VehicleID} updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating maintenance application.");
+                throw new InvalidOperationException("Failed to validate maintenance application.", ex);
+            }
+
             
+
             _logger.LogInformation("Creating new maintenance.");
             return await _repo.CreateMaintenanceAsync(dto);
         }

@@ -35,12 +35,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching all applications, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
 
@@ -56,17 +56,17 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching application");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching application, Check the parameters." });
             }
             catch (KeyNotFoundException ex)
             {
                 _logger.LogError(ex, "Application not found");
-                return NotFound(ex.Message);
+                return NotFound(new { message = "Application Not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -82,12 +82,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching applications by type, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -103,17 +103,17 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching applications by user Id, Check the parameters." });
             }
             catch (KeyNotFoundException ex)
             {
                 _logger.LogError(ex, "User not found");
-                return NotFound(ex.Message);
+                return NotFound(new { message = "User Not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -129,12 +129,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching applications by status, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -150,12 +150,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while counting applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while counting applications by type, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -171,12 +171,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while counting applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while counting applications by status, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -192,12 +192,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while counting applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while counting applications, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
     }

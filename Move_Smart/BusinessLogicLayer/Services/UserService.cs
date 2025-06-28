@@ -102,7 +102,7 @@ namespace BusinessLayer.Services
 
             if (!Enum.IsDefined(typeof(EnUserRole), dto.Role))
             {
-                _logger.LogWarning("Validation Failed: Invalid role.");
+                _logger.LogError("Validation Failed: Invalid role.");
                 throw new InvalidOperationException("Invalid role.");
             }
 

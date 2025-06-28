@@ -110,7 +110,7 @@ namespace DataAccessLayer.SharedFunctions
             const string query = "UPDATE drivers SET Status = @Status WHERE DriverID = @DriverId";
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync()) > 0;
+                return Convert.ToInt32(await cmd.ExecuteNonQueryAsync()) > 0;
             },
             new MySqlParameter("@DriverId", driverId),
             new MySqlParameter("@Status", status)
@@ -122,7 +122,7 @@ namespace DataAccessLayer.SharedFunctions
             const string query = "UPDATE vehicles SET Status = @Status WHERE VehicleID = @VehicleId";
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
-                return Convert.ToInt32(await cmd.ExecuteScalarAsync()) > 0;
+                return Convert.ToInt32(await cmd.ExecuteNonQueryAsync()) > 0;
             },
             new MySqlParameter("@VehicleId", vehicleId),
             new MySqlParameter("@Status", status)

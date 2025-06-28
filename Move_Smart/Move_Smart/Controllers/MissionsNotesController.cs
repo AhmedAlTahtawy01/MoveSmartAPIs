@@ -30,7 +30,7 @@ namespace Move_Smart.Controllers
 
             if (missionsNotes == null || !missionsNotes.Any())
             {
-                return NotFound("No missions notes found.");
+                return NotFound(new { message = "No missions notes found." });
             }
 
             return Ok(missionsNotes);
@@ -46,14 +46,14 @@ namespace Move_Smart.Controllers
         {
             if (noteID <= 0)
             {
-                return BadRequest($"Invalid ID [{noteID}]!");
+                return BadRequest(new { message = $"Invalid ID [{noteID}]!" });
             }
 
             MissionsNotesDTO? missionNote = await _service.GetMissionNoteByNoteIDAsync(noteID);
 
             if (missionNote == null)
             {
-                return NotFound($"Mission note with ID {noteID} not found.");
+                return NotFound(new { message = $"Mission note with ID {noteID} not found." });
             }
 
             return Ok(missionNote);
@@ -68,12 +68,12 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("MissionsNotesDTO cannot be null!");
+                return BadRequest(new { message = "MissionsNotesDTO cannot be null!" });
             }
 
             if (await _service.AddNewMissionNoteAsync(dto) == null)
             {
-                return BadRequest("Failed to add new mission note!");
+                return BadRequest(new { message = "Failed to add new mission note!" });
             }
 
             return CreatedAtAction("GetMissionNoteByID", new { noteID = dto.NoteID }, dto);
@@ -89,20 +89,20 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("MissionsNotesDTO cannot be null!");
+                return BadRequest(new { message = "MissionsNotesDTO cannot be null!" });
             }
 
             if (!await _service.IsMissionNoteExistsAsync(dto.NoteID ?? 0))
             {
-                return NotFound($"Mission note with ID [{dto.NoteID}] not found!");
+                return NotFound(new { message = $"Mission note with ID [{dto.NoteID}] not found!" });
             }
 
             if (!await _service.UpdateMissionNoteAsync(dto))
             {
-                return BadRequest($"Failed to update mission note with ID [{dto.NoteID}]!");
+                return BadRequest(new { message = $"Failed to update mission note with ID [{dto.NoteID}]!" });
             }
 
-            return Ok($"Mission note with ID [{dto.NoteID}] updated successfully.");
+            return Ok(new { message = $"Mission note with ID [{dto.NoteID}] updated successfully." });
         }
 
 
@@ -115,20 +115,20 @@ namespace Move_Smart.Controllers
         {
             if (noteID <= 0)
             {
-                return BadRequest($"Invalid ID [{noteID}]!");
+                return BadRequest(new { message = $"Invalid ID [{noteID}]!" });
             }
             
             if (!await _service.IsMissionNoteExistsAsync(noteID))
             {
-                return NotFound($"Mission note with ID [{noteID}] not found!");
+                return NotFound(new { message = $"Mission note with ID [{noteID}] not found!" });
             }
             
             if (!await _service.DeleteMissionNoteAsync(noteID))
             {
-                return BadRequest($"Failed to delete mission note with ID [{noteID}]!");
+                return BadRequest(new { message = $"Failed to delete mission note with ID [{noteID}]!" });
             }
             
-            return Ok($"Mission note with ID [{noteID}] deleted successfully.");
+            return Ok(new { message = $"Mission note with ID [{noteID}] deleted successfully." });
         }
     }
 }

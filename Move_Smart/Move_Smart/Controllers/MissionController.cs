@@ -29,7 +29,7 @@ namespace Move_Smart.Controllers
             if (dto == null)
             {
                 _logger.LogWarning("Received null DTO.");
-                return BadRequest("Mission data cannot be null.");
+                return BadRequest(new { message = "Mission data cannot be null." });
             }
 
             try
@@ -39,18 +39,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning($"Invalid Data {ex.Message}");
-                return Conflict(ex.Message);
+                _logger.LogError($"Invalid Data {ex.Message}");
+                return Conflict(new { message = $"Invalid Data {ex.Message}" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating mission.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -61,7 +61,7 @@ namespace Move_Smart.Controllers
             if (pageNumber < 1 || pageSize < 1)
             {
                 _logger.LogWarning("Invalid pagination parameters.");
-                return BadRequest("Page number and size must be greater than 0.");
+                return BadRequest(new { message = "Page number and size must be greater than 0." });
             }
 
             try
@@ -71,13 +71,13 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving missions.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -88,7 +88,7 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid mission ID.");
-                return BadRequest("Mission ID must be greater than 0.");
+                return BadRequest(new { message = "Mission ID must be greater than 0." });
             }
 
             try
@@ -98,18 +98,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Mission not found.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No mission found with ID {id}.");
+                return NotFound(new { message = $"No mission found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving mission.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -120,7 +120,7 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid mission note ID.");
-                return BadRequest("Mission note ID must be greater than 0.");
+                return BadRequest(new { message = "Mission note ID must be greater than 0." });
             }
             try
             {
@@ -129,49 +129,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Mission not found.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No mission found with ID {id}.");
+                return NotFound(new { message = $"No mission found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving missions.");
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        [Authorize(Policy = "RequireGeneralSupervisor")]
-        [HttpGet("vehicle/{id}")]
-        public async Task<IActionResult> GetMissionsByVehicleId([FromRoute] int id)
-        {
-            if (id <= 0)
-            {
-                _logger.LogWarning("Invalid vehicle ID.");
-                return BadRequest("Vehicle ID must be greater than 0.");
-            }
-            try
-            {
-                var missions = await _service.GetMissionsByVehicleIdAsync(id);
-                return Ok(missions);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Mission not found.");
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving missions.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -182,7 +151,7 @@ namespace Move_Smart.Controllers
             if (startDate == default)
             {
                 _logger.LogWarning("Invalid start date.");
-                return BadRequest("Start date must be a valid date.");
+                return BadRequest(new { message = "Start date must be a valid date." });
             }
 
             try
@@ -192,18 +161,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Mission not found.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No mission found with start date {startDate}.");
+                return NotFound(new { message = $"No mission found with start date {startDate}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving missions.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -214,7 +183,7 @@ namespace Move_Smart.Controllers
             if (string.IsNullOrWhiteSpace(destination))
             {
                 _logger.LogWarning("Invalid destination.");
-                return BadRequest("Destination cannot be null or empty.");
+                return BadRequest(new { message = "Destination cannot be null or empty." });
             }
 
             try
@@ -224,18 +193,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Mission not found.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No mission found with destination {destination}.");
+                return NotFound(new { message = $"No mission found with destination {destination}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving missions.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -246,17 +215,17 @@ namespace Move_Smart.Controllers
             if (dto == null)
             {
                 _logger.LogWarning("Received null DTO.");
-                return BadRequest("Mission data cannot be null.");
+                return BadRequest(new { message = "Mission data cannot be null." });
             }
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid mission ID.");
-                return BadRequest("Mission ID must be greater than 0.");
+                return BadRequest(new { message = "Mission ID must be greater than 0." });
             }
             if (dto.MissionId != id)
             {
                 _logger.LogWarning("Mission ID in DTO does not match route ID.");
-                return BadRequest("Mission ID in DTO must match route ID.");
+                return BadRequest(new { message = "Mission ID in DTO must match route ID." });
             }
 
             try
@@ -266,18 +235,18 @@ namespace Move_Smart.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Mission not found.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No mission found with ID {id}.");
+                return NotFound(new { message = $"No mission found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating mission.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -288,28 +257,28 @@ namespace Move_Smart.Controllers
             if (id <= 0)
             {
                 _logger.LogWarning("Invalid mission ID.");
-                return BadRequest("Mission ID must be greater than 0.");
+                return BadRequest(new { message = "Mission ID must be greater than 0." });
             }
 
             try
             {
                 await _service.DeleteMissionAsync(id);
-                return NoContent();
+                return Ok(new { message = $"Mission with ID {id} deleted successfully." });
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument provided.");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Invalid argument provided.");
+                return BadRequest(new { message = "Invalid argument provided." });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Mission not found.");
-                return NotFound(ex.Message);
+                _logger.LogError(ex, $"No mission found with ID {id}.");
+                return NotFound(new { message = $"No mission found with ID {id}." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting mission.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
     }

@@ -63,7 +63,7 @@ namespace Move_Smart.Controllers
             try
             {
                 await _isparepart.AddSparePart(spare);
-                return Ok("Spare part added successfully.");
+                return Ok(new { message = "Spare part added successfully." });
             }
             catch (Exception ex)
             {
@@ -79,7 +79,7 @@ namespace Move_Smart.Controllers
             try
             {
                 await _isparepart.UpdateSparePart(spare);
-                return Ok("Spare part updated successfully.");
+                return Ok(new { message = "Spare part updated successfully." });
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace Move_Smart.Controllers
             try
             {
                 await _isparepart.DeleteSparePart(id);
-                return Ok("Spare part deleted successfully.");
+                return Ok(new { message = "Spare part deleted successfully." });
             }
             catch (Exception ex)
             {
@@ -107,7 +107,7 @@ namespace Move_Smart.Controllers
         public async Task<IActionResult> Count()
         {
             var count = await _isparepart.CountAllOrdersAsync();
-            return Ok(count);
+            return Ok(new { message = count });
         }
     }
 }

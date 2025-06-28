@@ -30,7 +30,7 @@ namespace DataAccessLayer.Util
             return command;
         }
 
-        public async Task<T> ExecuteQueryAsync<T>(string query, Func<DbCommand, Task<T>> func, params MySqlParameter[] parameters)
+        public async Task<T> ExecuteQueryAsync<T>(string query, Func<MySqlCommand, Task<T>> func, params MySqlParameter[] parameters)
         {
             await using var conn = GetConnection();
             using var cmd = GetCommand(query, conn);
@@ -47,5 +47,6 @@ namespace DataAccessLayer.Util
                 throw new Exception($"Database error occurred in {nameof(func.Method)}.", ex);
             }
         }
+
     }
 }
