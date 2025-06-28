@@ -18,6 +18,7 @@ using BusinessLogicLayer.Helpers;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System.Configuration;
+using Org.BouncyCastle.Bcpg.Sig;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -166,6 +167,38 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("WorkshopSupervisor", policy =>
         policy.RequireRole(
             EnUserRole.SuperUser.ToString(),
+            EnUserRole.WorkshopSupervisor.ToString()
+        ));
+
+    // Policies for specific roles
+    options.AddPolicy("AllVehicles", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString(),
+            EnUserRole.WorkshopSupervisor.ToString()
+        ));
+
+    options.AddPolicy("Drivers", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString(),
+            EnUserRole.PatrolsSupervisor.ToString()
+        ));
+
+    options.AddPolicy("All", policy =>
+        policy.RequireRole(
+            EnUserRole.SuperUser.ToString(),
+            EnUserRole.HospitalManager.ToString(),
+            EnUserRole.GeneralManager.ToString(),
+            EnUserRole.GeneralSupervisor.ToString(),
+            EnUserRole.AdministrativeSupervisor.ToString(),
+            EnUserRole.PatrolsSupervisor.ToString(),
             EnUserRole.WorkshopSupervisor.ToString()
         ));
 });

@@ -30,7 +30,7 @@ namespace Move_Smart.Controllers
 
             if (patrols == null || !patrols.Any())
             {
-                return NotFound("No patrols found!");
+                return NotFound(new { message = "No patrols found!" });
             }
 
             return Ok(patrols);
@@ -46,21 +46,21 @@ namespace Move_Smart.Controllers
         {
             if (patrolID <= 0)
             {
-                return BadRequest($"Invalid ID [{patrolID}]");
+                return BadRequest(new { message = $"Invalid ID [{patrolID}]" });
             }
 
             PatrolDTO? patrol = await _service.GetPatrolByIDAsync(patrolID);
 
             if (patrol == null)
             {
-                return NotFound($"Patrol with ID [{patrolID}] not found!");
+                return NotFound(new { message = $"Patrol with ID [{patrolID}] not found!" });
             }
 
             return Ok(patrol);
         }
 
 
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPost(Name = "AddNewPatrol")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -68,24 +68,24 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("PatrolDTO cannot be null!");
+                return BadRequest(new { message = "PatrolDTO cannot be null!" });
             }
 
             if (await _service.IsPatrolExistsAsync(dto.PatrolID ?? 0))
             {
-                return BadRequest($"Patrol with ID [{dto.PatrolID}] already exists!");
+                return BadRequest(new { message = $"Patrol with ID [{dto.PatrolID}] already exists!" });
             }
 
             if (await _service.AddNewPatrolAsync(dto) == null)
             {
-                return BadRequest("Failed to add new patrol!");
+                return BadRequest(new { message = "Failed to add new patrol!" });
             }
 
             return CreatedAtRoute("GetPatrolByID", new { patrolID = dto.PatrolID }, dto);
         }
 
 
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPut(Name = "UpdatePatrol")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -94,24 +94,24 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("PatrolDTO cannot be null!");
+                return BadRequest(new { message = "PatrolDTO cannot be null!" });
             }
 
             if (!await _service.IsPatrolExistsAsync(dto.PatrolID ?? 0))
             {
-                return NotFound($"No patrols found with ID [{dto.PatrolID}]!");
+                return NotFound(new { message = $"No patrols found with ID [{dto.PatrolID}]!" });
             }
 
             if (!await _service.UpdatePatrolAsync(dto))
             {
-                return BadRequest($"Failed to update patrol with ID [{dto.PatrolID}]!");
+                return BadRequest(new { message = $"Failed to update patrol with ID [{dto.PatrolID}]!" });
             }
 
-            return Ok($"Patrol with ID [{dto.PatrolID}] updated successfully");
+            return Ok(new { message = $"Patrol with ID [{dto.PatrolID}] updated successfully" });
         }
 
 
-        [Authorize(Policy = "RequireGeneralSupervisor")]
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpDelete("{patrolID}", Name = "DeletePatrol")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -120,20 +120,20 @@ namespace Move_Smart.Controllers
         {
             if (patrolID <= 0)
             {
-                return BadRequest($"Invalid ID [{patrolID}]!");
+                return BadRequest(new { message = $"Invalid ID [{patrolID}]!" });
             }
 
             if (!await _service.IsPatrolExistsAsync(patrolID))
             {
-                return NotFound($"No patrol found with ID [{patrolID}]!");
+                return NotFound(new { message = $"No patrol found with ID [{patrolID}]!" });
             }
 
             if (!await _service.DeletePatrolAsync(patrolID))
             {
-                return BadRequest($"Failed to delete patrol with ID [{patrolID}]!");
+                return BadRequest(new { message = $"Failed to delete patrol with ID [{patrolID}]!" });
             }
 
-            return Ok($"Patrol with ID [{patrolID}] deleted successfully");
+            return Ok(new { message = $"Patrol with ID [{patrolID}] deleted successfully" });
         }
 
         [Authorize(Policy = "RequirePatrolsSupervisor")]

@@ -31,7 +31,7 @@ namespace Move_Smart.Controllers
 
             if (employees == null || !employees.Any())
             {
-                return NotFound("No employees found!");
+                return NotFound(new { message = "No employees found!" });
             }
 
             return Ok(employees);
@@ -48,7 +48,7 @@ namespace Move_Smart.Controllers
 
             if (employees == null || !employees.Any())
             {
-                return NotFound($"No employees found using bus with ID [{busID}]!");
+                return NotFound(new { message = $"No employees found using bus with ID [{busID}]!" });
             }
 
             return Ok(employees);
@@ -64,14 +64,14 @@ namespace Move_Smart.Controllers
         {
             if(employeeID <= 0)
             {
-                return BadRequest($"Invalid ID [{employeeID}]");
+                return BadRequest(new { message = $"Invalid ID [{employeeID}]" });
             }
 
             EmployeeDTO? employee = await _service.GetEmployeeByIDAsync(employeeID);
             
             if (employee == null)
             {
-                return NotFound($"No employee found with ID [{employeeID}]!");
+                return NotFound(new { message = $"No employee found with ID [{employeeID}]!" });
             }
      
             return Ok(employee);
@@ -87,14 +87,14 @@ namespace Move_Smart.Controllers
         {
             if (nationalNo.Length != 14 || nationalNo.Any(ch => char.IsLetter(ch)))
             {
-                return BadRequest($"Invalid NationalNo [{nationalNo}]");
+                return BadRequest(new { message = $"Invalid NationalNo [{nationalNo}]" });
             }
 
             EmployeeDTO? employee = await _service.GetEmployeeByNationalNoAsync(nationalNo);
 
             if (employee == null)
             {
-                return NotFound($"No employee found with NationalNo [{nationalNo}]!");
+                return NotFound(new { message = $"No employee found with NationalNo [{nationalNo}]!" });
             }
 
             return Ok(employee);
@@ -110,14 +110,14 @@ namespace Move_Smart.Controllers
         {
             if (phone.Length != 11 || phone.Any(ch => char.IsLetter(ch)))
             {
-                return BadRequest($"Invalid Phone Number [{phone}]");
+                return BadRequest(new { message = $"Invalid Phone Number [{phone}]" });
             }
 
             EmployeeDTO? employee = await _service.GetEmployeeByPhoneAsync(phone);
 
             if (employee == null)
             {
-                return NotFound($"No employee found with phone number [{phone}]!");
+                return NotFound(new { message = $"No employee found with phone number [{phone}]!" });
             }
 
             return Ok(employee);
@@ -133,12 +133,12 @@ namespace Move_Smart.Controllers
         {
             if (employeeID <= 0)
             {
-                return BadRequest($"Invalid Employee ID [{employeeID}]");
+                return BadRequest(new { message = $"Invalid Employee ID [{employeeID}]" });
             }
             
             if (!await _service.IsTransportationSubscriptionValidAsync(employeeID))
             {
-                return NotFound($"Transportation subscription for employee with ID [{employeeID}] is not valid!");
+                return NotFound(new { message = $"Transportation subscription for employee with ID [{employeeID}] is not valid!" });
             }
             
             return Ok(true);
@@ -153,17 +153,17 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("EmployeeDTO cannot be null!");
+                return BadRequest(new { message = "EmployeeDTO cannot be null!" });
             }
 
             if (await _service.IsEmployeeExistsAsync(dto.NationalNo))
             {
-                return BadRequest($"Employee with NationalNo [{dto.NationalNo}] already exists!");
+                return BadRequest(new { message = $"Employee with NationalNo [{dto.NationalNo}] already exists!" });
             }
 
             if(await _service.AddNewEmployeeAsync(dto) == null)
             {
-                return BadRequest("Failed to add new employee!");
+                return BadRequest(new { message = "Failed to add new employee!" });
             }
 
             return CreatedAtRoute("GetEmployeeByID", new { employeeID = dto.EmployeeID }, dto);
@@ -179,25 +179,25 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("EmployeeDTO cannot be null!");
+                return BadRequest(new { message = "EmployeeDTO cannot be null!" });
             }
 
             if (dto.EmployeeID <= 0)
             {
-                return BadRequest($"Invalid Employee ID [{dto.EmployeeID}]");
+                return BadRequest(new { message = $"Invalid Employee ID [{dto.EmployeeID}]" });
             }
 
             if(!await _service.IsEmployeeExistsAsync(dto.EmployeeID ?? 0))
             {
-                return NotFound($"No employee found with ID [{dto.EmployeeID}]!");
+                return NotFound(new { message = $"No employee found with ID [{dto.EmployeeID}]!" });
             }
 
             if (!await _service.UpdateEmployeeAsync(dto))
             {
-                return BadRequest($"Failed to update employee with ID [{dto.EmployeeID}]!");
+                return BadRequest(new { message = $"Failed to update employee with ID [{dto.EmployeeID}]!" });
             }
 
-            return Ok($"Employee with ID [{dto.EmployeeID}] updated successfully");
+            return Ok(new { message = $"Employee with ID [{dto.EmployeeID}] updated successfully" });
         }
 
 
@@ -210,20 +210,20 @@ namespace Move_Smart.Controllers
         {
             if (employeeID <= 0)
             {
-                return BadRequest($"Invalid Employee ID [{employeeID}]");
+                return BadRequest(new { message = $"Invalid Employee ID [{employeeID}]" });
             }
 
             if (!await _service.IsEmployeeExistsAsync(employeeID))
             {
-                return NotFound($"No employee found with ID [{employeeID}]!");
+                return NotFound(new { message = $"No employee found with ID [{employeeID}]!" });
             }
             
             if (!await _service.DeleteEmployeeAsync(employeeID))
             {
-                return NotFound($"Failed to delete employee with ID [{employeeID}]!");
+                return NotFound(new { message = $"Failed to delete employee with ID [{employeeID}]!" });
             }
             
-            return Ok($"Employee with ID [{employeeID}] deleted successfully");
+            return Ok(new { message = $"Employee with ID [{employeeID}] deleted successfully" });
         }
 
 
@@ -236,20 +236,20 @@ namespace Move_Smart.Controllers
         {
             if (nationalNo.Length != 14 || nationalNo.Any(ch => char.IsLetter(ch)))
             {
-                return BadRequest($"Invalid NationalNo [{nationalNo}]");
+                return BadRequest(new { message = $"Invalid NationalNo [{nationalNo}]" });
             }
 
             if (!await _service.IsEmployeeExistsAsync(nationalNo))
             {
-                return NotFound($"No employee found with NationalNo [{nationalNo}]!");
+                return NotFound(new { message = $"No employee found with NationalNo [{nationalNo}]!" });
             }
             
             if (!await _service.DeleteEmployeeAsync(nationalNo))
             {
-                return NotFound($"Failed to delete employee with NationalNo [{nationalNo}]!");
+                return NotFound(new { message = $"Failed to delete employee with NationalNo [{nationalNo}]!" });
             }
             
-            return Ok($"Employee with NationalNo [{nationalNo}] deleted successfully");
+            return Ok(new { message = $"Employee with NationalNo [{nationalNo}] deleted successfully" });
         }
     }
 }

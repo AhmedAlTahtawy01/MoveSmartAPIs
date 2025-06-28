@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer;
+using DataAccessLayer.Repositories;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -56,6 +57,12 @@ namespace BusinessLayer
             {
                 _driverLogger.LogError("Phone Must Be 11 Numbers.");
                 throw new ArgumentException("Phone Must Be 11 Numbers.");
+            }
+
+            if (!Enum.IsDefined(typeof(enDriverStatus), dto.Status))
+            {
+                _driverLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
             }
         }
 

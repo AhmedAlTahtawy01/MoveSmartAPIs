@@ -19,7 +19,7 @@ namespace DataAccessLayer.Repositories
         Confirmed = 1,
         Rejected = 2,
         Pending = 3,
-        Canceled = 4
+        Cancelled = 4
     }
 
     public enum enApplicationType

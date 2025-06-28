@@ -23,6 +23,7 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize (Policy = "RequireGeneralSupervisor")]
         [HttpGet]
         public async Task<IActionResult> GetAllApplications([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -34,15 +35,16 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching all applications, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error." });
             }
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationById([FromRoute] int id)
         {
@@ -54,20 +56,21 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching application");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching application, Check the parameters." });
             }
             catch (KeyNotFoundException ex)
             {
                 _logger.LogError(ex, "Application not found");
-                return NotFound(ex.Message);
+                return NotFound(new { message = "Application Not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
+        [Authorize]
         [HttpGet("type/{type}")]
         public async Task<IActionResult> GetApplicationsByType([FromRoute] enApplicationType type)
         {
@@ -79,15 +82,16 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching applications by type, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
+        [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetApplicationsByUserId([FromRoute] int userId)
         {
@@ -99,20 +103,21 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching applications by user Id, Check the parameters." });
             }
             catch (KeyNotFoundException ex)
             {
                 _logger.LogError(ex, "User not found");
-                return NotFound(ex.Message);
+                return NotFound(new { message = "User Not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
+        [Authorize]
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetApplicationsByStatus([FromRoute] enStatus status)
         {
@@ -124,15 +129,16 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while fetching applications by status, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
-        
+
+        [Authorize]
         [HttpGet("count/type/{type}")]
         public async Task<IActionResult> CountApplicationsByType([FromRoute] enApplicationType type)
         {
@@ -144,15 +150,16 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while counting applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while counting applications by type, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
+        [Authorize]
         [HttpGet("count/status/{status}")]
         public async Task<IActionResult> CountApplicationsByStatus([FromRoute] enStatus status) 
         {
@@ -164,15 +171,16 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while counting applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while counting applications by status, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
+        [Authorize(Policy = "RequireGeneralSupervisor")]
         [HttpGet("count")]
         public async Task<IActionResult> CountAllApplications()
         {
@@ -184,12 +192,12 @@ namespace Move_Smart.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while counting applications");
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = "Error occurred while counting applications, Check the parameters." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿
-using BusinessLayer;
+﻿using BusinessLayer;
 using DataAccessLayer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +29,7 @@ namespace Move_Smart.Controllers
 
             if (vacations == null || !vacations.Any())
             {
-                return NotFound("No vacations found.");
+                return NotFound(new { message = "No vacations found." });
             }
 
             return Ok(vacations);
@@ -47,7 +46,7 @@ namespace Move_Smart.Controllers
 
             if (vacations == null || !vacations.Any())
             {
-                return NotFound($"No vacations found for driver with ID {driverID}.");
+                return NotFound(new { message = $"No vacations found for driver with ID {driverID}." });
             }
 
             return Ok(vacations);
@@ -64,7 +63,7 @@ namespace Move_Smart.Controllers
 
             if (vacations == null || !vacations.Any())
             {
-                return NotFound($"No valid vacations found for driver with ID {driverID}.");
+                return NotFound(new { message = $"No valid vacations found for driver with ID {driverID}." });
             }
 
             return Ok(vacations);
@@ -81,7 +80,7 @@ namespace Move_Smart.Controllers
 
             if (vacation == null)
             {
-                return NotFound($"Vacation with ID {vacationID} not found.");
+                return NotFound(new { message = $"Vacation with ID {vacationID} not found." });
             }
             
             return Ok(vacation);
@@ -96,12 +95,12 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("VacationDTO cannot be null!");
+                return BadRequest(new { message = "VacationDTO cannot be null!" });
             }
 
             if (await _service.AddNewVacationAsync(dto) == null)
             {
-                return BadRequest("Failed to add new vacation.");
+                return BadRequest(new { message = "Failed to add new vacation." });
             }
 
             return CreatedAtRoute("GetVacationByID", new { vacationID = dto.VacationID }, dto);
@@ -117,25 +116,25 @@ namespace Move_Smart.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("VacationDTO cannot be null!");
+                return BadRequest(new { message = "VacationDTO cannot be null!" });
             }
 
             if (dto.VacationID <= 0)
             {
-                return BadRequest($"Invalid ID [{dto.VacationID}]!");
+                return BadRequest(new { message = $"Invalid ID [{dto.VacationID}]!" });
             }
             
             if (!await _service.IsVacationExistsAsync(dto.VacationID ?? 0))
             {
-                return NotFound($"Vacation with ID {dto.VacationID} not found!");
+                return NotFound(new { message = $"Vacation with ID {dto.VacationID} not found!" });
             }
 
             if (!await _service.UpdateVacationAsync(dto))
             {
-                return BadRequest($"Failed to update vacation with ID [{dto.VacationID}]!");
+                return BadRequest(new { message = $"Failed to update vacation with ID [{dto.VacationID}]!" });
             }
 
-            return Ok($"Vacation with ID [{dto.VacationID}] updaed successfully.");
+            return Ok(new { message = $"Vacation with ID [{dto.VacationID}] updaed successfully." });
         }
 
 
@@ -148,20 +147,20 @@ namespace Move_Smart.Controllers
         {
             if (vacationID <= 0)
             {
-                return BadRequest($"Invalid ID [{vacationID}]!");
+                return BadRequest(new { message = $"Invalid ID [{vacationID}]!" });
             }
 
             if (!await _service.IsVacationExistsAsync(vacationID))
             {
-                return NotFound($"Vacation with ID {vacationID} not found!");
+                return NotFound(new { message = $"Vacation with ID {vacationID} not found!" });
             }
             
             if (!await _service.DeleteVacationAsync(vacationID))
             {
-                return BadRequest($"Failed to delete vacation with ID [{vacationID}]!");
+                return BadRequest(new { message = $"Failed to delete vacation with ID [{vacationID}]!" });
             }
             
-            return Ok($"Vacation with ID [{vacationID}] deleted successfully.");
+            return Ok(new { message = $"Vacation with ID [{vacationID}] deleted successfully." });
         }
 
 
@@ -173,7 +172,7 @@ namespace Move_Smart.Controllers
         {
             if (driverID <= 0)
             {
-                return BadRequest($"Invalid ID [{driverID}]!");
+                return BadRequest(new { message = $"Invalid ID [{driverID}]!" });
             }
             
             return await _service.IsDriverInVacationAsync(driverID) ? Ok(true) : Ok(false);

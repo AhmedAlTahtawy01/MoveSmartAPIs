@@ -1,0 +1,69 @@
+// Application status
+public enum enStatus
+{
+    Confirmed = 1,
+    Rejected = 2,
+    Pending = 3,
+    Cancelled = 4
+}
+
+// Application Type
+public enum enApplicationType
+{
+    JobOrder = 1,
+    MissionNote = 2,
+    SparePartWithdrawApplication = 3,
+    SparePartPurchaseOrder = 4,
+    ConsumableWithdrawApplication = 5,
+    ConsumablePurchaseOrder = 6,
+    MaintenanceApplication = 7
+}
+
+// Driver status
+public enum enDriverStatus
+{
+ Available = 1,
+ Absent = 2,
+ Working = 3 
+};
+
+// patrol subscription status
+public enum enTransportationSubscriptionStatus : byte
+{
+    Valid = 0,
+    Expired = 1,
+    Unsubscribed = 2
+}
+
+// User roles
+public enum EnUserRole
+{
+    SuperUser = 0,
+    HospitalManager = 1,
+    GeneralManager = 2,
+    GeneralSupervisor = 3,
+    PatrolsSupervisor = 4,
+    WorkshopSupervisor = 5,
+    AdministrativeSupervisor = 6
+}
+
+// Vehicle Status
+public enum enVehicleStatus : byte
+{
+    Available = 1,
+    Working = 2,
+    BrokenDown = 3
+}
+
+// Vehicle Type
+public enum enVehicleType : byte
+{
+    Sedan = 0,
+    SingleCab = 1,
+    DoubleCab = 2,
+    Truck = 3,
+    Microbus = 4,
+    Minibus = 5,
+    Bus = 6,
+    Ambulance = 7
+}

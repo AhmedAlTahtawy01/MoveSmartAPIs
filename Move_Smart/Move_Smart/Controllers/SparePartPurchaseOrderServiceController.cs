@@ -19,7 +19,7 @@ namespace Move_Smart.Controllers
 
         [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpPost]
-        public async Task<IActionResult> Add(Sparepartspurchaseorder partpurchaseorder)
+        public async Task<IActionResult> Add([FromBody]Sparepartspurchaseorder partpurchaseorder)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace Move_Smart.Controllers
             try
             {
                 var count = await _sparePartPurchaseOrderService.CountAllSparePartPurchaseOrdersAsync();
-                return Ok(count);
+                return Ok(new { message = count });
             }
             catch (Exception ex)
             {

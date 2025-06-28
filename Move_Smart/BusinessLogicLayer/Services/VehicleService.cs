@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer;
+using DataAccessLayer.Repositories;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,24 @@ namespace BusinessLayer
             {
                 _vehicleLogger.LogError("Plate numbers must be between 6-7 characters long.");
                 throw new ArgumentException("Plate numbers must be between 6-7 characters long.");
+            }
+
+            if (!Enum.IsDefined(typeof(enVehicleStatus), dto.Status))
+            {
+                _vehicleLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
+            }
+
+            if (!Enum.IsDefined(typeof(enVehicleType), dto.VehicleType))
+            {
+                _vehicleLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
+            }
+
+            if (!Enum.IsDefined(typeof(enFuelType), dto.FuelType))
+            {
+                _vehicleLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
             }
         }
 
@@ -82,6 +101,38 @@ namespace BusinessLayer
 
             _vehicleLogger.LogError($"Vehicle with ID {dto.VehicleID} does not exist.");
             return false;
+        }
+
+        public async Task<bool> UpdateVehicleTotalKilometersAsync(int totalKilometers, short vehicleID)
+        {
+            if (totalKilometers < 0)
+            {
+                _vehicleLogger.LogError("Total kilometers cannot be negative.");
+                return false;
+            }
+
+            if (vehicleID <= 0)
+            {
+                _vehicleLogger.LogError("Vehicle ID must be a positive integer.");
+                return false;
+            }
+
+            try
+            {
+                if (!await _vehicleRepo.IsVehicleExistsAsync(vehicleID))
+                {
+                    _vehicleLogger.LogError($"Vehicle with ID {vehicleID} does not exist.");
+                    return false;
+                }
+
+                _vehicleLogger.LogInformation($"Updating total kilometers for vehicle ID {vehicleID} by {totalKilometers}.");
+                return await _vehicleRepo.UpdateVehicleTotalKilometersAsync(totalKilometers, vehicleID);
+            }
+            catch (Exception ex)
+            {
+                _vehicleLogger.LogError(ex, "Failed to update total kilometers for vehicle.");
+                return false;
+            }
         }
 
         public async Task<List<VehicleDTO>> GetAllVehiclesAsync()

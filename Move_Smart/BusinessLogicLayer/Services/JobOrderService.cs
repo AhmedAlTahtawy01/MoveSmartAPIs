@@ -6,6 +6,8 @@ using DataAccessLayer.Repositories;
 using DataAccessLayer.SharedFunctions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using static DataAccessLayer.DriverDTO;
+using static DataAccessLayer.VehicleDTO;
 
 namespace BusinessLayer.Services
 {
@@ -14,13 +16,31 @@ namespace BusinessLayer.Services
        
         private readonly JobOrderRepo _jobOrderRepo;
         private readonly ILogger<JobOrderService> _jobOrderLogger;
-        
+        private readonly VehicleService _vehicleService;
 
-        public JobOrderService(JobOrderRepo repo, ApplicationRepo appRepo, ILogger<JobOrderService> logger, ILogger<ApplicationService> appLogger, SharedFunctions sharedFunctions, IHubContext<NotificationHub> hubContext)
+
+        public JobOrderService(JobOrderRepo repo, ApplicationRepo appRepo, ILogger<JobOrderService> logger, VehicleService vehicleService, ILogger<ApplicationService> appLogger, SharedFunctions sharedFunctions, IHubContext<NotificationHub> hubContext)
             : base(appRepo, appLogger, sharedFunctions,hubContext )
         {
             _jobOrderRepo = repo ?? throw new ArgumentNullException(nameof(repo), "Data access layer cannot be null.");
             _jobOrderLogger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _vehicleService = vehicleService ?? throw new ArgumentNullException(nameof(vehicleService), "Vehicle service cannot be null.");
+        }
+
+        private enDriverStatus _GetDriverStatus(enStatus status)
+        {
+            if (status == enStatus.Pending)
+                return enDriverStatus.Working;
+            else
+                return enDriverStatus.Available;
+        }
+        
+        private enVehicleStatus _GetVehicleStatus(enStatus status)
+        {
+            if (status == enStatus.Pending)
+                return enVehicleStatus.Working;
+            else
+                return enVehicleStatus.Available;
         }
 
         public async Task<int> CreateJobOrderAsync(JobOrderDTO dto)
@@ -33,7 +53,33 @@ namespace BusinessLayer.Services
                 _jobOrderLogger.LogInformation($"Created application with ID {dto.Application.ApplicationId} for job order.");
 
                 _jobOrderLogger.LogInformation("Creating new job order.");
-                return await _jobOrderRepo.CreateJobOrderAsync(dto);
+                int jobOrderId = await _jobOrderRepo.CreateJobOrderAsync(dto);
+                if (jobOrderId > 0)
+                {
+                    _jobOrderLogger.LogInformation($"Created job order with ID {jobOrderId}.");
+
+                    try
+                    {
+                        _jobOrderLogger.LogInformation("Updating driver status...");
+                        bool driverResult = await _shared.UpdateDriverStatusAsync(dto.DriverId, enDriverStatus.Working);
+                        _jobOrderLogger.LogInformation($"Driver status updated: {driverResult}");
+
+                        _jobOrderLogger.LogInformation("Updating vehicle status...");
+                        bool vehicleResult = await _shared.UpdateVehicleStatusAsync(dto.VehicleId, enVehicleStatus.Working);
+                        _jobOrderLogger.LogInformation($"Vehicle status updated: {vehicleResult}");
+                    }
+                    catch (Exception updateEx)
+                    {
+                        _jobOrderLogger.LogError(updateEx, "Error while updating driver or vehicle status.");
+                    }
+
+                    return jobOrderId;
+                }
+                else
+                {
+                    _jobOrderLogger.LogError("Failed to create job order.");
+                    throw new InvalidOperationException("Failed to create job order.");
+                }
             }
             catch (Exception ex)
             {
@@ -51,7 +97,7 @@ namespace BusinessLayer.Services
             }
 
             await _ValidateJobOrderDTO(dto);
-            
+
             var existingJobOrder = await _jobOrderRepo.GetJobOrderByIdAsync(dto.OrderId);
             if (existingJobOrder == null)
             {
@@ -59,18 +105,28 @@ namespace BusinessLayer.Services
                 throw new KeyNotFoundException($"Job order with ID {dto.OrderId} not found.");
             }
 
-
             if (dto.Application != null && dto.Application.ApplicationId > 0)
             {
                 dto.Application.CreationDate = existingJobOrder.Application.CreationDate;
-                dto.Application.CreatedByUserID= existingJobOrder.Application.CreatedByUserID;
+                dto.Application.CreatedByUserID = existingJobOrder.Application.CreatedByUserID;
 
-                await UpdateApplicationAsync(dto.Application);
+                bool updated = await UpdateApplicationAsync(dto.Application);
+                if (updated)
+                {
+                    await _shared.UpdateDriverStatusAsync(dto.DriverId, _GetDriverStatus(dto.Application.Status));
+                    await _shared.UpdateVehicleStatusAsync(dto.VehicleId, _GetVehicleStatus(dto.Application.Status));
+                }
                 _jobOrderLogger.LogInformation($"Updated application with ID {dto.Application.ApplicationId} for job order.");
             }
 
             _jobOrderLogger.LogInformation("Updating job order.");
-            return await _jobOrderRepo.UpdateJobOrderAsync(dto);
+            if (await _jobOrderRepo.UpdateJobOrderAsync(dto) && dto.OdometerAfter != null)
+            {
+                var jobOrderKilometers = dto.OdometerAfter.Value - dto.OdometerBefore;
+                await _vehicleService.UpdateVehicleTotalKilometersAsync(jobOrderKilometers, dto.VehicleId);
+            }
+
+            return true; // Ensure the method returns a value as expected.
         }
 
         public async Task<List<JobOrderDTO>> GetAllJobOrdersAsync(int pageNumber, int pageSize)
@@ -270,6 +326,9 @@ namespace BusinessLayer.Services
 
             if (dto.OdometerAfter.HasValue && dto.OdometerAfter < 0)
                 throw new InvalidOperationException("Odometer after must be greater than or equal to 0.");
+
+            if (dto.OdometerAfter < dto.OdometerBefore)
+                throw new InvalidOperationException("Odometer after must be greater than odometer before.");
         }
 
     }

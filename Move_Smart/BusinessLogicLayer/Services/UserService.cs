@@ -100,6 +100,12 @@ namespace BusinessLayer.Services
                 throw new InvalidOperationException("National Number is required.");
             }
 
+            if (!Enum.IsDefined(typeof(EnUserRole), dto.Role))
+            {
+                _logger.LogError("Validation Failed: Invalid role.");
+                throw new InvalidOperationException("Invalid role.");
+            }
+
             if (string.IsNullOrWhiteSpace(dto.Password))
             {
                 _logger.LogError("Password is required.");

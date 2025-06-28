@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "2ae2b4ca-2eda-42c3-927e-d1f02141682e",
 		"name": "Move_Smart",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "34403808"
 	},
 	"item": [
@@ -111,20 +111,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/User/login",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"User",
-								"login"
-							]
-						}
+						"url": "{{baseUrl}}/v1/User/login"
 					},
 					"response": []
 				},
@@ -166,41 +153,18 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiOTc4ZmFjNjUtOTMxYS00OTJkLTllNTMtNDkzN2RlMDI2ZThlIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1NDY5MCwiZXhwIjoxNzQ3MjU4MjkwLCJpYXQiOjE3NDcyNTQ2OTAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.h3OUzhrZiMe3ZIeM9oN_EADcvvlSIL4jQhPLDQf58KY",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"userId\": 0,\r\n    \"nationalNo\": \"30310012614556\",\r\n    \"password\": \"string\",\r\n    \"name\": \"Rashad\",\r\n    \"role\": 6,\r\n    \"accessright\": 0\r\n}",
+							"raw": "{\r\n    \"nationalNo\": \"30310012614557\",\r\n    \"password\": \"string\",\r\n    \"name\": \"Ali\",\r\n    \"role\": 5,\r\n    \"accessright\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "https://movesmartapi.runasp.net/api/v1/User",
-							"protocol": "https",
-							"host": [
-								"movesmartapi",
-								"runasp",
-								"net"
-							],
-							"path": [
-								"api",
-								"v1",
-								"User"
-							]
-						}
+						"url": "{{hostUrl}}/v1/User"
 					},
 					"response": []
 				},
@@ -221,16 +185,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{baseUrl}}/User/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"User",
-								"1"
-							]
-						}
+						"url": "{{baseUrl}}/User/1"
 					},
 					"response": []
 				},
@@ -239,16 +194,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/User/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"User",
-								""
-							]
-						}
+						"url": "{{hostUrl}}/v1/User/"
 					},
 					"response": []
 				},
@@ -266,16 +212,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{baseUrl}}/User/4",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"User",
-								"4"
-							]
-						}
+						"url": "{{baseUrl}}/User/4"
 					},
 					"response": []
 				},
@@ -293,17 +230,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{baseUrl}}/User/all/4",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"User",
-								"all",
-								"4"
-							]
-						}
+						"url": "{{baseUrl}}/User/all/4"
 					},
 					"response": []
 				},
@@ -312,16 +239,7 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/User/4",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"User",
-								"4"
-							]
-						}
+						"url": "{{baseUrl}}/User/4"
 					},
 					"response": []
 				}
@@ -333,31 +251,9 @@
 				{
 					"name": "GetALL",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiOTc4ZmFjNjUtOTMxYS00OTJkLTllNTMtNDkzN2RlMDI2ZThlIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1NDY5MCwiZXhwIjoxNzQ3MjU4MjkwLCJpYXQiOjE3NDcyNTQ2OTAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.h3OUzhrZiMe3ZIeM9oN_EADcvvlSIL4jQhPLDQf58KY",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "https://movesmartapi.runasp.net/api/SparePart",
-							"protocol": "https",
-							"host": [
-								"movesmartapi",
-								"runasp",
-								"net"
-							],
-							"path": [
-								"api",
-								"SparePart"
-							]
-						}
+						"url": "https://movesmartapi.runasp.net/api/SparePart"
 					},
 					"response": []
 				},
@@ -366,13 +262,9 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiMzc0MGY4NjUtN2ZmNS00NTA3LWIyMGQtMDBlOTNiNDU5YzFmIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI0OTE1OCwiZXhwIjoxNzQ3MjUyNzU4LCJpYXQiOjE3NDcyNDkxNTgsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.Bi11ljpDK61tiwLus0FZlLeufFQh-xbm68b44KbmlNU",
-									"type": "string"
-								}
-							]
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiMzc0MGY4NjUtN2ZmNS00NTA3LWIyMGQtMDBlOTNiNDU5YzFmIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI0OTE1OCwiZXhwIjoxNzQ3MjUyNzU4LCJpYXQiOjE3NDcyNDkxNTgsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.Bi11ljpDK61tiwLus0FZlLeufFQh-xbm68b44KbmlNU"
+							}
 						},
 						"method": "POST",
 						"header": [],
@@ -385,19 +277,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "https://movesmartapi.runasp.net/api/SparePart",
-							"protocol": "https",
-							"host": [
-								"movesmartapi",
-								"runasp",
-								"net"
-							],
-							"path": [
-								"api",
-								"SparePart"
-							]
-						}
+						"url": "https://movesmartapi.runasp.net/api/SparePart"
 					},
 					"response": []
 				},
@@ -406,13 +286,9 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiOTc4ZmFjNjUtOTMxYS00OTJkLTllNTMtNDkzN2RlMDI2ZThlIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1NDY5MCwiZXhwIjoxNzQ3MjU4MjkwLCJpYXQiOjE3NDcyNTQ2OTAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.h3OUzhrZiMe3ZIeM9oN_EADcvvlSIL4jQhPLDQf58KY",
-									"type": "string"
-								}
-							]
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiOTc4ZmFjNjUtOTMxYS00OTJkLTllNTMtNDkzN2RlMDI2ZThlIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1NDY5MCwiZXhwIjoxNzQ3MjU4MjkwLCJpYXQiOjE3NDcyNTQ2OTAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.h3OUzhrZiMe3ZIeM9oN_EADcvvlSIL4jQhPLDQf58KY"
+							}
 						},
 						"method": "PUT",
 						"header": [],
@@ -425,19 +301,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "https://movesmartapi.runasp.net/api/SparePart",
-							"protocol": "https",
-							"host": [
-								"movesmartapi",
-								"runasp",
-								"net"
-							],
-							"path": [
-								"api",
-								"SparePart"
-							]
-						}
+						"url": "https://movesmartapi.runasp.net/api/SparePart"
 					},
 					"response": []
 				}
@@ -452,36 +316,53 @@
 						"disableBodyPruning": true
 					},
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTYiLCJSYXNoYWQiXSwianRpIjoiNjU0YTNkOWQtM2I1Mi00NTY5LWI0OTAtZDk5YjIwMTU0MjBlIiwicm9sZSI6IkFkbWluaXN0cmF0aXZlU3VwZXJ2aXNvciIsIm5iZiI6MTc0NzI1NTc1OSwiZXhwIjoxNzQ3MjU5MzU5LCJpYXQiOjE3NDcyNTU3NTksImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.LIbCM3sUoYtIis4tF36KzDCV5-2Yqql6Kz_YaNd-dzU",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"nationalNo\": \"30310012614555\",\r\n    \"password\": \"string\"\r\n}"
 						},
-						"url": {
-							"raw": "https://movesmartapi.runasp.net/api/Vehicles/All",
-							"protocol": "https",
-							"host": [
-								"movesmartapi",
-								"runasp",
-								"net"
-							],
-							"path": [
-								"api",
-								"Vehicles",
-								"All"
-							]
-						}
+						"url": "{{baseUrl}}/Vehicles/All"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
+						},
+						"url": "{{hostUrl}}/Vehicles/ByID/12"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete with platenumber",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{hostUrl}}//Vehicles/ByPlateNumbers/bcd123"
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"vehicleID\": 0,\r\n  \"brandName\": \"Test\",\r\n  \"modelName\": \"Test again\",\r\n  \"plateNumbers\": \"asd1234\",\r\n  \"vehicleType\": 0,\r\n  \"associatedHospital\": \"string\",\r\n  \"associatedTask\": \"string\",\r\n  \"status\": 1,\r\n  \"totalKilometersMoved\": 0,\r\n  \"fuelType\": 0,\r\n  \"fuelConsumptionRate\": 50,\r\n  \"oilConsumptionRate\": 100\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/Vehicles"
 					},
 					"response": []
 				}
@@ -495,13 +376,9 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiNDAxNDZmNDktMGE0Yy00ODgxLTg3ZWMtODQ2ZmJmZThiYjJhIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1OTUzNSwiZXhwIjoxNzQ3MjYzMTM1LCJpYXQiOjE3NDcyNTk1MzUsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.hGojBryAXX7a_gID6UEwdc_gz-zooqVlPoIexjv1zVo",
-									"type": "string"
-								}
-							]
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiNDAxNDZmNDktMGE0Yy00ODgxLTg3ZWMtODQ2ZmJmZThiYjJhIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1OTUzNSwiZXhwIjoxNzQ3MjYzMTM1LCJpYXQiOjE3NDcyNTk1MzUsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.hGojBryAXX7a_gID6UEwdc_gz-zooqVlPoIexjv1zVo"
+							}
 						},
 						"method": "POST",
 						"header": [],
@@ -514,19 +391,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "https://movesmartapi.runasp.net/api/VehicleConsumable",
-							"protocol": "https",
-							"host": [
-								"movesmartapi",
-								"runasp",
-								"net"
-							],
-							"path": [
-								"api",
-								"VehicleConsumable"
-							]
-						}
+						"url": "https://movesmartapi.runasp.net/api/VehicleConsumable"
 					},
 					"response": []
 				},
@@ -535,29 +400,13 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiNDAxNDZmNDktMGE0Yy00ODgxLTg3ZWMtODQ2ZmJmZThiYjJhIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1OTUzNSwiZXhwIjoxNzQ3MjYzMTM1LCJpYXQiOjE3NDcyNTk1MzUsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.hGojBryAXX7a_gID6UEwdc_gz-zooqVlPoIexjv1zVo",
-									"type": "string"
-								}
-							]
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJzdHJpbmciXSwianRpIjoiNDAxNDZmNDktMGE0Yy00ODgxLTg3ZWMtODQ2ZmJmZThiYjJhIiwicm9sZSI6IlN1cGVyVXNlciIsIm5iZiI6MTc0NzI1OTUzNSwiZXhwIjoxNzQ3MjYzMTM1LCJpYXQiOjE3NDcyNTk1MzUsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.hGojBryAXX7a_gID6UEwdc_gz-zooqVlPoIexjv1zVo"
+							}
 						},
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "https://movesmartapi.runasp.net/api/VehicleConsumable",
-							"protocol": "https",
-							"host": [
-								"movesmartapi",
-								"runasp",
-								"net"
-							],
-							"path": [
-								"api",
-								"VehicleConsumable"
-							]
-						}
+						"url": "https://movesmartapi.runasp.net/api/VehicleConsumable"
 					},
 					"response": []
 				}
@@ -628,14 +477,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder?pageNumber=1&pageSize=10",
-							"protocol": "https",
+							"raw": "{{baseUrl}}/v1/JobOrder?pageNumber=1&pageSize=10",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "7141",
 							"path": [
-								"api",
 								"v1",
 								"JobOrder"
 							],
@@ -713,26 +559,14 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"orderId\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"status\": 1,\r\n    \"applicationType\": 1,\r\n    \"applicationDescription\": \"Test application from test job order\",\r\n    \"createdByUserID\": 1\r\n  },\r\n  \"vehicleId\": 1,\r\n  \"driverId\": 1,\r\n  \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n  \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n  \"startTime\": \"08:00:00\",\r\n  \"endTime\": \"10:00:00\",\r\n  \"destination\": \"Sohag\",\r\n  \"odometerBefore\": 1000\r\n}",
+							"raw": "{\r\n  \"orderId\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"status\": 1,\r\n    \"applicationType\": 1,\r\n    \"applicationDescription\": \"Test application from test job order\",\r\n    \"createdByUserID\": 1\r\n  },\r\n  \"vehicleId\": 4,\r\n  \"driverId\": 3,\r\n  \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n  \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n  \"startTime\": \"08:00:00\",\r\n  \"endTime\": \"10:00:00\",\r\n  \"destination\": \"Sohag\",\r\n  \"odometerBefore\": 1000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder"
-							]
-						}
+						"url": "{{baseUrl}}/v1/JobOrder"
 					},
 					"response": []
 				},
@@ -743,27 +577,14 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"orderId\": 13,\r\n    \"application\": {\r\n        \"$id\": \"2\",\r\n        \"applicationId\": 14,\r\n        \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n        \"status\": 3,\r\n        \"applicationType\": 1,\r\n        \"applicationDescription\": \"Test update application from test update job order\",\r\n        \"createdByUserID\": 1\r\n    },\r\n    \"vehicleId\": 1,\r\n    \"driverId\": 1,\r\n    \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n    \"startTime\": \"08:00:00\",\r\n    \"endTime\": \"10:00:00\",\r\n    \"destination\": \"Sohag\",\r\n    \"odometerBefore\": 1000,\r\n    \"odometerAfter\": 1000\r\n}",
+							"raw": "{\r\n    \"orderId\": 21,\r\n    \"application\": {\r\n        \"$id\": \"2\",\r\n        \"applicationId\": 24,\r\n        \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n        \"status\": 1,\r\n        \"applicationType\": 1,\r\n        \"applicationDescription\": \"Test update application from test update job order\",\r\n        \"createdByUserID\": 1\r\n    },\r\n    \"vehicleId\": 4,\r\n    \"driverId\": 3,\r\n    \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n    \"startTime\": \"08:00:00\",\r\n    \"endTime\": \"10:00:00\",\r\n    \"destination\": \"Sohag\",\r\n    \"odometerBefore\": 1000,\r\n    \"odometerAfter\": 1000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/13",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"13"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/21"
 					},
 					"response": []
 				},
@@ -772,20 +593,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/12",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"12"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/12"
 					},
 					"response": []
 				},
@@ -806,21 +614,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/vehicle/1",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"vehicle",
-								"1"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/vehicle/1"
 					},
 					"response": []
 				},
@@ -892,21 +686,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/driver/1",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"driver",
-								"1"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/driver/1"
 					},
 					"response": []
 				},
@@ -983,20 +763,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/daterange",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"daterange"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/daterange"
 					},
 					"response": []
 				},
@@ -1068,21 +835,7 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/startdate/2025-05-15",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"startdate",
-								"2025-05-15"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/startdate/2025-05-15"
 					},
 					"response": []
 				},
@@ -1166,21 +919,7 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/destination/sohag",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"destination",
-								"sohag"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/destination/sohag"
 					},
 					"response": []
 				},
@@ -1252,21 +991,7 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/status/4",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"status",
-								"4"
-							]
-						}
+						"url": "https://localhost:7141/api/v1/JobOrder/status/4"
 					},
 					"response": []
 				},
@@ -1279,20 +1004,325 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
 						},
-						"url": {
-							"raw": "https://localhost:7141/api/v1/JobOrder/12",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "7141",
-							"path": [
-								"api",
-								"v1",
-								"JobOrder",
-								"12"
-							]
+						"url": "{{hostUrl}}/v1/JobOrder/2"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Drivers",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/Drivers/All"
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"driverID\": 0,\r\n  \"nationalNo\": \"20711111111112\",\r\n  \"name\": \"string\",\r\n  \"phone\": \"01000000000\",\r\n  \"status\": 0,\r\n  \"vehicleID\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/Drivers"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patrols",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"description\": \"First Patrol to test\",\r\n  \"movingAt\": \"08:00\",\r\n  \"approximatedTime\": 60,\r\n  \"busID\": 6\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{hostUrl}}/Patrols"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{hostUrl}}/Patrols/All"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Buses",
+			"item": [
+				{
+					"name": "GetAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nationalNo\": \"30310012614555\",\r\n    \"password\": \"string\"\r\n}"
+						},
+						"url": "{{hostUrl}}/Buses/All"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{hostUrl}}/Buses/ByID/"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Mission",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{hostUrl}}/Mission"
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"missionId\": 0,\r\n  \"missionNoteId\": 1,\r\n  \"missionVehiclesId\": 0,\r\n  \"startDate\": \"2025-06-17T16:54:43.664Z\",\r\n  \"endDate\": \"2025-06-17T16:54:43.664Z\",\r\n  \"destination\": \"string\",\r\n  \"userId\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{hostUrl}}/Mission"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MissionNote",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"noteID\": 0,\r\n  \"applicationID\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-06-17T16:07:25.550Z\",\r\n    \"status\": 1,\r\n    \"applicationType\": 2,\r\n    \"applicationDescription\": \"string\",\r\n    \"createdByUserID\": 1\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{hostUrl}}/MissionsNotes"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MissionVehicle",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"noteID\": 0,\r\n  \"applicationID\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-06-17T16:07:25.550Z\",\r\n    \"status\": 1,\r\n    \"applicationType\": 2,\r\n    \"applicationDescription\": \"string\",\r\n    \"createdByUserID\": 1\r\n  }\r\n}"
+						},
+						"url": "{{hostUrl}}/MissionVehicle"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SparepartPurchaseOrder",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": 0,\r\n  \"applicationId\": 0,\r\n  \"requiredItem\": 18,\r\n  \"requiredQuantity\": 20,\r\n  \"approvedByGeneralSupervisor\": 0,\r\n  \"approvedByGeneralManager\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-06-21T12:52:19.573Z\",\r\n    \"status\": 1,\r\n    \"applicationType\": 4,\r\n    \"applicationDescription\": \"string\",\r\n    \"createdByUserID\": 1\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{hostUrl}}/SparePartPurchaseOrderService"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Order ID</th>\r",
+									"        <th>Application ID</th>\r",
+									"        <th>Required Item</th>\r",
+									"        <th>Required Quantity</th>\r",
+									"        <th>Approved By General Supervisor</th>\r",
+									"        <th>Approved By General Manager</th>\r",
+									"        <th>Application Creation Date</th>\r",
+									"        <th>Application Status</th>\r",
+									"        <th>Application Description</th>\r",
+									"    </tr>\r",
+									"    \r",
+									"    {{#each response.$values}}\r",
+									"        <tr>\r",
+									"            <td>{{orderId}}</td>\r",
+									"            <td>{{applicationId}}</td>\r",
+									"            <td>{{requiredItem}}</td>\r",
+									"            <td>{{requiredQuantity}}</td>\r",
+									"            <td>{{approvedByGeneralSupervisor}}</td>\r",
+									"            <td>{{approvedByGeneralManager}}</td>\r",
+									"            <td>{{application.creationDate}}</td>\r",
+									"            <td>{{application.status}}</td>\r",
+									"            <td>{{application.applicationDescription}}</td>\r",
+									"        </tr>\r",
+									"    {{/each}}\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    var res = pm.response.json();\r",
+									"    return { response: res };\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{hostUrl}}/SparePartPurchaseOrderService"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ConsumablePurchaseOrder",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{hostUrl}}/ConsumablePurchaseOrderService"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MaintenanceApplication",
+			"item": [
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"maintenanceApplicationID\": 2,\r\n  \"applicationID\": 21,\r\n  \"vehicleID\": 1,\r\n  \"approvedByGeneralSupervisor\": true,\r\n  \"approvedByGeneralManager\": true,\r\n  \"application\": {\r\n    \"applicationId\": 21,\r\n    \"creationDate\": \"2025-06-23T18:38:30.217Z\",\r\n    \"status\": 4,\r\n    \"applicationType\": 7,\r\n    \"applicationDescription\": \"stringtest agagin\",\r\n    \"createdByUserID\": 1\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/MaintenanceApplications"
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"maintenanceApplicationID\": 0,\r\n  \"applicationID\": 0,\r\n  \"vehicleID\": 1,\r\n  \"approvedByGeneralSupervisor\": false,\r\n  \"approvedByGeneralManager\": false,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-06-23T18:38:30.217Z\",\r\n    \"status\": 3,\r\n    \"applicationType\": 7,\r\n    \"applicationDescription\": \"string\",\r\n    \"createdByUserID\": 1\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/MaintenanceApplications"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/MaintenanceApplications/All"
 					},
 					"response": []
 				}
@@ -1301,13 +1331,9 @@
 	],
 	"auth": {
 		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJBaG1lZCBIYW1keSJdLCJqdGkiOiIxNGVjYmU3Mi0xYzZkLTQ2MTAtYTJjNy05NWRiNmMwYjNkNmQiLCJyb2xlIjoiU3VwZXJVc2VyIiwibmJmIjoxNzQ3MzA0MDY0LCJleHAiOjE3NDczMDc2NjMsImlhdCI6MTc0NzMwNDA2NCwiaXNzIjoiTW92ZVNtYXJ0QVBJIiwiYXVkIjoiTW92ZVNtYXJ0VXNlcnMifQ.q-cU3bK22xm3CURGpWVZMaqmH69DRAw6_QFlP7v-Zvw",
-				"type": "string"
-			}
-		]
+		"bearer": {
+			"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJBaG1lZCBIYW1keSJdLCJqdGkiOiI2NGE1ODg4Ni04YjVjLTQyNjctOTlmZS1hMTlhZTFmZGJmYjUiLCJyb2xlIjoiU3VwZXJVc2VyIiwibmFtZWlkIjoiMSIsIm5iZiI6MTc1MDcwNDAyMCwiZXhwIjoxNzUwNzA3NjIwLCJpYXQiOjE3NTA3MDQwMjAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.7xqXwFZMlQ1lRg-O17ukpkPlSevWIrRTHYxQTlk1i4A"
+		}
 	},
 	"event": [
 		{
@@ -1329,6 +1355,18 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:7141/api",
+			"type": "string"
+		},
+		{
+			"key": "hostUrl",
+			"value": "https://movesmartapi.runasp.net/api",
+			"type": "string"
 		}
 	]
 }

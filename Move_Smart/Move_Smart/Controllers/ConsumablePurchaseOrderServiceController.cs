@@ -102,7 +102,7 @@ namespace Move_Smart.Controllers
             try
             {
                 var count = await _consumablespurchaseorderService.CountAllConsumablePurchaseOrdersAsync();
-                return Ok(count);
+                return Ok( new { count });
             }
             catch (Exception ex)
             {

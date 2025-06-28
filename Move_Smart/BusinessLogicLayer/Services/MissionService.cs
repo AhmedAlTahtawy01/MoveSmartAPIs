@@ -30,40 +30,40 @@ namespace BusinessLogicLayer.Services
             return (endDate - startDate).Days;
         }
 
-        private async void CreateJobOrdersForMissionAsync(MissionDTO mission)
-        {
-            int jobOrdersToCreate = CalculateDays(mission.StartDate, mission.EndDate);
+        //private async void CreateJobOrdersForMissionAsync(MissionDTO mission)
+        //{
+        //    int jobOrdersToCreate = CalculateDays(mission.StartDate, mission.EndDate);
 
-            if (jobOrdersToCreate < 0)
-            {
-                _logger.LogWarning("Invalid number of job orders to create.");
-                throw new ArgumentException("Invalid number of job orders to create.");
-            }
+        //    if (jobOrdersToCreate < 0)
+        //    {
+        //        _logger.LogWarning("Invalid number of job orders to create.");
+        //        throw new ArgumentException("Invalid number of job orders to create.");
+        //    }
             
-            try
-            {
-                for (int i = 0; i <= jobOrdersToCreate; i++)
-                {
-                    // Assuming JobOrderDTO is a valid DTO for job orders
-                    //var jobOrder = new JobOrderDTO
-                    //{
-                    //    OrderId = 0,
-                    //    StartDate = mission.StartDate.AddDays(i),
-                    //    EndDate = mission.StartDate.AddDays(i + 1),
-                    //    VehicleId = mission.MissionVehiclesId,
-                    //    Destination = mission.Destination
-                    //};
+        //    try
+        //    {
+        //        for (int i = 0; i <= jobOrdersToCreate; i++)
+        //        {
+        //            // Assuming JobOrderDTO is a valid DTO for job orders
+        //            //var jobOrder = new JobOrderDTO
+        //            //{
+        //            //    OrderId = 0,
+        //            //    StartDate = mission.StartDate.AddDays(i),
+        //            //    EndDate = mission.StartDate.AddDays(i + 1),
+        //            //    VehicleId = mission.MissionVehiclesId,
+        //            //    Destination = mission.Destination
+        //            //};
 
-                    _logger.LogInformation($"Creating job order {i + 1} for mission {mission.MissionId}.");
-                    //await _jobOrderService.CreateJobOrderAsync(jobOrder);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Failed to create job orders for mission {mission.MissionId}: {ex.Message}");
-                throw;
-            }
-        }
+        //            _logger.LogInformation($"Creating job order {i + 1} for mission {mission.MissionId}.");
+        //            //await _jobOrderService.CreateJobOrderAsync(jobOrder);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError($"Failed to create job orders for mission {mission.MissionId}: {ex.Message}");
+        //        throw;
+        //    }
+        //}
 
         public async Task<int> CreateMissionAsync(int missionNoteId, MissionDTO dto)
         {
@@ -89,7 +89,7 @@ namespace BusinessLogicLayer.Services
 
             dto.MissionNoteId = missionNoteId;
 
-            CreateJobOrdersForMissionAsync(dto);
+            //CreateJobOrdersForMissionAsync(dto);
 
             _logger.LogInformation("Creating new mission.");
             return await _repo.CreateMissionAsync(dto);
@@ -159,18 +159,6 @@ namespace BusinessLogicLayer.Services
             return await _repo.GetMissionsByNoteIdAsync(missionNoteId);
         }
 
-        public async Task<List<MissionDTO>> GetMissionsByVehicleIdAsync(int missionVehicleId)
-        {
-            if (missionVehicleId <= 0)
-            {
-                _logger.LogWarning("Attempted to retrieve missions with invalid Vehicle ID.");
-                throw new ArgumentException("Mission Vehicle ID must be greater than 0.");
-            }
-
-            _logger.LogInformation($"Retrieving missions for Vehicle ID {missionVehicleId}");
-            return await _repo.GetMissionsByVehicleIdAsync(missionVehicleId);
-        }
-
         public async Task<List<MissionDTO>> GetMissionsByStartDateAsync(DateTime startDate)
         {
             if (startDate == default)
@@ -219,12 +207,6 @@ namespace BusinessLogicLayer.Services
             {
                 _logger.LogWarning("Mission Note ID is invalid.");
                 throw new ArgumentException("Mission Note ID must be greater than 0.", nameof(mission.MissionNoteId));
-            }
-
-            if (mission.MissionVehiclesId <= 0)
-            {
-                _logger.LogWarning("Mission Vehicle ID is invalid.");
-                throw new ArgumentException("Mission Vehicle ID must be greater than 0.", nameof(mission.MissionVehiclesId));
             }
 
             if (mission.UserId <= 0)

@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using MySql.Data.MySqlClient;
+using DataAccessLayer.Repositories;
+using static DataAccessLayer.DriverDTO;
+using static DataAccessLayer.VehicleDTO;
 
 namespace DataAccessLayer.SharedFunctions
 {
@@ -99,6 +102,30 @@ namespace DataAccessLayer.SharedFunctions
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync()) > 0;
             },
             new MySqlParameter("@JobOrderId", jobOrderId)
+            );
+        }
+    
+        public async Task<bool> UpdateDriverStatusAsync(int driverId, enDriverStatus status)
+        {
+            const string query = "UPDATE drivers SET Status = @Status WHERE DriverID = @DriverId";
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteNonQueryAsync()) > 0;
+            },
+            new MySqlParameter("@DriverId", driverId),
+            new MySqlParameter("@Status", status)
+            );
+        }
+
+        public async Task<bool> UpdateVehicleStatusAsync(int vehicleId, enVehicleStatus status)
+        {
+            const string query = "UPDATE vehicles SET Status = @Status WHERE VehicleID = @VehicleId";
+            return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                return Convert.ToInt32(await cmd.ExecuteNonQueryAsync()) > 0;
+            },
+            new MySqlParameter("@VehicleId", vehicleId),
+            new MySqlParameter("@Status", status)
             );
         }
     }

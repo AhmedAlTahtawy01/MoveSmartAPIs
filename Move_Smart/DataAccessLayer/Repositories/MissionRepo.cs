@@ -16,17 +16,15 @@ namespace DataAccessLayer.Repositories
     {
         public int MissionId { get; set; }
         public int MissionNoteId { get; set; }
-        public int MissionVehiclesId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string Destination { get; set; }
         public int UserId { get; set; }
 
-        public MissionDTO(int missionId, int missionNoteId, int missionVechiclesId, DateTime startDate, DateTime endDate, string destination, int createdByUser)
+        public MissionDTO(int missionId, int missionNoteId, DateTime startDate, DateTime endDate, string destination, int createdByUser)
         {
             MissionId = missionId;
             MissionNoteId = missionNoteId;
-            MissionVehiclesId = missionVechiclesId;
             StartDate = startDate;
             EndDate = endDate;
             Destination = destination;
@@ -51,7 +49,6 @@ namespace DataAccessLayer.Repositories
             (
                 reader.GetInt32("MissionID"),
                 reader.GetInt32("MissionNoteID"),
-                reader.GetInt32("MissionVehiclesID"),
                 reader.GetDateTime("MissionStartDate"),
                 reader.GetDateTime("MissionEndDate"),
                 reader.GetString("Destination"),
@@ -65,7 +62,7 @@ namespace DataAccessLayer.Repositories
                 throw new ArgumentException("Page number and page size must be greater than 0.");
 
             const string query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
+                    SELECT MissionID, MissionNoteID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
                     FROM missions
                     LIMIT @Offset, @PageSize";
             int offset = (pageNumber - 1) * pageSize;
@@ -84,7 +81,7 @@ namespace DataAccessLayer.Repositories
         public async Task<MissionDTO?> GetMissionByIdAsync(int missionId)
         {
             const string query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
+                    SELECT MissionID, MissionNoteID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
                     FROM missions
                     WHERE MissionID = @missionId";
 
@@ -98,7 +95,7 @@ namespace DataAccessLayer.Repositories
         private async Task<List<MissionDTO>> GetMissionsAsync(string filter, params MySqlParameter[] parameters)
         {
             string query = @"
-                    SELECT MissionID, MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
+                    SELECT MissionID, MissionNoteID, MissionStartDate, MissionEndDate, Destination, CreatedByUser
                     FROM missions";
 
             if (!string.IsNullOrEmpty(filter))
@@ -117,12 +114,6 @@ namespace DataAccessLayer.Repositories
         {
             return await GetMissionsAsync("MissionNoteID = @missionNoteId",
                 new MySqlParameter("@missionNoteId", missionNoteId));
-        }
-
-        public async Task<List<MissionDTO>> GetMissionsByVehicleIdAsync(int missionVehiclesId)
-        {
-            return await GetMissionsAsync("MissionVehiclesID = @missionVehiclesId",
-                new MySqlParameter("@missionVehicleId", missionVehiclesId));
         }
 
         public async Task<List<MissionDTO>> GetMissionsByStartDateAsync(DateTime startDate)
@@ -146,15 +137,14 @@ namespace DataAccessLayer.Repositories
         public async Task<int> CreateMissionAsync(MissionDTO mission)
         {
             const string query = @"
-                INSERT INTO missions (MissionNoteID, MissionVehiclesID, MissionStartDate, MissionEndDate, Destination, CreatedByUser)
-                VALUES (@missionNoteId, @missionVehiclesId, @missionStartDate, @missionEndDate, @destination, @createdByUser)
+                INSERT INTO missions (MissionNoteID, MissionStartDate, MissionEndDate, Destination, CreatedByUser)
+                VALUES (@missionNoteId, @missionStartDate, @missionEndDate, @destination, @createdByUser)
                 SELECT LAST_INSERT_ID();";
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return Convert.ToInt32(await cmd.ExecuteScalarAsync());
             }, new MySqlParameter("@missionNoteId", mission.MissionNoteId),
-            new MySqlParameter("@missionVehiclesId", mission.MissionVehiclesId),
             new MySqlParameter("@missionStartDate", mission.StartDate),
             new MySqlParameter("@missionEndDate", mission.EndDate),
             new MySqlParameter("@destination", mission.Destination),
@@ -167,7 +157,6 @@ namespace DataAccessLayer.Repositories
                 UPDATE missions
                 SET 
                     MissionNoteID = @missionNoteId,
-                    MissionVehiclesID = @missionVehiclesId,
                     MissionStartDate = @startDate,
                     MissionEndDate = @endDate,
                     Destination = @destination,
@@ -180,7 +169,6 @@ namespace DataAccessLayer.Repositories
                 return await cmd.ExecuteNonQueryAsync() > 0;
             }, new MySqlParameter("@missionId", mission.MissionId),
             new MySqlParameter("@missionNoteId", mission.MissionNoteId),
-            new MySqlParameter("@missionVehiclesId", mission.MissionVehiclesId),
             new MySqlParameter("@missionStartDate", mission.StartDate),
             new MySqlParameter("@missionEndDate", mission.EndDate),
             new MySqlParameter("@destination", mission.Destination),
