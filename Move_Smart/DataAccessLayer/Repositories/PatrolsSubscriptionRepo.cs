@@ -44,6 +44,39 @@ namespace DataAccessLayer
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        public async Task<List<PatrolsSubscriptionDTO>> GetAllSubscriptionsAsync()
+        {
+            List<PatrolsSubscriptionDTO> subscriptionsList = new List<PatrolsSubscriptionDTO>();
+            string query = @"SELECT * FROM PatrolsSubscriptions";
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        await conn.OpenAsync();
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                subscriptionsList.Add(new PatrolsSubscriptionDTO(
+                                    Convert.ToInt32(reader["SubscriptionID"]),
+                                    Convert.ToInt16(reader["PatrolID"]),
+                                    Convert.ToInt32(reader["EmployeeID"]),
+                                    (enTransportationSubscriptionStatus)Enum.Parse(typeof(enTransportationSubscriptionStatus), reader["TransportationSubscriptionStatus"].ToString() ?? string.Empty)
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return subscriptionsList;
+        }
+
         public async Task<List<PatrolsSubscriptionDTO>> GetAllSubscriptionsForEmployeeAsync(int employeeID)
         {
             List<PatrolsSubscriptionDTO> subscriptionsList = new List<PatrolsSubscriptionDTO>();
@@ -180,7 +213,7 @@ namespace DataAccessLayer
                     {
                         cmd.Parameters.AddWithValue("PatrolID", newSubscription.PatrolID);
                         cmd.Parameters.AddWithValue("EmployeeID", newSubscription.EmployeeID);
-                        cmd.Parameters.AddWithValue("EmployeeID", newSubscription.TransportationSubscriptionStatus.ToString());
+                        cmd.Parameters.AddWithValue("TransportationSubscriptionStatus", newSubscription.TransportationSubscriptionStatus.ToString());
 
                         await conn.OpenAsync();
 
@@ -218,7 +251,7 @@ namespace DataAccessLayer
                         cmd.Parameters.AddWithValue("SubscriptionID", updatedSubscription.SubscriptionID);
                         cmd.Parameters.AddWithValue("PatrolID", updatedSubscription.PatrolID);
                         cmd.Parameters.AddWithValue("EmployeeID", updatedSubscription.EmployeeID);
-                        cmd.Parameters.AddWithValue("EmployeeID", updatedSubscription.TransportationSubscriptionStatus.ToString());
+                        cmd.Parameters.AddWithValue("TransportationSubscriptionStatus", updatedSubscription.TransportationSubscriptionStatus.ToString());
 
                         await conn.OpenAsync();
 

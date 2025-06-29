@@ -1,10 +1,12 @@
 ﻿using DataAccessLayer;
+using DataAccessLayer.Repositories;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DataAccessLayer.PatrolsSubscriptionDTO;
 
 namespace BusinessLogicLayer.Services
 {
@@ -39,6 +41,12 @@ namespace BusinessLogicLayer.Services
             {
                 _patrolsSubscriptionLogger.LogError($"Employee with ID {dto.EmployeeID} doesn't exist.");
                 throw new ArgumentException(nameof(dto), $"Employee with ID {dto.EmployeeID} doesn't exist.");
+            }
+
+            if (!Enum.IsDefined(typeof(enTransportationSubscriptionStatus), dto.TransportationSubscriptionStatus))
+            {
+                _patrolsSubscriptionLogger.LogError("Validation Failed: Invalid status.");
+                throw new InvalidOperationException("Invalid status.");
             }
         }
 
@@ -77,6 +85,11 @@ namespace BusinessLogicLayer.Services
             }
 
             return await _patrolsSubscriptionRepo.UpdateSubscriptionRecordAsync(dto);
+        }
+
+        public async Task<List<PatrolsSubscriptionDTO>> GetAllPatrolsSubscriptionsAsync()
+        {
+            return await _patrolsSubscriptionRepo.GetAllSubscriptionsAsync();
         }
 
         public async Task<List<PatrolsSubscriptionDTO>> GetAllPatrolsSubscriptionsForEmployeeAsync(int employeeID)

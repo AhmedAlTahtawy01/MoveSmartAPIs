@@ -19,6 +19,19 @@ namespace Move_Smart.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "RequirePatrolsSupervisor")]
+        [HttpGet("All", Name = "GetAllPatrolsSubscriptions")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<PatrolsSubscriptionDTO>>> GetAllPatrolsSubscriptions()
+        {
+            List<PatrolsSubscriptionDTO> patrolsSubscriptions = await _service.GetAllPatrolsSubscriptionsAsync();
+            if (patrolsSubscriptions == null || !patrolsSubscriptions.Any())
+            {
+                return NotFound(new { message = "No patrols subscriptions found." });
+            }
+            return Ok(patrolsSubscriptions);
+        }
 
         [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpGet("AllForEmployee/{employeeID}", Name = "GetPatrolsSubscriptionForEmployee")]
