@@ -125,27 +125,6 @@ namespace Move_Smart.Controllers
 
 
         [Authorize(Policy = "RequirePatrolsSupervisor")]
-        [HttpGet("/IsTransportationSubscriptionValid/{employeeID}", Name = "IsTransportationSubscriptionValid")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<bool>> IsTransportationSubscriptionValid(int employeeID)
-        {
-            if (employeeID <= 0)
-            {
-                return BadRequest(new { message = $"Invalid Employee ID [{employeeID}]" });
-            }
-            
-            if (!await _service.IsTransportationSubscriptionValidAsync(employeeID))
-            {
-                return NotFound(new { message = $"Transportation subscription for employee with ID [{employeeID}] is not valid!" });
-            }
-            
-            return Ok(true);
-        }
-
-
-        [Authorize(Policy = "RequirePatrolsSupervisor")]
         [HttpPost(Name = "AddNewEmployee")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

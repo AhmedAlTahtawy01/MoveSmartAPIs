@@ -6,20 +6,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DataAccessLayer.PatrolsSubscriptionDTO;
 
 namespace DataAccessLayer
 {
     public class PatrolsSubscriptionDTO
     {
+        public enum enTransportationSubscriptionStatus : byte
+        {
+            Valid = 0,
+            Expired = 1,
+            Unsubscribed = 2
+        }
         public int? SubscriptionID { get; set; }
         public short PatrolID { get; set; }
         public int EmployeeID { get; set; }
+        public enTransportationSubscriptionStatus TransportationSubscriptionStatus { get; set; }
 
-        public PatrolsSubscriptionDTO(int? subscriptionID, short patrolID, int employeeID)
+        public PatrolsSubscriptionDTO(int? subscriptionID, short patrolID, int employeeID,
+            enTransportationSubscriptionStatus transportationSubscriptionStatus)
         {
             SubscriptionID = subscriptionID;
             PatrolID = patrolID;
             EmployeeID = employeeID;
+            TransportationSubscriptionStatus = transportationSubscriptionStatus;
         }
     }
 
@@ -58,7 +68,8 @@ namespace DataAccessLayer
                                 subscriptionsList.Add(new PatrolsSubscriptionDTO(
                                     Convert.ToInt32(reader["SubscriptionID"]),
                                     Convert.ToInt16(reader["PatrolID"]),
-                                    Convert.ToInt32(reader["EmployeeID"])
+                                    Convert.ToInt32(reader["EmployeeID"]),
+                                    (enTransportationSubscriptionStatus)Enum.Parse(typeof(enTransportationSubscriptionStatus), reader["TransportationSubscriptionStatus"].ToString() ?? string.Empty)
                                 ));
                             }
                         }
@@ -97,7 +108,8 @@ namespace DataAccessLayer
                                 subscriptionsList.Add(new PatrolsSubscriptionDTO(
                                     Convert.ToInt32(reader["SubscriptionID"]),
                                     Convert.ToInt16(reader["PatrolID"]),
-                                    Convert.ToInt32(reader["EmployeeID"])
+                                    Convert.ToInt32(reader["EmployeeID"]),
+                                    (enTransportationSubscriptionStatus)Enum.Parse(typeof(enTransportationSubscriptionStatus), reader["TransportationSubscriptionStatus"].ToString() ?? string.Empty)
                                 ));
                             }
                         }
@@ -134,7 +146,8 @@ namespace DataAccessLayer
                                 return new PatrolsSubscriptionDTO(
                                     Convert.ToInt32(reader["SubscriptionID"]),
                                     Convert.ToInt16(reader["PatrolID"]),
-                                    Convert.ToInt32(reader["EmployeeID"])
+                                    Convert.ToInt32(reader["EmployeeID"]),
+                                    (enTransportationSubscriptionStatus)Enum.Parse(typeof(enTransportationSubscriptionStatus), reader["TransportationSubscriptionStatus"].ToString() ?? string.Empty)
                                 );
                             }
                         }
@@ -152,9 +165,9 @@ namespace DataAccessLayer
         public async Task<int?> CreateNewSubscriptionRecordAsync(PatrolsSubscriptionDTO newSubscription)
         {
             string query = @"INSERT INTO PatrolsSubscriptions
-                            (PatrolID, EmployeeID)
+                            (PatrolID, EmployeeID, TransportationSubscriptionStatus)
                             VALUES
-                            (@PatrolID, @EmployeeID);
+                            (@PatrolID, @EmployeeID, TransportationSubscriptionStatus);
 
                             SELECT LAST_INSERT_ID();"
             ;
@@ -167,6 +180,7 @@ namespace DataAccessLayer
                     {
                         cmd.Parameters.AddWithValue("PatrolID", newSubscription.PatrolID);
                         cmd.Parameters.AddWithValue("EmployeeID", newSubscription.EmployeeID);
+                        cmd.Parameters.AddWithValue("EmployeeID", newSubscription.TransportationSubscriptionStatus.ToString());
 
                         await conn.OpenAsync();
 
@@ -190,7 +204,8 @@ namespace DataAccessLayer
         {
             string query = @"UPDATE PatrolsSubscriptions SET
                             PatrolID = @PatrolID,
-                            EmployeeID = @EmployeeID
+                            EmployeeID = @EmployeeID,
+                            TransportationSubscriptionStatus = @TransportationSubscriptionStatus
                             WHERE SubscriptionID = @SubscriptionID"
             ;
 
@@ -203,6 +218,7 @@ namespace DataAccessLayer
                         cmd.Parameters.AddWithValue("SubscriptionID", updatedSubscription.SubscriptionID);
                         cmd.Parameters.AddWithValue("PatrolID", updatedSubscription.PatrolID);
                         cmd.Parameters.AddWithValue("EmployeeID", updatedSubscription.EmployeeID);
+                        cmd.Parameters.AddWithValue("EmployeeID", updatedSubscription.TransportationSubscriptionStatus.ToString());
 
                         await conn.OpenAsync();
 

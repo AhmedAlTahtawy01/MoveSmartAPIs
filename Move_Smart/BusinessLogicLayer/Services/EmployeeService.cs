@@ -58,12 +58,6 @@ namespace BusinessLayer
                 _employeeLogger.LogError("Phone Must Be 11 Numbers.");
                 throw new ArgumentException("Phone Must Be 11 Numbers.");
             }
-
-            if (!Enum.IsDefined(typeof(enTransportationSubscriptionStatus), dto.TransportationSubscriptionStatus))
-            {
-                _employeeLogger.LogError("Validation Failed: Invalid status.");
-                throw new InvalidOperationException("Invalid status.");
-            }
         }
 
         public async Task<int?> AddNewEmployeeAsync(EmployeeDTO dto)
@@ -142,11 +136,6 @@ namespace BusinessLayer
         public async Task<bool> DeleteEmployeeAsync(int employeeID)
         {
             return await _employeeRepo.DeleteEmployeeAsync(employeeID);
-        }
-
-        public async Task<bool> IsTransportationSubscriptionValidAsync(int employeeID)
-        {
-            return await _employeeRepo.IsEmployeeTransportationSubscriptionValidAsync(employeeID);
         }
 
         public async Task<bool> IsEmployeeExistsAsync(string nationalNo)
