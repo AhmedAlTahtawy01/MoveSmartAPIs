@@ -75,7 +75,7 @@ namespace DataAccessLayer.Repositories
 
         public async Task<MaintenanceDTO?> GetMaintenanceByIdAsync(int maintenanceId)
         {
-            var query = @"
+            const string query = @"
                 SELECT MaintenanceID, MaintenanceDate, Description, MaintenanceApplicationID
                 FROM maintenance
                 WHERE MaintenanceID = @maintenanceId;";
@@ -85,6 +85,24 @@ namespace DataAccessLayer.Repositories
                 using var reader = await cmd.ExecuteReaderAsync();
                 return await reader.ReadAsync() ? MapMaintenance(reader) : null;
             }, new MySqlParameter("maintenanceId", maintenanceId));
+        }
+
+        public async Task<List<MaintenanceDTO>> GetMaintenancesByVehicleIdAsync(int vehicleId)
+        {
+            const string query = @"
+                SELECT m.MaintenanceID, m.MaintenanceDate, m.Description, m.MaintenanceApplicationID
+                FROM maintenance m
+                JOIN maintenanceapplications ma ON m.MaintenanceApplicationID = ma.MaintenanceApplicationID
+                WHERE ma.VehicleID = @vehicleId;";
+
+            return await _ConnectionSettings.ExecuteQueryAsync(query, async cmd =>
+            {
+                var maintenances = new List<MaintenanceDTO>();
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync()) maintenances.Add(MapMaintenance(reader));
+                return maintenances;
+            }, new MySqlParameter("vehicleId", vehicleId));
         }
 
         private async Task<List<MaintenanceDTO>> GetMaintenancesAsync(string filter, params MySqlParameter[] parameters)

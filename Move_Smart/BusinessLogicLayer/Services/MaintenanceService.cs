@@ -124,6 +124,26 @@ namespace BusinessLogicLayer.Services
             return maintenance;
         }
 
+        public async Task<List<MaintenanceDTO>> GetMaintenancesByVehicleIdAsync(int vehicleId)
+        {
+            if (vehicleId <= 0)
+            {
+                _logger.LogWarning("Attempted to retrieve maintenances with invalid vehicle ID.");
+                throw new ArgumentException("Vehicle ID must be greater than 0.");
+            }
+
+            var maintenances = await _repo.GetMaintenancesByVehicleIdAsync(vehicleId);
+
+            if (maintenances == null || maintenances.Count == 0)
+            {
+                _logger.LogError($"No maintenances found for vehicle ID {vehicleId}.");
+                throw new KeyNotFoundException($"No maintenances found for vehicle ID {vehicleId}.");
+            }
+
+            _logger.LogInformation($"Retrieving maintenances for vehicle ID {vehicleId}.");
+            return maintenances;
+        }
+
         public async Task<List<MaintenanceDTO>> GetMaintenancesByDateAsync(DateTime date)
         {
             _logger.LogInformation($"Retrieving maintenances with date {date}.");

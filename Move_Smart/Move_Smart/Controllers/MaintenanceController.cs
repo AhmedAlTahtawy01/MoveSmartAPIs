@@ -117,6 +117,32 @@ namespace Move_Smart.Controllers
         }
 
         [Authorize(Policy = "RequireWorkshopSupervisor")]
+        [HttpGet("vehicle/{vehicleId}")]
+        public async Task<IActionResult> GetMaintenancesByVehicleId(int vehicleId)
+        {
+            try
+            {
+                var maintenances = await _service.GetMaintenancesByVehicleIdAsync(vehicleId);
+                return Ok(maintenances);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Invalid arguments for retrieving maintenance by vehicle ID.");
+                return BadRequest(new { message = "Invalid argument provided." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogError(ex, "No maintenance found for vehicle ID {VehicleId}.", vehicleId);
+                return NotFound(new { message = $"No maintenance found for vehicle ID {vehicleId}." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving maintenance by vehicle ID.");
+                return StatusCode(500, new { message = "Internal server error." });
+            }
+        }
+
+        [Authorize(Policy = "RequireWorkshopSupervisor")]
         [HttpGet("date/{date}")]
         public async Task<IActionResult> GetMaintenanceByDate(DateTime date)
         {
