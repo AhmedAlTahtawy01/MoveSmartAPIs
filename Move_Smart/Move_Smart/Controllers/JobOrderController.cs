@@ -10,6 +10,7 @@ using Move_Smart.Models;
 
 namespace Move_Smart.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/[controller]")]
     public class JobOrderController : ControllerBase

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Move_Smart.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
