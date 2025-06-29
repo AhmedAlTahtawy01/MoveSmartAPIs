@@ -10,6 +10,7 @@ using Move_Smart.Models;
 
 namespace Move_Smart.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ApplicationController : ControllerBase
@@ -44,7 +45,6 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationById([FromRoute] int id)
         {
@@ -70,7 +70,6 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("type/{type}")]
         public async Task<IActionResult> GetApplicationsByType([FromRoute] enApplicationType type)
         {
@@ -91,7 +90,6 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetApplicationsByUserId([FromRoute] int userId)
         {
@@ -117,7 +115,6 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetApplicationsByStatus([FromRoute] enStatus status)
         {
@@ -138,7 +135,6 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("count/type/{type}")]
         public async Task<IActionResult> CountApplicationsByType([FromRoute] enApplicationType type)
         {
@@ -159,7 +155,6 @@ namespace Move_Smart.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("count/status/{status}")]
         public async Task<IActionResult> CountApplicationsByStatus([FromRoute] enStatus status) 
         {
