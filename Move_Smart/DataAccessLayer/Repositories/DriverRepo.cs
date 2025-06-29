@@ -571,5 +571,37 @@ namespace DataAccessLayer
 
             return false;
         }
+
+        public async Task<enDriverStatus> GetDriverCurrentStatusAsync(int driverID)
+        {
+            string query = @"SELECT Status FROM Drivers
+                            WHERE DriverID = @DriverID;";
+
+            try
+            {
+                using (MySqlConnection conn = _connectionSettings.GetConnection())
+                {
+                    using (MySqlCommand cmd = _connectionSettings.GetCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("DriverID", driverID);
+
+                        await conn.OpenAsync();
+                        
+                        object? result = await cmd.ExecuteScalarAsync();
+
+                        if (result != null)
+                        {
+                            return (enDriverStatus)Enum.Parse(typeof(enDriverStatus), result.ToString() ?? string.Empty);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return enDriverStatus.Available;
+        }
     }
 }

@@ -255,7 +255,6 @@ CREATE TABLE IF NOT EXISTS `move_smart`.`employees` (
   `Name` VARCHAR(150) CHARACTER SET 'utf8mb3' NOT NULL,
   `JobTitle` VARCHAR(50) CHARACTER SET 'utf8mb3' NOT NULL,
   `Phone` CHAR(11) NOT NULL,
-  `TransportationSubscriptionStatus` ENUM('Valid', 'Expired', 'Canceled', 'Unsubscriped') NOT NULL,
   PRIMARY KEY (`EmployeeID`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -399,6 +398,7 @@ CREATE TABLE IF NOT EXISTS `move_smart`.`patrolsubscriptions` (
   `SubscriptionID` INT NOT NULL AUTO_INCREMENT,
   `EmployeeID` INT NOT NULL,
   `PatrolID` SMALLINT NOT NULL,
+  `TransportationSubscriptionStatus` ENUM('Valid', 'Expired', 'Canceled', 'Unsubscriped') NOT NULL,
   PRIMARY KEY (`SubscriptionID`),
   INDEX `PatrolID_idx` (`PatrolID` ASC) VISIBLE,
   INDEX `FK_PatrolSubscriptions_Employees_idx` (`EmployeeID` ASC) VISIBLE,
