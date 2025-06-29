@@ -1,6 +1,5 @@
 ﻿using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Move_Smart.Controllers
@@ -70,6 +69,7 @@ namespace Move_Smart.Controllers
             var count = await _vehicleconsumable.CountAllOrdersAsync();
             return Ok(new { message = count });
         }
+
         [Authorize(Policy = "GeneralSupervisor")]
         [HttpDelete]
         [Route("{id}")]
@@ -119,8 +119,5 @@ namespace Move_Smart.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        
-
     }
 }
-

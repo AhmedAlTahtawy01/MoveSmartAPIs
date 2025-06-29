@@ -149,7 +149,7 @@ namespace DataAccessLayer.Repositories
         }
         public async Task<int> CountAllOrdersAsync()
         {
-            return await _appDBContext.Consumableswithdrawapplications.CountAsync();
+            return await _appDBContext.Spareparts.CountAsync();
         }
 
     }
