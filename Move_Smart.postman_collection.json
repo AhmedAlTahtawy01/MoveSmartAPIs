@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nationalNo\": \"30310012614555\",\r\n    \"password\": \"Ahmed123\"\r\n}",
+							"raw": "{\r\n    \"nationalNo\": \"30310012614555\",\r\n    \"password\": \"string\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -304,6 +304,15 @@
 						"url": "https://movesmartapi.runasp.net/api/SparePart"
 					},
 					"response": []
+				},
+				{
+					"name": "Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{hostUrl}}/SparePart/count"
+					},
+					"response": []
 				}
 			]
 		},
@@ -335,7 +344,7 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"startDate\": \"2025-05-01\",\r\n    \"endDate\": \"2025-05-15\"\r\n}"
 						},
-						"url": "{{hostUrl}}/Vehicles/ByID/12"
+						"url": "{{hostUrl}}/Vehicles/ByID/30"
 					},
 					"response": []
 				},
@@ -355,14 +364,14 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"vehicleID\": 0,\r\n  \"brandName\": \"Test\",\r\n  \"modelName\": \"Test again\",\r\n  \"plateNumbers\": \"asd1234\",\r\n  \"vehicleType\": 0,\r\n  \"associatedHospital\": \"string\",\r\n  \"associatedTask\": \"string\",\r\n  \"status\": 1,\r\n  \"totalKilometersMoved\": 0,\r\n  \"fuelType\": 0,\r\n  \"fuelConsumptionRate\": 50,\r\n  \"oilConsumptionRate\": 100\r\n}",
+							"raw": "{\r\n  \"vehicleID\": 0,\r\n  \"brandName\": \"string\",\r\n  \"modelName\": \"string\",\r\n  \"plateNumbers\": \"string\",\r\n  \"vehicleType\": 0,\r\n  \"associatedHospital\": \"string\",\r\n  \"associatedTask\": \"string\",\r\n  \"status\": 1,\r\n  \"totalKilometersMoved\": 0,\r\n  \"fuelType\": 0,\r\n  \"fuelConsumptionRate\": 0,\r\n  \"oilConsumptionRate\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{baseUrl}}/Vehicles"
+						"url": "{{hostUrl}}/Vehicles"
 					},
 					"response": []
 				}
@@ -559,7 +568,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"orderId\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"status\": 1,\r\n    \"applicationType\": 1,\r\n    \"applicationDescription\": \"Test application from test job order\",\r\n    \"createdByUserID\": 1\r\n  },\r\n  \"vehicleId\": 4,\r\n  \"driverId\": 3,\r\n  \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n  \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n  \"startTime\": \"08:00:00\",\r\n  \"endTime\": \"10:00:00\",\r\n  \"destination\": \"Sohag\",\r\n  \"odometerBefore\": 1000\r\n}",
+							"raw": "{\r\n  \"orderId\": 0,\r\n  \"application\": {\r\n    \"applicationId\": 0,\r\n    \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"status\": 3,\r\n    \"applicationType\": 1,\r\n    \"applicationDescription\": \"Test application from test job order\",\r\n    \"createdByUserID\": 1\r\n  },\r\n  \"vehicleId\": 5,\r\n  \"driverId\": 4,\r\n  \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n  \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n  \"startTime\": \"08:00:00\",\r\n  \"endTime\": \"10:00:00\",\r\n  \"destination\": \"Sohag\",\r\n  \"odometerBefore\": 1000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -577,14 +586,14 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"orderId\": 21,\r\n    \"application\": {\r\n        \"$id\": \"2\",\r\n        \"applicationId\": 24,\r\n        \"creationDate\": \"2025-05-15T08:39:22.919Z\",\r\n        \"status\": 1,\r\n        \"applicationType\": 1,\r\n        \"applicationDescription\": \"Test update application from test update job order\",\r\n        \"createdByUserID\": 1\r\n    },\r\n    \"vehicleId\": 4,\r\n    \"driverId\": 3,\r\n    \"startDate\": \"2025-05-15T08:39:22.919Z\",\r\n    \"endDate\": \"2025-05-20T08:39:22.919Z\",\r\n    \"startTime\": \"08:00:00\",\r\n    \"endTime\": \"10:00:00\",\r\n    \"destination\": \"Sohag\",\r\n    \"odometerBefore\": 1000,\r\n    \"odometerAfter\": 1000\r\n}",
+							"raw": "{\r\n    \"orderId\": 14,\r\n    \"application\": {\r\n        \"$id\": \"5\",\r\n        \"applicationId\": 16,\r\n        \"creationDate\": \"2025-05-15T00:00:00\",\r\n        \"status\": 3,\r\n        \"applicationType\": 1,\r\n        \"applicationDescription\": \"Test application from test job order\",\r\n        \"createdByUserID\": 1\r\n    },\r\n    \"vehicleId\": 1,\r\n    \"driverId\": 1,\r\n    \"startDate\": \"2025-05-15T00:00:00\",\r\n    \"endDate\": \"2025-05-20T00:00:00\",\r\n    \"startTime\": \"08:00:00\",\r\n    \"endTime\": \"10:00:00\",\r\n    \"destination\": \"Sohag\",\r\n    \"odometerBefore\": 1000,\r\n    \"odometerAfter\": 2000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "https://localhost:7141/api/v1/JobOrder/21"
+						"url": "{{baseUrl}}/v1/JobOrder/14"
 					},
 					"response": []
 				},
@@ -1029,14 +1038,14 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"driverID\": 0,\r\n  \"nationalNo\": \"20711111111112\",\r\n  \"name\": \"string\",\r\n  \"phone\": \"01000000000\",\r\n  \"status\": 0,\r\n  \"vehicleID\": 2\r\n}",
+							"raw": "{\r\n  \"driverID\": 0,\r\n  \"nationalNo\": \"20711111111115\",\r\n  \"name\": \"string\",\r\n  \"phone\": \"01000000000\",\r\n  \"status\": 1,\r\n  \"vehicleID\": 28\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{baseUrl}}/Drivers"
+						"url": "{{hostUrl}}/Drivers"
 					},
 					"response": []
 				}
@@ -1052,14 +1061,14 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"description\": \"First Patrol to test\",\r\n  \"movingAt\": \"08:00\",\r\n  \"approximatedTime\": 60,\r\n  \"busID\": 6\r\n}",
+							"raw": "{\r\n  \"description\": \"First Patrol to test\",\r\n  \"movingAt\": \"08:00\",\r\n  \"approximatedTime\": 60,\r\n  \"busID\": 3\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{hostUrl}}/Patrols"
+						"url": "{{baseUrl}}/Patrols"
 					},
 					"response": []
 				},
@@ -1089,7 +1098,7 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"nationalNo\": \"30310012614555\",\r\n    \"password\": \"string\"\r\n}"
 						},
-						"url": "{{hostUrl}}/Buses/All"
+						"url": "{{baseUrl}}/Buses/All"
 					},
 					"response": []
 				},
@@ -1099,6 +1108,24 @@
 						"method": "DELETE",
 						"header": [],
 						"url": "{{hostUrl}}/Buses/ByID/"
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"busID\": 0,\r\n  \"capacity\": 100,\r\n  \"availableSpace\": 100,\r\n  \"vehicleID\": 0,\r\n  \"vehicle\": {\r\n    \"vehicleID\": 0,\r\n    \"brandName\": \"string\",\r\n    \"modelName\": \"string\",\r\n    \"plateNumbers\": \"string\",\r\n    \"vehicleType\": 0,\r\n    \"associatedHospital\": \"string\",\r\n    \"associatedTask\": \"string\",\r\n    \"status\": 1,\r\n    \"totalKilometersMoved\": 0,\r\n    \"fuelType\": 0,\r\n    \"fuelConsumptionRate\": 0,\r\n    \"oilConsumptionRate\": 0\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/Buses"
 					},
 					"response": []
 				}
@@ -1123,7 +1150,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"missionId\": 0,\r\n  \"missionNoteId\": 1,\r\n  \"missionVehiclesId\": 0,\r\n  \"startDate\": \"2025-06-17T16:54:43.664Z\",\r\n  \"endDate\": \"2025-06-17T16:54:43.664Z\",\r\n  \"destination\": \"string\",\r\n  \"userId\": 1\r\n}",
+							"raw": "{\r\n  \"missionId\": 0,\r\n  \"missionNoteId\": 8,\r\n  \"missionVehiclesId\": 37,\r\n  \"startDate\": \"2025-06-17T16:54:43.664Z\",\r\n  \"endDate\": \"2025-06-17T16:54:43.664Z\",\r\n  \"destination\": \"string\",\r\n  \"userId\": 5\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1327,12 +1354,90 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Maintenance",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"maintenanceId\": 0,\r\n  \"maintenanceDate\": \"2025-06-24T15:28:46.098Z\",\r\n  \"description\": \"string\",\r\n  \"maintenanceApplicationId\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/Maintenance"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/Maintenance"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PatrolsSubscriptions",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"subscriptionID\": 0,\r\n  \"patrolID\": 1,\r\n  \"employeeID\": 1,\r\n  \"transportationSubscriptionStatus\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/PatrolsSubscriptions"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"employeeID\": 0,\r\n  \"nationalNo\": \"11111111111111\",\r\n  \"name\": \"string\",\r\n  \"jobTitle\": \"string\",\r\n  \"phone\": \"01011111111\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/Employees"
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
 		"type": "bearer",
 		"bearer": {
-			"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJBaG1lZCBIYW1keSJdLCJqdGkiOiI2NGE1ODg4Ni04YjVjLTQyNjctOTlmZS1hMTlhZTFmZGJmYjUiLCJyb2xlIjoiU3VwZXJVc2VyIiwibmFtZWlkIjoiMSIsIm5iZiI6MTc1MDcwNDAyMCwiZXhwIjoxNzUwNzA3NjIwLCJpYXQiOjE3NTA3MDQwMjAsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.7xqXwFZMlQ1lRg-O17ukpkPlSevWIrRTHYxQTlk1i4A"
+			"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOlsiMzAzMTAwMTI2MTQ1NTUiLCJBaG1lZCBIYW1keSJdLCJqdGkiOiI1NTAwZDU0NS1lMjAwLTQ5OGYtYjc1NC00MDhjNTg2ZDU1ZWMiLCJyb2xlIjoiU3VwZXJVc2VyIiwibmFtZWlkIjoiMSIsIm5iZiI6MTc1MTI0MTk1MSwiZXhwIjoxNzUxMjQ1NTUxLCJpYXQiOjE3NTEyNDE5NTEsImlzcyI6Ik1vdmVTbWFydEFQSSIsImF1ZCI6Ik1vdmVTbWFydFVzZXJzIn0.n7E-i1k4RiJ-aHu4L0P8gCE6JhtHSyOp58EXvCTvhv0"
 		}
 	},
 	"event": [
