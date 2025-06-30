@@ -47,7 +47,7 @@ namespace DataAccessLayer
         public async Task<List<PatrolsSubscriptionDTO>> GetAllSubscriptionsAsync()
         {
             List<PatrolsSubscriptionDTO> subscriptionsList = new List<PatrolsSubscriptionDTO>();
-            string query = @"SELECT * FROM PatrolsSubscriptions";
+            string query = @"SELECT * FROM patrolsubscriptions";
             try
             {
                 using (MySqlConnection conn = _connectionSettings.GetConnection())
@@ -73,6 +73,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in GetAllSubscriptionsAsync.", ex);
             }
             return subscriptionsList;
         }
@@ -81,7 +82,7 @@ namespace DataAccessLayer
         {
             List<PatrolsSubscriptionDTO> subscriptionsList = new List<PatrolsSubscriptionDTO>();
 
-            string query = @"SELECT * FROM PatrolsSubscriptions
+            string query = @"SELECT * FROM patrolsubscriptions
                             WHERE EmployeeID = @EmployeeID"
             ;
 
@@ -112,6 +113,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in GetAllSubscriptionsForEmployeeAsync.", ex);
             }
 
             return subscriptionsList;
@@ -121,7 +123,7 @@ namespace DataAccessLayer
         {
             List<PatrolsSubscriptionDTO> subscriptionsList = new List<PatrolsSubscriptionDTO>();
 
-            string query = @"SELECT * FROM PatrolsSubscriptions
+            string query = @"SELECT * FROM patrolsubscriptions
                             WHERE PatrolID = @PatrolID"
             ;
 
@@ -152,6 +154,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in GetAllSubscriptionsForPatrolAsync.", ex);
             }
 
             return subscriptionsList;
@@ -159,7 +162,7 @@ namespace DataAccessLayer
 
         public async Task<PatrolsSubscriptionDTO?> GetSubscriptionRecordByIDAsync(int subscriptionID)
         {
-            string query = @"SELECT * FROM PatrolsSubscriptions
+            string query = @"SELECT * FROM patrolsubscriptions
                             WHERE SubscriptionID = @SubscriptionID"
             ;
 
@@ -190,6 +193,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in GetSubscriptionRecordByIDAsync.", ex);
             }
 
             return null;
@@ -197,7 +201,7 @@ namespace DataAccessLayer
 
         public async Task<int?> CreateNewSubscriptionRecordAsync(PatrolsSubscriptionDTO newSubscription)
         {
-            string query = @"INSERT INTO PatrolsSubscriptions
+            string query = @"INSERT INTO patrolsubscriptions
                             (PatrolID, EmployeeID, TransportationSubscriptionStatus)
                             VALUES
                             (@PatrolID, @EmployeeID, TransportationSubscriptionStatus);
@@ -228,6 +232,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in CreateNewSubscriptionRecordAsync.", ex);
             }
 
             return null;
@@ -235,7 +240,7 @@ namespace DataAccessLayer
 
         public async Task<bool> UpdateSubscriptionRecordAsync(PatrolsSubscriptionDTO updatedSubscription)
         {
-            string query = @"UPDATE PatrolsSubscriptions SET
+            string query = @"UPDATE patrolsubscriptions SET
                             PatrolID = @PatrolID,
                             EmployeeID = @EmployeeID,
                             TransportationSubscriptionStatus = @TransportationSubscriptionStatus
@@ -262,6 +267,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in UpdateSubscriptionRecordAsync.", ex);
             }
 
             return false;
@@ -269,7 +275,7 @@ namespace DataAccessLayer
 
         public async Task<bool> DeleteSubscriptionRecordAsync(int subscriptionID)
         {
-            string query = @"DELETE FROM PatrolsSubscriptions
+            string query = @"DELETE FROM patrolsubscriptions
                             WHERE SubscriptionID = @SubscriptionID"
             ;
 
@@ -290,6 +296,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in DeleteSubscriptionRecordAsync.", ex);
             }
 
             return false;
@@ -297,7 +304,7 @@ namespace DataAccessLayer
 
         public async Task<bool> IsPatrolSubscriptionExistsAsync(int subscriptionID)
         {
-            string query = @"SELECT 1 AS Found FROM PatrolsSubscriptions
+            string query = @"SELECT 1 AS Found FROM patrolsubscriptions
                             WHERE SubscriptionID = @SubscriptionID"
             ;
             try
@@ -317,6 +324,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in IsPatrolSubscriptionExistsAsync.", ex);
             }
 
             return false;
@@ -324,7 +332,7 @@ namespace DataAccessLayer
 
         public async Task<int> GetNumberOfPatrolsSubscriptionsAsync()
         {
-            string query = @"SELECT COUNT(*) FROM PatrolsSubscriptions";
+            string query = @"SELECT COUNT(*) FROM patrolsubscriptions";
 
             try
             {
@@ -345,6 +353,7 @@ namespace DataAccessLayer
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw new Exception($"Database error occurred in GetNumberOfPatrolsSubscriptionsAsync.", ex);
             }
     
             return 0;
