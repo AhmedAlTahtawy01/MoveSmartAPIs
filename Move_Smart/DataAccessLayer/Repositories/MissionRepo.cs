@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 namespace DataAccessLayer.Repositories
 {
@@ -21,14 +22,15 @@ namespace DataAccessLayer.Repositories
         public string Destination { get; set; }
         public int UserId { get; set; }
 
-        public MissionDTO(int missionId, int missionNoteId, DateTime startDate, DateTime endDate, string destination, int createdByUser)
+        [JsonConstructor]
+        public MissionDTO(int missionId, int missionNoteId, DateTime startDate, DateTime endDate, string destination, int userId)
         {
             MissionId = missionId;
             MissionNoteId = missionNoteId;
             StartDate = startDate;
             EndDate = endDate;
             Destination = destination;
-            UserId = createdByUser;
+            UserId = userId;
         }
     }
 
@@ -138,7 +140,7 @@ namespace DataAccessLayer.Repositories
         {
             const string query = @"
                 INSERT INTO missions (MissionNoteID, MissionStartDate, MissionEndDate, Destination, CreatedByUser)
-                VALUES (@missionNoteId, @missionStartDate, @missionEndDate, @destination, @createdByUser)
+                VALUES (@missionNoteId, @missionStartDate, @missionEndDate, @destination, @createdByUser);
                 SELECT LAST_INSERT_ID();";
 
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
@@ -169,8 +171,8 @@ namespace DataAccessLayer.Repositories
                 return await cmd.ExecuteNonQueryAsync() > 0;
             }, new MySqlParameter("@missionId", mission.MissionId),
             new MySqlParameter("@missionNoteId", mission.MissionNoteId),
-            new MySqlParameter("@missionStartDate", mission.StartDate),
-            new MySqlParameter("@missionEndDate", mission.EndDate),
+            new MySqlParameter("@startDate", mission.StartDate),
+            new MySqlParameter("@endDate", mission.EndDate),
             new MySqlParameter("@destination", mission.Destination),
             new MySqlParameter("@createdByUser", mission.UserId));
         }
@@ -182,7 +184,7 @@ namespace DataAccessLayer.Repositories
             return await _connectionSettings.ExecuteQueryAsync(query, async cmd =>
             {
                 return await cmd.ExecuteNonQueryAsync() > 0;
-            }, new MySqlParameter("missionId", missionId));
+            }, new MySqlParameter("@missionId", missionId));
         }
     }
 }

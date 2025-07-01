@@ -36,7 +36,7 @@ namespace Move_Smart.Controllers
             try
             {
                 var missionId = await _service.CreateMissionAsync(dto.MissionNoteId, dto);
-                return CreatedAtAction(nameof(GetMissionById), new { missionId }, dto);
+                return CreatedAtAction(nameof(GetMissionById), new { id = missionId }, dto);
             }
             catch (ArgumentException ex)
             {
